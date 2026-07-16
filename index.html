@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -176,7 +176,7 @@
     <div class="container">
         <div id="swap-tab" class="tab-content active">
             <div class="input-group">
-                <label>Từ Token</label>
+                <label>From Token</label>
                 <select id="swapFromToken" onchange="handleSwapFromChange()">
                     <option value="USDC">USDC</option>
                     <option value="EURC" selected>EURC</option>
@@ -184,47 +184,47 @@
             </div>
             <div class="input-group">
                 <label>
-                    <span>Số lượng bán</span>
-                    <span class="balance-label">Ví: <span id="balance-swap">0.0000</span></span>
+                    <span>Amount to Sell</span>
+                    <span class="balance-label">Wallet: <span id="balance-swap">0.0000</span></span>
                 </label>
                 <input type="number" id="swapAmountIn" placeholder="0.0" value="2" step="any">
             </div>
             <div class="input-group">
-                <label>Đến Token</label>
+                <label>To Token</label>
                 <select id="swapToToken" onchange="handleSwapToChange()">
                     <option value="EURC">EURC</option>
                     <option value="USDC" selected>USDC</option>
                 </select>
             </div>
-            <button class="btn-action" onclick="uiSwap()">Xác Nhận Swap</button>
+            <button class="btn-action" onclick="uiSwap()">Confirm Swap</button>
         </div>
 
         <div id="liquidity-tab" class="tab-content">
             <h3>Liquidity Pool</h3>
             <div class="input-group">
                 <label>
-                    <span>Số lượng USDC nạp</span>
-                    <span class="balance-label">Ví: <span id="balance-liq-usdc">0.0000</span></span>
+                    <span>USDC Deposit Amount</span>
+                    <span class="balance-label">Wallet: <span id="balance-liq-usdc">0.0000</span></span>
                 </label>
                 <input type="number" id="liquidityUsdcAmount" placeholder="0.0" step="any">
             </div>
             <div class="input-group">
                 <label>
-                    <span>Số lượng EURC nạp</span>
-                    <span class="balance-label">Ví: <span id="balance-liq-eurc">0.0000</span></span>
+                    <span>EURC Deposit Amount</span>
+                    <span class="balance-label">Wallet: <span id="balance-liq-eurc">0.0000</span></span>
                 </label>
                 <input type="number" id="liquidityEurcAmount" placeholder="0.0" step="any">
             </div>
             
             <button class="btn-action" style="background-color: #4b5563; margin-bottom: 8px;" onclick="approveUSDC()">Approve USDC</button>
             <button class="btn-action" style="background-color: #4b5563; margin-bottom: 8px;" onclick="approveEURC()">Approve EURC</button>
-            <button class="btn-action" style="background-color: #10b981;" onclick="executeAddLiquidity()">Xác Nhận Thêm Thanh Khoản</button>
+            <button class="btn-action" style="background-color: #10b981;" onclick="executeAddLiquidity()">Confirm Add Liquidity</button>
         </div>
 
         <div id="lending-tab" class="tab-content">
             <h3>Lending Pool</h3>
             <div class="input-group">
-                <label>Chọn tài sản gửi</label>
+                <label>Select Asset to Deposit</label>
                 <select id="lendingToken" onchange="updateAllBalances()">
                     <option value="USDC">USDC</option>
                     <option value="EURC">EURC</option>
@@ -232,20 +232,20 @@
             </div>
             <div class="input-group">
                 <label>
-                    <span>Số lượng muốn gửi</span>
-                    <span class="balance-label">Ví: <span id="balance-lending">0.0000</span></span>
+                    <span>Amount to Deposit</span>
+                    <span class="balance-label">Wallet: <span id="balance-lending">0.0000</span></span>
                 </label>
                 <input type="number" id="lendingAmount" placeholder="0.0" step="any">
             </div>
             
             <button class="btn-action" style="background-color: #4b5563; margin-bottom: 8px;" onclick="approveLending()">Approve Token</button>
-            <button class="btn-action" style="background-color: #10b981;" onclick="executeLendingDeposit()">Xác Nhận Gửi (Deposit)</button>
+            <button class="btn-action" style="background-color: #10b981;" onclick="executeLendingDeposit()">Confirm Deposit</button>
         </div>
 
         <div id="borrow-tab" class="tab-content">
-            <h3>Borrow (Vay)</h3>
+            <h3>Borrow Asset</h3>
             <div class="input-group">
-                <label>Chọn tài sản vay</label>
+                <label>Select Asset to Borrow</label>
                 <select id="borrowToken" onchange="updateAllBalances()">
                     <option value="USDC">USDC</option>
                     <option value="EURC">EURC</option>
@@ -253,25 +253,25 @@
             </div>
             <div class="input-group">
                 <label>
-                    <span>Số lượng vay</span>
-                    <span class="balance-label">Ví: <span id="balance-borrow">0.0000</span></span>
+                    <span>Amount to Borrow</span>
+                    <span class="balance-label">Wallet: <span id="balance-borrow">0.0000</span></span>
                 </label>
                 <input type="number" id="borrowAmount" placeholder="0.0" step="any">
             </div>
-            <button class="btn-action" onclick="uiBorrow()">Xác Nhận Vay</button>
+            <button class="btn-action" onclick="uiBorrow()">Confirm Borrow</button>
         </div>
 
         <div id="bridge-tab" class="tab-content">
             <h3>Cross-Chain Bridge</h3>
             <div class="input-group">
-                <label>Chuỗi đích chuyển đến</label>
+                <label>Destination Chain</label>
                 <select id="bridgeTargetChain">
                     <option value="1">Sepolia Testnet</option>
                     <option value="2">Base Testnet</option>
                 </select>
             </div>
             <div class="input-group">
-                <label>Chọn Token</label>
+                <label>Select Token</label>
                 <select id="bridgeToken" onchange="updateAllBalances()">
                     <option value="USDC">USDC</option>
                     <option value="EURC">EURC</option>
@@ -279,25 +279,24 @@
             </div>
             <div class="input-group">
                 <label>
-                    <span>Số lượng chuyển</span>
-                    <span class="balance-label">Ví: <span id="balance-bridge">0.0000</span></span>
+                    <span>Amount to Bridge</span>
+                    <span class="balance-label">Wallet: <span id="balance-bridge">0.0000</span></span>
                 </label>
                 <input type="number" id="bridgeAmount" placeholder="0.0" step="any">
             </div>
             <div class="input-group">
-                <label>Ví nhận ở mạng đích</label>
+                <label>Recipient Address on Destination Chain</label>
                 <input type="text" id="bridgeRecipient" placeholder="0x...">
             </div>
             
             <button class="btn-action" style="background-color: #4b5563; margin-bottom: 8px;" onclick="approveBridge()">Approve Bridge Token</button>
-            <button class="btn-action" style="background-color: #10b981;" onclick="executeBridge()">Xác Nhận Kích Hoạt Cầu Nối</button>
+            <button class="btn-action" style="background-color: #10b981;" onclick="executeBridge()">Confirm Initiate Bridge</button>
         </div>
 
-        <div class="status-box" id="statusConsole">Hệ thống: Sẵn sàng kết nối ví Arc Network.</div>
+        <div class="status-box" id="statusConsole">System: Ready to connect Arc Network wallet.</div>
     </div>
 
     <script>
-        // ĐÃ ĐỒNG BỘ CHÍNH XÁC ĐỊA CHỈ CONTRACT THEO YÊU CẦU CỦA BẠN
         const RAW_CONTRACTS = {
             USDC_TOKEN: "0x3600000000000000000000000000000000000000", 
             EURC_TOKEN: "0x89B50855Aa3bE2F677cD6303Cec089B5F319D72a", 
@@ -367,7 +366,7 @@
                 const balance = await contract.balanceOf(getSafeAddress(account));
                 return ethers.formatUnits(balance, 6);
             } catch (err) {
-                console.error("Lỗi RPC balanceOf:", err);
+                console.error("RPC balanceOf error:", err);
                 return "0.0000";
             }
         }
@@ -400,22 +399,22 @@
                 const balBridge = await getTokenBalance(bridgeTokenAddress, userAddress);
                 document.getElementById('balance-bridge').innerText = parseFloat(balBridge).toFixed(4);
             } catch (error) {
-                console.error("Lỗi cập nhật số dư:", error);
+                console.error("Error updating balances:", error);
             }
         }
 
         async function connectWallet() {
-            if (!window.ethereum) return alert("Vui lòng cài đặt MetaMask!");
+            if (!window.ethereum) return alert("Please install MetaMask!");
             try {
                 const provider = new ethers.BrowserProvider(window.ethereum);
                 const accounts = await provider.send("eth_requestAccounts", []);
                 userAddress = accounts[0];
                 document.getElementById('connectBtn').innerText = userAddress.substring(0, 6) + "..." + userAddress.substring(38);
                 document.getElementById('disconnectBtn').style.display = "inline-block";
-                updateLog("Đã kết nối ví: " + userAddress);
+                updateLog("Wallet connected: " + userAddress);
                 await updateAllBalances();
             } catch (err) {
-                updateLog("Lỗi kết nối ví: " + err.message);
+                updateLog("Wallet connection error: " + err.message);
             }
         }
 
@@ -423,7 +422,7 @@
             userAddress = null;
             document.getElementById('connectBtn').innerText = "Connect Wallet";
             document.getElementById('disconnectBtn').style.display = "none";
-            updateLog("Đã ngắt kết nối ví.");
+            updateLog("Wallet disconnected.");
         }
 
         async function getLegacyGasParam(provider) {
@@ -437,15 +436,15 @@
         }
 
         async function uiSwap() {
-            if (!userAddress || !window.ethereum) return alert("Vui lòng kết nối ví trước!");
+            if (!userAddress || !window.ethereum) return alert("Please connect your wallet first!");
             const fromSymbol = document.getElementById('swapFromToken').value;
             const toSymbol = document.getElementById('swapToToken').value;
             const amountIn = document.getElementById('swapAmountIn').value;
             
             const targetRouter = getSafeAddress(RAW_CONTRACTS.SWAP_POOL_ROUTER);
 
-            if (fromSymbol === toSymbol) return alert("Token nguồn và đích phải khác nhau!");
-            if (!amountIn || parseFloat(amountIn) <= 0) return alert("Vui lòng nhập số lượng hợp lệ!");
+            if (fromSymbol === toSymbol) return alert("Source and destination tokens must be different!");
+            if (!amountIn || parseFloat(amountIn) <= 0) return alert("Please enter a valid amount!");
 
             const fromAddress = getSafeAddress(fromSymbol === "USDC" ? RAW_CONTRACTS.USDC_TOKEN : RAW_CONTRACTS.EURC_TOKEN);
 
@@ -458,41 +457,41 @@
                 
                 const parsedAmountIn = ethers.parseUnits(amountIn.toString(), 6);
 
-                updateLog(`Đang kiểm tra quyền hạn (allowance) của ${fromSymbol}...`);
+                updateLog(`Checking allowance for ${fromSymbol}...`);
                 const allowance = await tokenInContract.allowance(getSafeAddress(userAddress), targetRouter);
                 
                 const gasParams = await getLegacyGasParam(provider);
 
                 if (BigInt(allowance) < BigInt(parsedAmountIn)) {
-                    updateLog(`Hạn mức chưa đủ. Đang gửi yêu cầu Approve ${fromSymbol}...`);
+                    updateLog(`Insufficient allowance. Sending Approve request for ${fromSymbol}...`);
                     let approveTx = await tokenInContract.approve(targetRouter, parsedAmountIn, { 
                         gasLimit: 80000,
                         ...gasParams 
                     });
                     await approveTx.wait();
-                    updateLog(`Approve thành công!`);
+                    updateLog(`Approve successful!`);
                 }
                 
-                updateLog(`Đang tiến hành gọi trade()...`);
+                updateLog(`Proceeding to call trade()...`);
                 let tx = await swapContract.trade(fromAddress, parsedAmountIn, {
                     gasLimit: 280000,
                     ...gasParams
                 });
                 await tx.wait();
 
-                updateLog(`Hoán đổi thành công!`);
-                alert("Hoán đổi thành công!");
+                updateLog(`Swap successful!`);
+                alert("Swap successful!");
                 await updateAllBalances();
             } catch (err) {
-                updateLog("Giao dịch lỗi: " + (err.reason || err.message));
-                alert("Lỗi giao dịch!");
+                updateLog("Transaction error: " + (err.reason || err.message));
+                alert("Transaction failed!");
             }
         }
 
         async function approveUSDC() {
-            if (!userAddress || !window.ethereum) return alert("Vui lòng kết nối ví!");
+            if (!userAddress || !window.ethereum) return alert("Please connect your wallet!");
             const amountUSDC = document.getElementById('liquidityUsdcAmount').value;
-            if(!amountUSDC || parseFloat(amountUSDC) <= 0) return alert("Vui lòng nhập số lượng USDC hợp lệ!");
+            if(!amountUSDC || parseFloat(amountUSDC) <= 0) return alert("Please enter a valid USDC amount!");
             const targetPool = getSafeAddress(RAW_CONTRACTS.SWAP_POOL_ROUTER);
             try {
                 const provider = new ethers.BrowserProvider(window.ethereum);
@@ -500,19 +499,19 @@
                 const usdc = new ethers.Contract(getSafeAddress(RAW_CONTRACTS.USDC_TOKEN), ERC20_ABI, signer);
                 const gasParams = await getLegacyGasParam(provider);
                 
-                updateLog("Đang Approve USDC...");
+                updateLog("Approving USDC...");
                 let tx = await usdc.approve(targetPool, ethers.parseUnits(amountUSDC.toString(), 6), { gasLimit: 80000, ...gasParams });
                 await tx.wait();
-                updateLog("Approve USDC thành công!");
+                updateLog("Approve USDC successful!");
             } catch (err) { 
-                updateLog("Lỗi Approve USDC: " + (err.reason || err.message)); 
+                updateLog("Approve USDC error: " + (err.reason || err.message)); 
             }
         }
 
         async function approveEURC() {
-            if (!userAddress || !window.ethereum) return alert("Vui lòng kết nối ví!");
+            if (!userAddress || !window.ethereum) return alert("Please connect your wallet!");
             const amountEURC = document.getElementById('liquidityEurcAmount').value;
-            if(!amountEURC || parseFloat(amountEURC) <= 0) return alert("Vui lòng nhập số lượng EURC hợp lệ!");
+            if(!amountEURC || parseFloat(amountEURC) <= 0) return alert("Please enter a valid EURC amount!");
             const targetPool = getSafeAddress(RAW_CONTRACTS.SWAP_POOL_ROUTER);
             try {
                 const provider = new ethers.BrowserProvider(window.ethereum);
@@ -520,22 +519,22 @@
                 const eurc = new ethers.Contract(getSafeAddress(RAW_CONTRACTS.EURC_TOKEN), ERC20_ABI, signer);
                 const gasParams = await getLegacyGasParam(provider);
 
-                updateLog("Đang Approve EURC...");
+                updateLog("Approving EURC...");
                 let tx = await eurc.approve(targetPool, ethers.parseUnits(amountEURC.toString(), 6), { gasLimit: 80000, ...gasParams });
                 await tx.wait();
-                updateLog("Approve EURC thành công!");
+                updateLog("Approve EURC successful!");
             } catch (err) { 
-                updateLog("Lỗi Approve EURC: " + (err.reason || err.message)); 
+                updateLog("Approve EURC error: " + (err.reason || err.message)); 
             }
         }
 
         async function executeAddLiquidity() {
-            if (!userAddress || !window.ethereum) return alert("Vui lòng kết nối ví!");
+            if (!userAddress || !window.ethereum) return alert("Please connect your wallet!");
             const amountUSDC = document.getElementById('liquidityUsdcAmount').value;
             const amountEURC = document.getElementById('liquidityEurcAmount').value;
             const targetPool = getSafeAddress(RAW_CONTRACTS.SWAP_POOL_ROUTER);
             if(!amountUSDC || parseFloat(amountUSDC) <= 0 || !amountEURC || parseFloat(amountEURC) <= 0) {
-                return alert("Vui lòng kiểm tra lại số lượng!");
+                return alert("Please check the input amounts!");
             }
             try {
                 const provider = new ethers.BrowserProvider(window.ethereum);
@@ -543,26 +542,26 @@
                 const swapPool = new ethers.Contract(targetPool, SWAP_POOL_ABI, signer);
                 const gasParams = await getLegacyGasParam(provider);
 
-                updateLog("Đang tiến hành gửi lệnh addLiquidity()...");
+                updateLog("Sending addLiquidity() transaction...");
                 let tx = await swapPool.addLiquidity(
                     ethers.parseUnits(amountUSDC.toString(), 6), 
                     ethers.parseUnits(amountEURC.toString(), 6),
                     { gasLimit: 380000, ...gasParams }
                 );
                 await tx.wait();
-                updateLog("Nạp thanh khoản thành công!");
-                alert("Nạp thanh khoản thành công!");
+                updateLog("Liquidity deposit successful!");
+                alert("Liquidity deposit successful!");
                 await updateAllBalances();
             } catch (err) { 
-                updateLog("Lỗi addLiquidity: " + (err.reason || err.message));
+                updateLog("addLiquidity error: " + (err.reason || err.message));
             }
         }
 
         async function approveLending() {
-            if (!userAddress || !window.ethereum) return alert("Vui lòng kết nối ví trước!");
+            if (!userAddress || !window.ethereum) return alert("Please connect your wallet first!");
             const tokenSymbol = document.getElementById('lendingToken').value;
             const amount = document.getElementById('lendingAmount').value;
-            if (!amount || parseFloat(amount) <= 0) return alert("Vui lòng nhập số lượng hợp lệ!");
+            if (!amount || parseFloat(amount) <= 0) return alert("Please enter a valid amount!");
             
             const targetPool = getSafeAddress(RAW_CONTRACTS.LENDING_POOL);
             const tokenAddress = getSafeAddress(tokenSymbol === "USDC" ? RAW_CONTRACTS.USDC_TOKEN : RAW_CONTRACTS.EURC_TOKEN);
@@ -573,20 +572,20 @@
                 const token = new ethers.Contract(tokenAddress, ERC20_ABI, signer);
                 const gasParams = await getLegacyGasParam(provider);
                 
-                updateLog(`Đang Approve ${tokenSymbol} cho Lending Pool mới...`);
+                updateLog(`Approving ${tokenSymbol} for the Lending Pool...`);
                 let tx = await token.approve(targetPool, ethers.parseUnits(amount.toString(), 6), { gasLimit: 80000, ...gasParams });
                 await tx.wait();
-                updateLog(`Approve ${tokenSymbol} thành công!`);
+                updateLog(`Approve ${tokenSymbol} successful!`);
             } catch (err) {
-                updateLog("Lỗi Approve Lending: " + (err.reason || err.message));
+                updateLog("Lending Approve error: " + (err.reason || err.message));
             }
         }
 
         async function executeLendingDeposit() {
-            if (!userAddress || !window.ethereum) return alert("Vui lòng kết nối ví trước!");
+            if (!userAddress || !window.ethereum) return alert("Please connect your wallet first!");
             const tokenSymbol = document.getElementById('lendingToken').value;
             const amount = document.getElementById('lendingAmount').value;
-            if (!amount || parseFloat(amount) <= 0) return alert("Vui lòng nhập số lượng hợp lệ!");
+            if (!amount || parseFloat(amount) <= 0) return alert("Please enter a valid amount!");
             
             const targetPool = getSafeAddress(RAW_CONTRACTS.LENDING_POOL);
             const tokenAddress = getSafeAddress(tokenSymbol === "USDC" ? RAW_CONTRACTS.USDC_TOKEN : RAW_CONTRACTS.EURC_TOKEN);
@@ -597,25 +596,25 @@
                 const lending = new ethers.Contract(targetPool, LENDING_POOL_ABI, signer);
                 const gasParams = await getLegacyGasParam(provider);
                 
-                updateLog("Đang tiến hành gọi deposit() trừ tiền thật...");
+                updateLog("Calling deposit()...");
                 let tx = await lending.deposit(tokenAddress, ethers.parseUnits(amount.toString(), 6), { gasLimit: 280000, ...gasParams });
                 await tx.wait();
-                updateLog(`Lending thành công! Ví đã bị khấu trừ tài sản.`);
-                alert("Gửi tài sản vào Lending Pool thành công!");
+                updateLog(`Deposit successful! Assets have been deducted from your wallet.`);
+                alert("Assets successfully deposited into the Lending Pool!");
                 await updateAllBalances();
             } catch (err) {
-                updateLog("Lỗi deposit Lending: " + (err.reason || err.message));
+                updateLog("Lending deposit error: " + (err.reason || err.message));
             }
         }
 
         async function uiBorrow() {
-            if (!userAddress || !window.ethereum) return alert("Vui lòng kết nối ví trước!");
+            if (!userAddress || !window.ethereum) return alert("Please connect your wallet first!");
             const tokenSymbol = document.getElementById('borrowToken').value;
             const amount = document.getElementById('borrowAmount').value;
             const targetPool = getSafeAddress(RAW_CONTRACTS.LENDING_POOL);
             const tokenAddress = getSafeAddress(tokenSymbol === "USDC" ? RAW_CONTRACTS.USDC_TOKEN : RAW_CONTRACTS.EURC_TOKEN);
 
-            if (!amount || parseFloat(amount) <= 0) return alert("Vui lòng nhập số lượng vay hợp lệ!");
+            if (!amount || parseFloat(amount) <= 0) return alert("Please enter a valid borrow amount!");
 
             try {
                 const provider = new ethers.BrowserProvider(window.ethereum);
@@ -623,22 +622,22 @@
                 const lending = new ethers.Contract(targetPool, LENDING_POOL_ABI, signer);
                 const gasParams = await getLegacyGasParam(provider);
 
-                updateLog(`Đang gửi lệnh vay borrow() giải ngân về ví...`);
+                updateLog(`Sending borrow() transaction...`);
                 let tx = await lending.borrow(tokenAddress, ethers.parseUnits(amount.toString(), 6), { gasLimit: 280000, ...gasParams });
                 await tx.wait();
-                updateLog(`Vay thành công! Số dư ví của bạn đã được cộng thêm.`);
-                alert("Vay tài sản thành công (Đã nhận tiền về ví)!");
+                updateLog(`Borrow successful! Funds have been credited to your wallet.`);
+                alert("Asset borrowed successfully (Funds received)!");
                 await updateAllBalances();
             } catch (err) { 
-                updateLog("Lỗi Vay (Borrow): " + (err.reason || err.message));
+                updateLog("Borrow error: " + (err.reason || err.message));
             }
         }
 
         async function approveBridge() {
-            if (!userAddress || !window.ethereum) return alert("Vui lòng kết nối ví trước!");
+            if (!userAddress || !window.ethereum) return alert("Please connect your wallet first!");
             const tokenSymbol = document.getElementById('bridgeToken').value;
             const amount = document.getElementById('bridgeAmount').value;
-            if (!amount || parseFloat(amount) <= 0) return alert("Vui lòng nhập số lượng chuyển hợp lệ!");
+            if (!amount || parseFloat(amount) <= 0) return alert("Please enter a valid amount to bridge!");
             
             const targetBridge = getSafeAddress(RAW_CONTRACTS.BRIDGE_CONTRACT);
             const tokenAddress = getSafeAddress(tokenSymbol === "USDC" ? RAW_CONTRACTS.USDC_TOKEN : RAW_CONTRACTS.EURC_TOKEN);
@@ -649,17 +648,17 @@
                 const token = new ethers.Contract(tokenAddress, ERC20_ABI, signer);
                 const gasParams = await getLegacyGasParam(provider);
 
-                updateLog(`Đang duyệt hạn mức (Approve) cho Cầu Nối mới...`);
+                updateLog(`Approving allowance for the Bridge contract...`);
                 let tx = await token.approve(targetBridge, ethers.parseUnits(amount.toString(), 6), { gasLimit: 80000, ...gasParams });
                 await tx.wait();
-                updateLog(`Approve thành công! Bạn có thể kích hoạt cầu nối.`);
+                updateLog(`Approve successful! You can now initiate the bridge.`);
             } catch (err) {
-                updateLog("Lỗi Approve Bridge: " + (err.reason || err.message));
+                updateLog("Bridge Approve error: " + (err.reason || err.message));
             }
         }
 
         async function executeBridge() {
-            if (!userAddress || !window.ethereum) return alert("Vui lòng kết nối ví trước!");
+            if (!userAddress || !window.ethereum) return alert("Please connect your wallet first!");
             const targetChainId = document.getElementById('bridgeTargetChain').value;
             const tokenSymbol = document.getElementById('bridgeToken').value;
             const amount = document.getElementById('bridgeAmount').value;
@@ -668,8 +667,8 @@
             const targetBridge = getSafeAddress(RAW_CONTRACTS.BRIDGE_CONTRACT);
             const tokenAddress = getSafeAddress(tokenSymbol === "USDC" ? RAW_CONTRACTS.USDC_TOKEN : RAW_CONTRACTS.EURC_TOKEN);
 
-            if (!amount || parseFloat(amount) <= 0) return alert("Số lượng không hợp lệ!");
-            if (!recipient || !recipient.trim().startsWith("0x")) return alert("Địa chỉ ví nhận mạng đích sai định dạng!");
+            if (!amount || parseFloat(amount) <= 0) return alert("Invalid amount!");
+            if (!recipient || !recipient.trim().startsWith("0x")) return alert("Invalid recipient address format on destination chain!");
 
             try {
                 const provider = new ethers.BrowserProvider(window.ethereum);
@@ -677,7 +676,7 @@
                 const bridgeContract = new ethers.Contract(targetBridge, BRIDGE_ABI, signer);
                 const gasParams = await getLegacyGasParam(provider);
 
-                updateLog(`Đang thực hiện gọi hàm bridgeAsset() trên contract mới...`);
+                updateLog(`Calling bridgeAsset()...`);
                 let tx = await bridgeContract.bridgeAsset(
                     BigInt(targetChainId),
                     tokenAddress,
@@ -687,12 +686,12 @@
                 );
                 await tx.wait();
                 
-                updateLog("Khóa tài sản và kích hoạt Bridge thành công!");
-                alert("Kích hoạt lệnh Bridge chuỗi chéo thành công!");
+                updateLog("Assets locked and bridge initiated successfully!");
+                alert("Cross-chain bridge initiated successfully!");
                 await updateAllBalances();
             } catch (err) {
-                updateLog("Lỗi Bridge: " + (err.reason || err.message));
-                alert("Lỗi: " + (err.reason || err.message));
+                updateLog("Bridge error: " + (err.reason || err.message));
+                alert("Error: " + (err.reason || err.message));
             }
         }
     </script>
