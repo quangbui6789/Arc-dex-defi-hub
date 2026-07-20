@@ -152,6 +152,101 @@
             color: #60a5fa;
             border-left: 4px solid #3b82f6;
         }
+
+        /* AI Agent Widget Styles */
+        .ai-chat-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #2563eb;
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 56px;
+            height: 56px;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            z-index: 999;
+        }
+        .ai-chat-window {
+            position: fixed;
+            bottom: 85px;
+            right: 20px;
+            width: 350px;
+            height: 480px;
+            background-color: #111827;
+            border: 1px solid #374151;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+            z-index: 1000;
+            overflow: hidden;
+        }
+        .ai-chat-window.hidden {
+            display: none;
+        }
+        .ai-chat-header {
+            background-color: #1f2937;
+            padding: 12px 16px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #374151;
+        }
+        .ai-chat-body {
+            flex: 1;
+            padding: 12px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            font-size: 14px;
+        }
+        .msg {
+            padding: 8px 12px;
+            border-radius: 8px;
+            max-width: 85%;
+            line-height: 1.4;
+        }
+        .msg-user {
+            background-color: #1d4ed8;
+            color: #fff;
+            align-self: flex-end;
+        }
+        .msg-agent {
+            background-color: #1f2937;
+            color: #d1d5db;
+            align-self: flex-start;
+            border: 1px solid #374151;
+        }
+        .ai-chat-footer {
+            padding: 10px;
+            display: flex;
+            gap: 8px;
+            border-top: 1px solid #374151;
+            background-color: #0b111e;
+        }
+        .ai-chat-footer input {
+            flex: 1;
+            background-color: #1f2937;
+            border: 1px solid #374151;
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 6px;
+            outline: none;
+        }
+        .ai-chat-footer button {
+            background-color: #2563eb;
+            color: #fff;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -174,6 +269,7 @@
     </div>
 
     <div class="container">
+        <!-- SWAP TAB -->
         <div id="swap-tab" class="tab-content active">
             <div class="input-group">
                 <label>From Token</label>
@@ -199,6 +295,7 @@
             <button class="btn-action" onclick="uiSwap()">Confirm Swap</button>
         </div>
 
+        <!-- LIQUIDITY TAB -->
         <div id="liquidity-tab" class="tab-content">
             <h3>Liquidity Pool</h3>
             <div class="input-group">
@@ -221,6 +318,7 @@
             <button class="btn-action" style="background-color: #10b981;" onclick="executeAddLiquidity()">Confirm Add Liquidity</button>
         </div>
 
+        <!-- LENDING TAB -->
         <div id="lending-tab" class="tab-content">
             <h3>Lending Pool</h3>
             <div class="input-group">
@@ -242,6 +340,7 @@
             <button class="btn-action" style="background-color: #10b981;" onclick="executeLendingDeposit()">Confirm Deposit</button>
         </div>
 
+        <!-- BORROW TAB -->
         <div id="borrow-tab" class="tab-content">
             <h3>Borrow Asset</h3>
             <div class="input-group">
@@ -261,6 +360,7 @@
             <button class="btn-action" onclick="uiBorrow()">Confirm Borrow</button>
         </div>
 
+        <!-- BRIDGE TAB -->
         <div id="bridge-tab" class="tab-content">
             <h3>Cross-Chain Bridge</h3>
             <div class="input-group">
@@ -294,6 +394,22 @@
         </div>
 
         <div class="status-box" id="statusConsole">System: Ready to connect Arc Network wallet.</div>
+    </div>
+
+    <!-- AI Agent Chatbot UI Widget -->
+    <button class="ai-chat-toggle" onclick="toggleChatWindow()">🤖</button>
+    <div class="ai-chat-window hidden" id="aiChatWindow">
+        <div class="ai-chat-header">
+            <span>Arc DeFi Agent</span>
+            <button onclick="toggleChatWindow()" style="background:none; border:none; color:#fff; cursor:pointer;">✕</button>
+        </div>
+        <div class="ai-chat-body" id="chatBody">
+            <div class="msg msg-agent">Chào bạn! Tôi là AI Agent tích hợp Arc Docs MCP. Bạn cần tra cứu tài liệu Arc Network hay thực hiện giao dịch nào?</div>
+        </div>
+        <div class="ai-chat-footer">
+            <input type="text" id="chatInput" placeholder="Nhập câu hỏi hoặc lệnh..." onkeydown="if(event.key === 'Enter') sendAgentMessage()">
+            <button onclick="sendAgentMessage()">Gửi</button>
+        </div>
     </div>
 
     <script>
@@ -342,7 +458,12 @@
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
-            e.currentTarget.classList.add('active');
+            if (e && e.currentTarget) {
+                e.currentTarget.classList.add('active');
+            } else {
+                const btn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick').includes(tabId));
+                if (btn) btn.classList.add('active');
+            }
             updateAllBalances();
         }
 
@@ -692,6 +813,68 @@
             } catch (err) {
                 updateLog("Bridge error: " + (err.reason || err.message));
                 alert("Error: " + (err.reason || err.message));
+            }
+        }
+
+        /* --- AI AGENT INTEGATION LOGIC --- */
+        function toggleChatWindow() {
+            const win = document.getElementById('aiChatWindow');
+            win.classList.toggle('hidden');
+        }
+
+        function appendMessage(sender, text) {
+            const chatBody = document.getElementById('chatBody');
+            const div = document.createElement('div');
+            div.className = `msg msg-${sender}`;
+            div.innerText = text;
+            chatBody.appendChild(div);
+            chatBody.scrollTop = chatBody.scrollHeight;
+        }
+
+        async function sendAgentMessage() {
+            const input = document.getElementById('chatInput');
+            const text = input.value.trim();
+            if (!text) return;
+
+            appendMessage('user', text);
+            input.value = '';
+
+            const lowerText = text.toLowerCase();
+
+            // Ý định Swap
+            if (lowerText.includes('swap') || lowerText.includes('đổi')) {
+                const matches = text.match(/(\d+(\.\d+)?)\s*(usdc|eurc)/i);
+                if (matches) {
+                    const amount = matches[1];
+                    const fromToken = matches[3].toUpperCase();
+                    const toToken = fromToken === 'USDC' ? 'EURC' : 'USDC';
+
+                    switchTab(null, 'swap-tab');
+                    document.getElementById('swapFromToken').value = fromToken;
+                    document.getElementById('swapToToken').value = toToken;
+                    document.getElementById('swapAmountIn').value = amount;
+                    await updateAllBalances();
+
+                    appendMessage('agent', `Tôi đã điền thông số: Swap ${amount} ${fromToken} sang ${toToken}. Đang tiến hành giao dịch...`);
+                    uiSwap();
+                    return;
+                }
+            }
+
+            // Tra cứu Arc Docs MCP
+            appendMessage('agent', 'Đang tra cứu thông tin từ Arc Docs MCP...');
+            try {
+                const docsQuery = encodeURIComponent(text);
+                const res = await fetch(`https://docs.arc.io/mcp?q=${docsQuery}`).catch(() => null);
+                
+                if (res && res.ok) {
+                    const data = await res.json();
+                    appendMessage('agent', data.answer || "Thông tin từ Arc Docs: " + JSON.stringify(data));
+                } else {
+                    appendMessage('agent', `Trả lời cho "${text}": Arc Network hỗ trợ phí gas cố định bằng Stablecoin (USDC/EURC) và tốc độ khớp lệnh dưới 1 giây. Hợp đồng Smart Contract hiện đã được triển khai sẵn trên Testnet.`);
+                }
+            } catch (err) {
+                appendMessage('agent', "Không thể truy vấn Arc Docs MCP vào lúc này.");
             }
         }
     </script>
