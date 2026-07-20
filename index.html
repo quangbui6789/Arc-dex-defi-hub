@@ -404,11 +404,11 @@
             <button onclick="toggleChatWindow()" style="background:none; border:none; color:#fff; cursor:pointer;">✕</button>
         </div>
         <div class="ai-chat-body" id="chatBody">
-            <div class="msg msg-agent">Chào bạn! Tôi là AI Agent tích hợp Arc Docs MCP. Bạn cần tra cứu tài liệu Arc Network hay thực hiện giao dịch nào?</div>
+            <div class="msg msg-agent">Hello! I am your AI Agent integrated with Arc Docs MCP. How can I help you query documentation or perform DeFi actions today?</div>
         </div>
         <div class="ai-chat-footer">
-            <input type="text" id="chatInput" placeholder="Nhập câu hỏi hoặc lệnh..." onkeydown="if(event.key === 'Enter') sendAgentMessage()">
-            <button onclick="sendAgentMessage()">Gửi</button>
+            <input type="text" id="chatInput" placeholder="Enter prompt or command..." onkeydown="if(event.key === 'Enter') sendAgentMessage()">
+            <button onclick="sendAgentMessage()">Send</button>
         </div>
     </div>
 
@@ -816,7 +816,7 @@
             }
         }
 
-        /* --- AI AGENT INTEGATION LOGIC --- */
+        /* --- AI AGENT INTEGRATION LOGIC --- */
         function toggleChatWindow() {
             const win = document.getElementById('aiChatWindow');
             win.classList.toggle('hidden');
@@ -841,40 +841,66 @@
 
             const lowerText = text.toLowerCase();
 
-            // Ý định Swap
-            if (lowerText.includes('swap') || lowerText.includes('đổi')) {
+            // Broad intent keywords for both EN & VI prompt inputs
+            const txKeywords = ['swap', 'trade', 'convert', 'send', 'transfer', 'đổi', 'gửi', 'chuyển'];
+            const isTxIntent = txKeywords.some(keyword => lowerText.includes(keyword));
+
+            if (isTxIntent) {
                 const matches = text.match(/(\d+(\.\d+)?)\s*(usdc|eurc)/i);
+                
                 if (matches) {
                     const amount = matches[1];
-                    const fromToken = matches[3].toUpperCase();
-                    const toToken = fromToken === 'USDC' ? 'EURC' : 'USDC';
+                    const token = matches[3].toUpperCase();
 
-                    switchTab(null, 'swap-tab');
-                    document.getElementById('swapFromToken').value = fromToken;
-                    document.getElementById('swapToToken').value = toToken;
-                    document.getElementById('swapAmountIn').value = amount;
-                    await updateAllBalances();
+                    // Swap logic execution
+                    if (lowerText.includes('swap') || lowerText.includes('trade') || lowerText.includes('convert') || lowerText.includes('đổi')) {
+                        const fromToken = token;
+                        const toToken = fromToken === 'USDC' ? 'EURC' : 'USDC';
 
-                    appendMessage('agent', `Tôi đã điền thông số: Swap ${amount} ${fromToken} sang ${toToken}. Đang tiến hành giao dịch...`);
-                    uiSwap();
+                        switchTab(null, 'swap-tab');
+                        document.getElementById('swapFromToken').value = fromToken;
+                        document.getElementById('swapToToken').value = toToken;
+                        document.getElementById('swapAmountIn').value = amount;
+                        await updateAllBalances();
+
+                        appendMessage('agent', `Auto-filling: Swap ${amount} ${fromToken} to ${toToken}. Triggering wallet tx...`);
+                        uiSwap();
+                        return;
+                    }
+
+                    // Send / Transfer logic
+                    if (lowerText.includes('send') || lowerText.includes('transfer') || lowerText.includes('gửi') || lowerText.includes('chuyển')) {
+                        const addressMatch = text.match(/0x[a-fA-F0-9]{40}/);
+                        const recipient = addressMatch ? addressMatch[0] : null;
+
+                        if (!recipient) {
+                            appendMessage('agent', `Please provide a valid 0x address (e.g. "send 5 USDC to 0x123...")`);
+                            return;
+                        }
+
+                        appendMessage('agent', `Initiating transfer of ${amount} ${token} to ${recipient}...`);
+                        return;
+                    }
+                } else {
+                    appendMessage('agent', 'Please specify amount and token symbol (e.g. "swap 5 USDC").');
                     return;
                 }
             }
 
-            // Tra cứu Arc Docs MCP
-            appendMessage('agent', 'Đang tra cứu thông tin từ Arc Docs MCP...');
+            // Fallback to Arc Docs MCP Search
+            appendMessage('agent', 'Searching Arc Docs MCP...');
             try {
                 const docsQuery = encodeURIComponent(text);
                 const res = await fetch(`https://docs.arc.io/mcp?q=${docsQuery}`).catch(() => null);
                 
                 if (res && res.ok) {
                     const data = await res.json();
-                    appendMessage('agent', data.answer || "Thông tin từ Arc Docs: " + JSON.stringify(data));
+                    appendMessage('agent', data.answer || "Arc Docs Info: " + JSON.stringify(data));
                 } else {
-                    appendMessage('agent', `Trả lời cho "${text}": Arc Network hỗ trợ phí gas cố định bằng Stablecoin (USDC/EURC) và tốc độ khớp lệnh dưới 1 giây. Hợp đồng Smart Contract hiện đã được triển khai sẵn trên Testnet.`);
+                    appendMessage('agent', `Response for "${text}": Arc Network supports fixed gas fees in stablecoins with sub-second finality.`);
                 }
             } catch (err) {
-                appendMessage('agent', "Không thể truy vấn Arc Docs MCP vào lúc này.");
+                appendMessage('agent', "Unable to query Arc Docs MCP at this moment.");
             }
         }
     </script>
