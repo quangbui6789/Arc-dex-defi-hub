@@ -841,7 +841,7 @@
 
             const lowerText = text.toLowerCase();
 
-            // Broad intent keywords for both EN & VI prompt inputs
+            // Intent Keywords
             const txKeywords = ['swap', 'trade', 'convert', 'send', 'transfer', 'đổi', 'gửi', 'chuyển'];
             const isTxIntent = txKeywords.some(keyword => lowerText.includes(keyword));
 
@@ -863,26 +863,59 @@
                         document.getElementById('swapAmountIn').value = amount;
                         await updateAllBalances();
 
-                        appendMessage('agent', `Auto-filling: Swap ${amount} ${fromToken} to ${toToken}. Triggering wallet tx...`);
+                        appendMessage('agent', `Auto-filling: Swap ${amount} ${fromToken} to ${toToken}. Opening MetaMask...`);
                         uiSwap();
                         return;
                     }
 
-                    // Send / Transfer logic
+                    // Send / Transfer logic execution via MetaMask
                     if (lowerText.includes('send') || lowerText.includes('transfer') || lowerText.includes('gửi') || lowerText.includes('chuyển')) {
                         const addressMatch = text.match(/0x[a-fA-F0-9]{40}/);
                         const recipient = addressMatch ? addressMatch[0] : null;
 
                         if (!recipient) {
-                            appendMessage('agent', `Please provide a valid 0x address (e.g. "send 5 USDC to 0x123...")`);
+                            appendMessage('agent', `Please provide a valid 0x recipient address (e.g., "send 5 USDC to 0x123...").`);
                             return;
                         }
 
-                        appendMessage('agent', `Initiating transfer of ${amount} ${token} to ${recipient}...`);
+                        if (!userAddress || !window.ethereum) {
+                            appendMessage('agent', `Please connect your MetaMask wallet first!`);
+                            return;
+                        }
+
+                        appendMessage('agent', `Initiating transfer of ${amount} ${token} to ${recipient}. Please confirm in MetaMask...`);
+                        
+                        try {
+                            const tokenAddress = getSafeAddress(token === 'USDC' ? RAW_CONTRACTS.USDC_TOKEN : RAW_CONTRACTS.EURC_TOKEN);
+                            const provider = new ethers.BrowserProvider(window.ethereum);
+                            const signer = await provider.getSigner();
+                            const tokenContract = new ethers.Contract(tokenAddress, ERC20_ABI, signer);
+
+                            const parsedAmount = ethers.parseUnits(amount.toString(), 6);
+                            const gasParams = await getLegacyGasParam(provider);
+
+                            // Execute direct ERC-20 transfer transaction on MetaMask
+                            const tx = await tokenContract.transfer(getSafeAddress(recipient), parsedAmount, {
+                                gasLimit: 80000,
+                                ...gasParams
+                            });
+
+                            updateLog(`Transfer tx submitted: ${tx.hash}`);
+                            appendMessage('agent', `Transaction submitted! Hash: ${tx.hash.substring(0, 10)}... Waiting for confirmation...`);
+
+                            await tx.wait();
+                            appendMessage('agent', `Transfer of ${amount} ${token} successful!`);
+                            updateLog(`Transfer successful!`);
+                            await updateAllBalances();
+                        } catch (err) {
+                            const errMsg = err.reason || err.message;
+                            appendMessage('agent', `Transaction failed or rejected: ${errMsg}`);
+                            updateLog(`Transfer error: ${errMsg}`);
+                        }
                         return;
                     }
                 } else {
-                    appendMessage('agent', 'Please specify amount and token symbol (e.g. "swap 5 USDC").');
+                    appendMessage('agent', 'Please specify amount and token symbol (e.g., "swap 5 USDC" or "transfer 5 USDC to 0x...").');
                     return;
                 }
             }
