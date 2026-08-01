@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MULTI-DEFI-HUB | Arc Rails</title>
+    <title>MULTI-DEFI-HUB | Arc AppKit Bridge</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -435,15 +435,15 @@
             <button class="btn-action btn-secondary" style="margin-top:8px;" onclick="uiRepayBorrow()">Repay Borrowed Asset</button>
         </div>
 
-        <!-- BRIDGE TAB -->
+        <!-- BRIDGE TAB (Cập nhật Arc AppKit Domain & CCTP chuẩn) -->
         <div id="bridge-tab" class="tab-content">
             <h3>Arc AppKit Cross-Chain Bridge</h3>
             <div class="input-group">
-                <label>Destination Chain</label>
-                <select id="bridgeTargetChain">
-                    <option value="11155111">Ethereum Sepolia (11155111)</option>
-                    <option value="84532">Base Sepolia (84532)</option>
-                    <option value="421614">Arbitrum Sepolia (421614)</option>
+                <label>Destination Chain Domain</label>
+                <select id="bridgeTargetDomain">
+                    <option value="0">Ethereum Sepolia (Domain 0)</option>
+                    <option value="6">Base Sepolia (Domain 6)</option>
+                    <option value="3">Arbitrum Sepolia (Domain 3)</option>
                 </select>
             </div>
 
@@ -460,7 +460,7 @@
                     <span>Amount to Bridge</span>
                     <span>Wallet: <span id="balance-bridge" class="balance-val">0.0000</span></span>
                 </label>
-                <input type="number" id="bridgeAmount" placeholder="0.0" step="any">
+                <input type="number" id="bridgeAmount" placeholder="0.0" value="2" step="any">
                 <div class="pct-group">
                     <button class="btn-pct" onclick="setQuickPct('bridgeAmount', 'balance-bridge', 0.50)">50%</button>
                     <button class="btn-pct" onclick="setQuickPct('bridgeAmount', 'balance-bridge', 1.00)">MAX</button>
@@ -468,12 +468,12 @@
             </div>
 
             <div class="input-group">
-                <label>Recipient Address (Optional - Defaults to current wallet)</label>
+                <label>Recipient Address (Destination Chain)</label>
                 <input type="text" id="bridgeRecipient" placeholder="0x..." style="font-size: 13px;">
             </div>
             
-            <button class="btn-action btn-secondary" onclick="approveBridge()">Approve Bridge Token</button>
-            <button class="btn-action" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);" onclick="executeBridge()">Initiate Arc Bridge Transfer</button>
+            <button class="btn-action btn-secondary" onclick="approveBridgeToken()">1. Approve TokenMessenger Contract</button>
+            <button class="btn-action" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);" onclick="executeArcBridge()">2. Initiate AppKit Cross-Chain Bridge</button>
         </div>
 
         <!-- PAYMENTS TAB -->
@@ -548,13 +548,18 @@
             USDC_TOKEN: "0x3600000000000000000000000000000000000000", 
             EURC_TOKEN: "0x89B50855Aa3bE2F677cD6303Cec089B5F319D72a", 
             SWAP_POOL_ROUTER: "0x8D02E191dDa6da9a2F8De7bd46caF795D3e3Bc9c", 
-            BRIDGE_CONTRACT: "0xfdB761CDB47093cEe833b8f20C6aDe50e5FbbC02",
-            LENDING_POOL: "0x398E4b2A5d5F534e1bfe64DC515DCf829620cFf5"
+            LENDING_POOL: "0x398E4b2A5d5F534e1bfe64DC515DCf829620cFf5",
+            // Arc AppKit / CCTP Token Messenger Native Address
+            TOKEN_MESSENGER: "0x9f32f32f3a2d212a76f296277259f9393a652a92"
         };
 
         function getSafeAddress(addr) {
             if (!addr) return ethers.ZeroAddress;
             return ethers.getAddress(addr.trim().toLowerCase());
+        }
+
+        function addressToBytes32(address) {
+            return ethers.zeroPadValue(getSafeAddress(address), 32);
         }
 
         const ERC20_ABI = [
@@ -570,9 +575,9 @@
             "function removeLiquidity(uint256 _amount) external"
         ];
 
+        // Standard AppKit CCTP Bridge Interface
         const BRIDGE_ABI = [
-            "function bridgeAsset(uint256 _targetChainId, address _token, uint256 _amount, address _recipient) external",
-            "event BridgeInitiated(uint256 indexed targetChainId, address indexed token, uint256 amount, address indexed recipient)"
+            "function depositForBurn(uint256 amount, uint32 destinationDomain, bytes32 mintRecipient, address burnToken) external returns (uint64 _nonce)"
         ];
 
         const LENDING_POOL_ABI = [
@@ -675,6 +680,7 @@
                 userAddress = accounts[0];
                 document.getElementById('connectBtn').innerText = userAddress.substring(0, 6) + "..." + userAddress.substring(38);
                 document.getElementById('disconnectBtn').style.display = "inline-block";
+                document.getElementById('bridgeRecipient').value = userAddress;
                 updateLog("Connected: " + userAddress);
                 await updateAllBalances();
             } catch (err) {
@@ -929,8 +935,8 @@
             }
         }
 
-        /* ARC APPKIT BRIDGE FUNCTIONS */
-        async function approveBridge() {
+        /* ARC APPKIT BRIDGE FUNCTIONS (Standard CCTP DepositForBurn) */
+        async function approveBridgeToken() {
             if (!userAddress || !window.ethereum) return alert("Please connect wallet!");
             const tokenSymbol = document.getElementById('bridgeToken').value;
             const tokenAddr = getSafeAddress(tokenSymbol === "USDC" ? RAW_CONTRACTS.USDC_TOKEN : RAW_CONTRACTS.EURC_TOKEN);
@@ -941,59 +947,61 @@
                 const tokenContract = new ethers.Contract(tokenAddr, ERC20_ABI, signer);
                 const gasParams = await getLegacyGasParam(provider);
 
-                updateLog(`Approving ${tokenSymbol} for Arc AppKit Bridge...`);
-                const tx = await tokenContract.approve(getSafeAddress(RAW_CONTRACTS.BRIDGE_CONTRACT), ethers.MaxUint256, gasParams);
+                updateLog(`Approving ${tokenSymbol} for TokenMessenger (${RAW_CONTRACTS.TOKEN_MESSENGER})...`);
+                const tx = await tokenContract.approve(getSafeAddress(RAW_CONTRACTS.TOKEN_MESSENGER), ethers.MaxUint256, gasParams);
                 await tx.wait();
-                updateLog(`${tokenSymbol} Approved for Bridge!`);
+                updateLog(`${tokenSymbol} Approved for TokenMessenger! Ready to bridge.`);
             } catch (err) {
                 updateLog("Bridge Approve Error: " + (err.reason || err.message));
             }
         }
 
-        async function executeBridge() {
+        async function executeArcBridge() {
             if (!userAddress || !window.ethereum) return alert("Please connect wallet!");
-            const targetChainId = document.getElementById('bridgeTargetChain').value;
+            const targetDomain = parseInt(document.getElementById('bridgeTargetDomain').value);
             const tokenSymbol = document.getElementById('bridgeToken').value;
-            const amount = document.getElementById('bridgeAmount').value;
+            const amountStr = document.getElementById('bridgeAmount').value;
             let recipient = document.getElementById('bridgeRecipient').value.trim();
 
-            if (!amount || parseFloat(amount) <= 0) return alert("Invalid amount!");
+            if (!amountStr || parseFloat(amountStr) <= 0) return alert("Invalid amount!");
             if (!recipient) recipient = userAddress;
 
             const tokenAddr = getSafeAddress(tokenSymbol === "USDC" ? RAW_CONTRACTS.USDC_TOKEN : RAW_CONTRACTS.EURC_TOKEN);
-            const bridgeAddr = getSafeAddress(RAW_CONTRACTS.BRIDGE_CONTRACT);
+            const messengerAddr = getSafeAddress(RAW_CONTRACTS.TOKEN_MESSENGER);
 
             try {
                 const provider = new ethers.BrowserProvider(window.ethereum);
                 const signer = await provider.getSigner();
                 const tokenContract = new ethers.Contract(tokenAddr, ERC20_ABI, signer);
-                const bridgeContract = new ethers.Contract(bridgeAddr, BRIDGE_ABI, signer);
-                const parsedAmount = ethers.parseUnits(amount, 6);
+                const bridgeContract = new ethers.Contract(messengerAddr, BRIDGE_ABI, signer);
+                const parsedAmount = ethers.parseUnits(amountStr, 6);
                 const gasParams = await getLegacyGasParam(provider);
 
-                updateLog("Checking Bridge allowance...");
-                const allowance = await tokenContract.allowance(userAddress, bridgeAddr);
+                updateLog("Checking TokenMessenger allowance...");
+                const allowance = await tokenContract.allowance(userAddress, messengerAddr);
                 if (allowance < parsedAmount) {
-                    updateLog(`Auto-approving ${tokenSymbol} for Bridge...`);
-                    const txApprove = await tokenContract.approve(bridgeAddr, ethers.MaxUint256, gasParams);
+                    updateLog(`Auto-approving ${tokenSymbol} for TokenMessenger...`);
+                    const txApprove = await tokenContract.approve(messengerAddr, ethers.MaxUint256, gasParams);
                     await txApprove.wait();
                     updateLog("Approval complete!");
                 }
 
-                updateLog(`Initiating Bridge to Chain ID ${targetChainId}...`);
-                const tx = await bridgeContract.bridgeAsset(
-                    targetChainId,
-                    tokenAddr,
+                const recipientBytes32 = addressToBytes32(recipient);
+
+                updateLog(`Initiating AppKit Bridge Burn to Domain ${targetDomain}...`);
+                const tx = await bridgeContract.depositForBurn(
                     parsedAmount,
-                    getSafeAddress(recipient),
+                    targetDomain,
+                    recipientBytes32,
+                    tokenAddr,
                     gasParams
                 );
-                
+
                 const txLink = `<a href="https://testnet.arcscan.app/tx/${tx.hash}" target="_blank" style="color:#60a5fa;text-decoration:underline;">${tx.hash.substring(0, 10)}...</a>`;
-                updateLog("Bridge Tx Sent: " + txLink + ". Waiting for confirmation...");
-                
+                updateLog("Bridge Burn Tx Sent: " + txLink + ". Waiting for confirmation...");
+
                 await tx.wait();
-                updateLog(`Bridge Event Dispatched to Chain ${targetChainId}! 🌉 (Pending Relayer Execution on destination chain)`);
+                updateLog(`Bridge Burn Complete! Token burn event sent. Waiting for Relayer to mint on Domain ${targetDomain}. 🌉`);
                 await updateAllBalances();
             } catch (err) {
                 updateLog("Bridge Error: " + (err.reason || err.message));
