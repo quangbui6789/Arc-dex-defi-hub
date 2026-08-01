@@ -3,1096 +3,1013 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arc Testnet DApp Hub - Web3 & Circle Bridge Integration</title>
-    
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Ethers.js v6 CDN -->
+    <title>MULTI-DEFI-HUB | Arc Rails</title>
+    <!-- Fonts & Ethers.js -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.11.1/ethers.umd.min.js"></script>
     
-    <!-- Custom CSS Styling & Animations -->
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
-        
+        :root {
+            --bg-color: #070a11;
+            --card-bg: rgba(15, 23, 42, 0.75);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --input-bg: rgba(7, 10, 17, 0.7);
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --accent-color: #10b981;
+            --text-color: #f8fafc;
+            --text-muted: #94a3b8;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+        }
+
+        * { box-sizing: border-box; transition: all 0.2s ease-in-out; }
+
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #0b0f17;
-            color: #f3f4f6;
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 24px 16px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
-        .font-mono {
-            font-family: 'JetBrains Mono', monospace;
-        }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #111827;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #374151;
-            border-radius: 3px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #4b5563;
-        }
-
-        /* Glowing Effects */
-        .glow-blue {
-            box-shadow: 0 0 25px -5px rgba(59, 130, 246, 0.25);
-        }
-        .glow-purple {
-            box-shadow: 0 0 25px -5px rgba(168, 85, 247, 0.25);
-        }
-        .glow-emerald {
-            box-shadow: 0 0 25px -5px rgba(16, 185, 129, 0.25);
-        }
-        .glow-cyan {
-            box-shadow: 0 0 25px -5px rgba(6, 182, 212, 0.25);
-        }
-
-        /* Active Navigation Tab */
-        .tab-btn.active {
-            color: #3b82f6;
-            border-bottom: 2px solid #3b82f6;
-            background: linear-gradient(180deg, rgba(59, 130, 246, 0.05) 0%, rgba(59, 130, 246, 0) 100%);
-        }
-
-        /* Glassmorphism Card Effect */
-        .glass-card {
-            background: rgba(17, 24, 39, 0.7);
+        /* HEADER & NAVBAR */
+        .header {
+            width: 100%;
+            max-width: 1100px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 24px;
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid var(--card-border);
             backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            margin-bottom: 24px;
         }
 
-        .glass-card-hover:hover {
-            border-color: rgba(59, 130, 246, 0.3);
-            transition: all 0.3s ease;
+        .logo-container { display: flex; align-items: center; gap: 12px; }
+        .logo {
+            font-size: 18px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #60a5fa 0%, #a855f7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
-        /* Chat Message Bubbles */
-        .msg-user {
-            align-self: flex-end;
+        .badge-net {
+            background: rgba(37, 99, 235, 0.15);
+            color: #60a5fa;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .wallet-zone { display: flex; align-items: center; gap: 12px; }
+        .btn-faucet {
+            background: rgba(147, 51, 234, 0.15);
+            color: #c084fc;
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            padding: 8px 14px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+        }
+        .btn-faucet:hover { background: rgba(147, 51, 234, 0.3); }
+
+        .btn-connect {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 13px;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.2);
+        }
+        .btn-connect:hover { filter: brightness(1.1); transform: translateY(-1px); }
+
+        .btn-disconnect {
+            background: rgba(239, 68, 68, 0.15);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            padding: 8px 14px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            display: none;
+        }
+
+        /* TABS */
+        .nav-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            background: rgba(15, 23, 42, 0.6);
+            padding: 5px;
+            border-radius: 14px;
+            border: 1px solid var(--card-border);
+            gap: 4px;
+            margin-bottom: 24px;
+            justify-content: center;
+        }
+
+        .tab-btn {
+            background: transparent;
+            color: var(--text-muted);
+            border: none;
+            padding: 10px 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+        }
+        .tab-btn:hover { color: var(--text-color); }
+        .tab-btn.active {
+            background: var(--primary-color);
+            color: white;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        /* MAIN CONTAINER */
+        .container {
+            width: 100%;
+            max-width: 520px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            padding: 24px;
+            border-radius: 20px;
+            backdrop-filter: blur(16px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        h3 { margin: 0 0 18px 0; font-size: 18px; font-weight: 700; }
+
+        /* INPUT GROUPS */
+        .input-group {
+            background: var(--input-bg);
+            border: 1px solid var(--card-border);
+            padding: 14px 16px;
+            border-radius: 14px;
+            margin-bottom: 14px;
+        }
+        .input-group label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            color: var(--text-muted);
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .balance-val { color: #60a5fa; font-weight: 700; }
+
+        .input-row { display: flex; align-items: center; gap: 12px; }
+
+        .input-group input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 18px;
+            font-weight: 700;
+            outline: none;
+            font-family: inherit;
+        }
+
+        .input-group select {
+            background: #1e293b;
+            color: white;
+            border: 1px solid var(--card-border);
+            padding: 8px 12px;
+            border-radius: 10px;
+            outline: none;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        /* QUICK PCT BUTTONS */
+        .pct-group { display: flex; justify-content: flex-end; gap: 6px; margin-top: 10px; }
+        .btn-pct {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--card-border);
+            color: var(--text-muted);
+            font-size: 10px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .btn-pct:hover { background: rgba(255, 255, 255, 0.15); color: white; }
+
+        /* BUTTONS */
+        .btn-action {
+            width: 100%;
             background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-            color: #ffffff;
-            border-radius: 16px 16px 2px 16px;
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 8px;
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
         }
-        .msg-agent {
-            align-self: flex-start;
-            background: #1f2937;
-            color: #e5e7eb;
-            border: 1px solid #374151;
-            border-radius: 16px 16px 16px 2px;
+        .btn-action:hover { filter: brightness(1.1); transform: translateY(-1px); }
+        .btn-secondary { background: #334155 !important; box-shadow: none !important; margin-bottom: 8px; }
+        .btn-danger { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important; box-shadow: 0 4px 14px rgba(239, 68, 68, 0.3) !important; }
+
+        /* ANALYTICS GRID */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+        .stat-card {
+            background: var(--input-bg);
+            border: 1px solid var(--card-border);
+            padding: 14px;
+            border-radius: 12px;
+        }
+        .stat-title { font-size: 11px; color: var(--text-muted); font-weight: 600; }
+        .stat-value { font-size: 18px; font-weight: 800; color: #60a5fa; margin-top: 4px; }
+
+        /* STATUS CONSOLE */
+        .status-box {
+            margin-top: 18px;
+            padding: 12px 14px;
+            border-radius: 10px;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            font-size: 12px;
+            font-family: monospace;
+            word-break: break-all;
+            color: #93c5fd;
         }
 
-        /* Pulse Animation */
-        @keyframes pulse-slow {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.8; transform: scale(1.03); }
+        /* AI AGENT WIDGET */
+        .ai-chat-toggle {
+            position: fixed; bottom: 24px; right: 24px;
+            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+            color: #fff; border: none; border-radius: 50%; width: 56px; height: 56px;
+            font-size: 24px; cursor: pointer; box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4); z-index: 999;
         }
-        .animate-pulse-slow {
-            animation: pulse-slow 3s infinite ease-in-out;
+        .ai-chat-window {
+            position: fixed; bottom: 92px; right: 24px; width: 360px; height: 460px;
+            background: #0f172a; border: 1px solid var(--card-border); border-radius: 16px;
+            display: flex; flex-direction: column; box-shadow: 0 12px 32px rgba(0,0,0,0.6); z-index: 1000; overflow: hidden;
         }
+        .ai-chat-window.hidden { display: none; }
+        .ai-chat-header {
+            background: #1e293b; padding: 14px 16px; font-weight: 700; font-size: 14px;
+            display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--card-border);
+        }
+        .ai-chat-body { flex: 1; padding: 14px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; font-size: 13px; }
+        .msg { padding: 10px 14px; border-radius: 12px; max-width: 85%; line-height: 1.4; }
+        .msg-user { background: var(--primary-color); color: #fff; align-self: flex-end; }
+        .msg-agent { background: #1e293b; color: #cbd5e1; align-self: flex-start; border: 1px solid var(--card-border); }
+        .ai-chat-footer { padding: 12px; display: flex; gap: 8px; border-top: 1px solid var(--card-border); background: #070a11; }
+        .ai-chat-footer input { flex: 1; background: #1e293b; border: 1px solid var(--card-border); color: #fff; padding: 8px 12px; border-radius: 8px; outline: none; font-size: 13px; }
+        .ai-chat-footer button { background: var(--primary-color); color: #fff; border: none; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 13px; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between selection:bg-blue-500 selection:text-white">
+<body>
 
-    <!-- TOP HEADER / NAVBAR -->
-    <header class="bg-gray-900/90 border-b border-gray-800 sticky top-0 z-50 backdrop-blur-md px-6 py-3.5">
-        <div class="max-w-7xl mx-auto flex justify-between items-center">
-            
-            <!-- Logo & Network Identity -->
-            <div class="flex items-center space-x-4">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-500 to-purple-500 flex items-center justify-center font-bold text-white text-xl shadow-lg shadow-blue-500/20">
-                    A
-                </div>
-                <div>
-                    <div class="flex items-center space-x-2">
-                        <span class="text-lg font-bold tracking-wide text-white">Arc Testnet</span>
-                        <span class="bg-blue-500/10 text-blue-400 border border-blue-500/30 text-[10px] font-semibold px-2 py-0.5 rounded-full">v2.4.0</span>
-                    </div>
-                    <p class="text-xs text-gray-400">Decentralized Finance & Cross-Chain Portal</p>
-                </div>
-            </div>
-
-            <!-- Network Status Indicators & Wallet Connect Button -->
-            <div class="flex items-center space-x-4">
-                <!-- Gas Tracker Badge -->
-                <div class="hidden sm:flex items-center space-x-2 bg-gray-800/80 border border-gray-700/60 px-3 py-1.5 rounded-lg text-xs">
-                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-                    <span class="text-gray-400">Gas:</span>
-                    <span class="font-mono font-medium text-emerald-400">1.2 Gwei</span>
-                </div>
-
-                <!-- Chain ID Badge -->
-                <div class="hidden md:flex items-center space-x-2 bg-gray-800/80 border border-gray-700/60 px-3 py-1.5 rounded-lg text-xs">
-                    <span class="text-gray-400">Network:</span>
-                    <span class="font-mono font-medium text-indigo-400">Arc-Testnet-1</span>
-                </div>
-
-                <!-- Wallet Connect Button -->
-                <button id="btnConnectWallet" onclick="handleWalletConnect()" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-medium text-sm py-2 px-5 rounded-xl transition duration-200 shadow-lg shadow-blue-600/20 flex items-center space-x-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                    </svg>
-                    <span id="btnWalletText">Connect Wallet</span>
-                </button>
-            </div>
-
+    <!-- Header -->
+    <div class="header">
+        <div class="logo-container">
+            <div class="logo">MULTI-DEFI-HUB</div>
+            <span class="badge-net">Arc Testnet</span>
         </div>
-    </header>
-
-    <!-- NAVIGATION TABS BAR -->
-    <div class="bg-gray-900/60 border-b border-gray-800 px-6 backdrop-blur-sm">
-        <div class="max-w-7xl mx-auto flex space-x-1 sm:space-x-4 overflow-x-auto text-sm font-medium py-1">
-            <button onclick="switchTab('swap')" id="tab-swap" class="tab-btn active px-4 py-3 rounded-t-lg transition flex items-center space-x-2 whitespace-nowrap text-gray-300 hover:text-white">
-                <span>🔄</span>
-                <span>Swap</span>
-            </button>
-            <button onclick="switchTab('liquidity')" id="tab-liquidity" class="tab-btn px-4 py-3 rounded-t-lg transition flex items-center space-x-2 whitespace-nowrap text-gray-400 hover:text-white">
-                <span>💧</span>
-                <span>Liquidity Pool</span>
-            </button>
-            <button onclick="switchTab('lending')" id="tab-lending" class="tab-btn px-4 py-3 rounded-t-lg transition flex items-center space-x-2 whitespace-nowrap text-gray-400 hover:text-white">
-                <span>🏦</span>
-                <span>Lending & Borrow</span>
-            </button>
-            <button onclick="switchTab('bridge')" id="tab-bridge" class="tab-btn px-4 py-3 rounded-t-lg transition flex items-center space-x-2 whitespace-nowrap text-gray-400 hover:text-white">
-                <span>🌉</span>
-                <span>Circle Bridge</span>
-            </button>
-            <button onclick="switchTab('pay')" id="tab-pay" class="tab-btn px-4 py-3 rounded-t-lg transition flex items-center space-x-2 whitespace-nowrap text-gray-400 hover:text-white">
-                <span>💸</span>
-                <span>Direct Transfer</span>
-            </button>
-            <button onclick="switchTab('analytics')" id="tab-analytics" class="tab-btn px-4 py-3 rounded-t-lg transition flex items-center space-x-2 whitespace-nowrap text-gray-400 hover:text-white">
-                <span>📊</span>
-                <span>Protocol Analytics</span>
-            </button>
+        <div class="wallet-zone">
+            <button class="btn-faucet" onclick="window.open('https://testnet.arcscan.app', '_blank')">🎁 Faucet USDC / EURC</button>
+            <button class="btn-connect" id="connectBtn" onclick="connectWallet()">Connect Wallet</button>
+            <button class="btn-disconnect" id="disconnectBtn" onclick="disconnectWallet()">Disconnect</button>
         </div>
     </div>
 
-    <!-- MAIN DASHBOARD BODY -->
-    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 my-2">
+    <!-- Navigation Tabs -->
+    <div class="nav-tabs">
+        <button class="tab-btn active" onclick="switchTab(event, 'dashboard-tab')">Dashboard</button>
+        <button class="tab-btn" onclick="switchTab(event, 'swap-tab')">Swap</button>
+        <button class="tab-btn" onclick="switchTab(event, 'liquidity-tab')">Liquidity</button>
+        <button class="tab-btn" onclick="switchTab(event, 'lending-tab')">Lending</button>
+        <button class="tab-btn" onclick="switchTab(event, 'borrow-tab')">Borrow</button>
+        <button class="tab-btn" onclick="switchTab(event, 'bridge-tab')">Bridge</button>
+        <button class="tab-btn" onclick="switchTab(event, 'payments-tab')">Payments</button>
+        <button class="tab-btn" onclick="switchTab(event, 'analytics-tab')">Analytics</button>
+    </div>
 
-        <!-- MAIN INTERACTIVE SECTION (LEFT/CENTER PANEL - 8 COLS) -->
-        <div class="lg:col-span-8 space-y-6">
+    <!-- Container -->
+    <div class="container">
 
-            <!-- STATS OVERVIEW HEADER -->
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                <div class="glass-card p-4 rounded-xl">
-                    <span class="text-xs text-gray-400 block mb-1">Total Value Locked</span>
-                    <span class="text-lg font-bold font-mono text-white">$14,250,890</span>
-                    <span class="text-[10px] text-emerald-400 block mt-1">↑ +4.2% (24h)</span>
+        <!-- DASHBOARD TAB -->
+        <div id="dashboard-tab" class="tab-content active">
+            <h3>Overview Dashboard</h3>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-title">USDC Balance</div>
+                    <div class="stat-value" id="dash-usdc">0.00</div>
                 </div>
-                <div class="glass-card p-4 rounded-xl">
-                    <span class="text-xs text-gray-400 block mb-1">24h Volume</span>
-                    <span class="text-lg font-bold font-mono text-white">$3,892,110</span>
-                    <span class="text-[10px] text-emerald-400 block mt-1">↑ +12.8%</span>
+                <div class="stat-card">
+                    <div class="stat-title">EURC Balance</div>
+                    <div class="stat-value" id="dash-eurc">0.00</div>
                 </div>
-                <div class="glass-card p-4 rounded-xl">
-                    <span class="text-xs text-gray-400 block mb-1">USDC APY</span>
-                    <span class="text-lg font-bold font-mono text-indigo-400">8.45%</span>
-                    <span class="text-[10px] text-gray-400 block mt-1">Variable Rate</span>
+                <div class="stat-card">
+                    <div class="stat-title">Total Supplied</div>
+                    <div class="stat-value" id="dash-supplied">$0.00</div>
                 </div>
-                <div class="glass-card p-4 rounded-xl">
-                    <span class="text-xs text-gray-400 block mb-1">EURC APY</span>
-                    <span class="text-lg font-bold font-mono text-purple-400">6.12%</span>
-                    <span class="text-[10px] text-gray-400 block mt-1">Variable Rate</span>
-                </div>
-            </div>
-
-            <!-- ================= SECTION 1: SWAP ================= -->
-            <div id="section-swap" class="glass-card rounded-2xl p-6 shadow-2xl relative overflow-hidden">
-                <div class="flex justify-between items-center mb-6">
-                    <div>
-                        <h2 class="text-xl font-bold text-white flex items-center space-x-2">
-                            <span>Swap Tokens</span>
-                        </h2>
-                        <p class="text-xs text-gray-400 mt-1">Trade USDC and EURC with minimal slippage on Arc Network</p>
-                    </div>
-                    <button class="p-2 text-gray-400 hover:text-white bg-gray-800 rounded-lg text-xs">⚙️ Settings</button>
-                </div>
-
-                <div class="space-y-4">
-                    <!-- Input Token Block -->
-                    <div class="bg-gray-900/80 p-4 rounded-xl border border-gray-800 focus-within:border-blue-500/50 transition">
-                        <div class="flex justify-between text-xs text-gray-400 mb-2">
-                            <span>You Pay</span>
-                            <span>Balance: <span id="swapFromBalance" class="font-mono text-gray-200">0.00</span></span>
-                        </div>
-                        <div class="flex items-center space-x-3">
-                            <input type="number" id="swapAmountIn" placeholder="0.0" class="w-full bg-transparent text-2xl font-mono text-white focus:outline-none" oninput="calculateSwapQuote()">
-                            <select id="swapFromToken" onchange="toggleSwapTokens()" class="bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2 text-sm font-semibold focus:outline-none">
-                                <option value="USDC">USDC</option>
-                                <option value="EURC">EURC</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <!-- Swap Direction Button -->
-                    <div class="flex justify-center -my-2 relative z-10">
-                        <button onclick="switchSwapDirection()" class="bg-gray-800 hover:bg-gray-700 border border-gray-700 p-2.5 rounded-xl text-blue-400 shadow-md transition hover:rotate-180">
-                            ⬇️
-                        </button>
-                    </div>
-
-                    <!-- Output Token Block -->
-                    <div class="bg-gray-900/80 p-4 rounded-xl border border-gray-800">
-                        <div class="flex justify-between text-xs text-gray-400 mb-2">
-                            <span>You Receive (Estimated)</span>
-                            <span>Balance: <span id="swapToBalance" class="font-mono text-gray-200">0.00</span></span>
-                        </div>
-                        <div class="flex items-center space-x-3">
-                            <input type="number" id="swapAmountOut" placeholder="0.0" readonly class="w-full bg-transparent text-2xl font-mono text-emerald-400 focus:outline-none">
-                            <select id="swapToToken" disabled class="bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2 text-sm font-semibold focus:outline-none opacity-80">
-                                <option value="EURC">EURC</option>
-                                <option value="USDC">USDC</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <!-- Exchange Rate & Route Details -->
-                    <div class="bg-gray-900/40 p-3 rounded-lg border border-gray-800/80 text-xs space-y-1.5">
-                        <div class="flex justify-between text-gray-400">
-                            <span>Exchange Rate</span>
-                            <span class="font-mono text-gray-200">1 USDC ≈ 0.92 EURC</span>
-                        </div>
-                        <div class="flex justify-between text-gray-400">
-                            <span>Price Impact</span>
-                            <span class="font-mono text-emerald-400">&lt; 0.01%</span>
-                        </div>
-                        <div class="flex justify-between text-gray-400">
-                            <span>Slippage Tolerance</span>
-                            <span class="font-mono text-gray-200">0.5%</span>
-                        </div>
-                    </div>
-
-                    <!-- Execute Button -->
-                    <button onclick="uiSwap()" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold py-3.5 rounded-xl transition duration-200 shadow-lg shadow-emerald-600/20 text-sm">
-                        Execute Swap
-                    </button>
+                <div class="stat-card">
+                    <div class="stat-title">Total Borrowed</div>
+                    <div class="stat-value" id="dash-borrowed">$0.00</div>
                 </div>
             </div>
-
-            <!-- ================= SECTION 2: LIQUIDITY ================= -->
-            <div id="section-liquidity" class="glass-card rounded-2xl p-6 shadow-2xl hidden">
-                <div class="flex justify-between items-center mb-6">
-                    <div>
-                        <h2 class="text-xl font-bold text-white">Liquidity Pools</h2>
-                        <p class="text-xs text-gray-400 mt-1">Provide liquidity to USDC/EURC AMM pool and earn 0.25% trading fees</p>
-                    </div>
-                    <span class="bg-purple-500/10 text-purple-400 border border-purple-500/30 text-xs px-3 py-1 rounded-full font-semibold">Pool APY: 14.2%</span>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Deposit Liquidity -->
-                    <div class="bg-gray-900/60 p-5 rounded-xl border border-gray-800 space-y-4">
-                        <h3 class="text-sm font-semibold text-purple-400">Add Liquidity</h3>
-                        <div>
-                            <label class="block text-xs text-gray-400 mb-1">USDC Amount</label>
-                            <input type="number" id="liquidityUsdcAmount" placeholder="0.0" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 text-sm text-white focus:outline-none focus:border-purple-500 font-mono">
-                            <button onclick="approveUSDC()" class="mt-2 w-full bg-gray-800 hover:bg-gray-700 text-xs py-2 rounded-lg text-yellow-400 font-semibold border border-yellow-500/20 transition">Approve USDC</button>
-                        </div>
-                        <div>
-                            <label class="block text-xs text-gray-400 mb-1">EURC Amount</label>
-                            <input type="number" id="liquidityEurcAmount" placeholder="0.0" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 text-sm text-white focus:outline-none focus:border-purple-500 font-mono">
-                            <button onclick="approveEURC()" class="mt-2 w-full bg-gray-800 hover:bg-gray-700 text-xs py-2 rounded-lg text-yellow-400 font-semibold border border-yellow-500/20 transition">Approve EURC</button>
-                        </div>
-                        <button onclick="executeAddLiquidity()" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-3 rounded-lg text-sm transition shadow-lg shadow-purple-600/20">
-                            Add Liquidity to Pool
-                        </button>
-                    </div>
-
-                    <!-- Your Position & Remove -->
-                    <div class="bg-gray-900/60 p-5 rounded-xl border border-gray-800 space-y-4 flex flex-col justify-between">
-                        <div>
-                            <h3 class="text-sm font-semibold text-gray-300 mb-3">Your Position</h3>
-                            <div class="space-y-3 bg-gray-800/50 p-4 rounded-lg border border-gray-700/50 text-xs">
-                                <div class="flex justify-between">
-                                    <span class="text-gray-400">Your Pool Tokens (LP):</span>
-                                    <span id="userLpBalance" class="font-mono text-white">0.00 LP</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span class="text-gray-400">Share of Pool:</span>
-                                    <span id="userPoolShare" class="font-mono text-white">0.00%</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span class="text-gray-400">Pooled USDC:</span>
-                                    <span id="pooledUsdc" class="font-mono text-emerald-400">0.00</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span class="text-gray-400">Pooled EURC:</span>
-                                    <span id="pooledEurc" class="font-mono text-purple-400">0.00</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div>
-                            <label class="block text-xs text-gray-400 mb-1">Remove Liquidity Amount (LP)</label>
-                            <input type="number" id="removeLpAmount" placeholder="0.0" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 text-sm text-white focus:outline-none focus:border-red-500 font-mono mb-3">
-                            <button onclick="executeRemoveLiquidity()" class="w-full bg-red-600/80 hover:bg-red-600 text-white font-bold py-3 rounded-lg text-sm transition shadow-lg shadow-red-600/20">
-                                Remove Liquidity
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ================= SECTION 3: LENDING & BORROW ================= -->
-            <div id="section-lending" class="glass-card rounded-2xl p-6 shadow-2xl hidden">
-                <div class="flex justify-between items-center mb-6">
-                    <div>
-                        <h2 class="text-xl font-bold text-white">Lending & Borrow Vaults</h2>
-                        <p class="text-xs text-gray-400 mt-1">Supply assets to earn interest or borrow against your collateral</p>
-                    </div>
-                    <div class="text-right">
-                        <span class="text-xs text-gray-400 block">Health Factor</span>
-                        <span id="healthFactor" class="text-sm font-bold font-mono text-emerald-400">1.85 (Safe)</span>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Deposit / Supply Collateral -->
-                    <div class="bg-gray-900/60 p-5 rounded-xl border border-gray-800 space-y-4">
-                        <div class="flex justify-between items-center">
-                            <h3 class="text-sm font-semibold text-indigo-400">Supply Collateral</h3>
-                            <span class="text-xs text-gray-400">Supply APY: ~8.4%</span>
-                        </div>
-                        <div class="space-y-3">
-                            <div>
-                                <label class="block text-xs text-gray-400 mb-1">Select Asset</label>
-                                <select id="lendingToken" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 text-sm text-white font-semibold">
-                                    <option value="USDC">USDC (USD Coin)</option>
-                                    <option value="EURC">EURC (Euro Coin)</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-xs text-gray-400 mb-1">Amount</label>
-                                <input type="number" id="lendingAmount" placeholder="0.0" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 text-sm text-white font-mono focus:outline-none focus:border-indigo-500">
-                            </div>
-                            <div class="grid grid-cols-2 gap-3 pt-1">
-                                <button onclick="approveLending()" class="bg-yellow-600/80 hover:bg-yellow-500 text-white font-semibold text-xs py-2.5 rounded-lg transition">
-                                    Approve Token
-                                </button>
-                                <button onclick="executeLendingDeposit()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs py-2.5 rounded-lg transition shadow-md shadow-indigo-600/20">
-                                    Deposit Asset
-                                </button>
-                            </div>
-                            <button onclick="executeLendingWithdraw()" class="w-full bg-gray-800 hover:bg-gray-700 text-gray-300 font-medium text-xs py-2.5 rounded-lg border border-gray-700 transition">
-                                Withdraw Collateral
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Borrow Assets -->
-                    <div class="bg-gray-900/60 p-5 rounded-xl border border-gray-800 space-y-4">
-                        <div class="flex justify-between items-center">
-                            <h3 class="text-sm font-semibold text-blue-400">Borrow Assets</h3>
-                            <span class="text-xs text-gray-400">Borrow APR: ~5.2%</span>
-                        </div>
-                        <div class="space-y-3">
-                            <div>
-                                <label class="block text-xs text-gray-400 mb-1">Select Asset to Borrow</label>
-                                <select id="borrowToken" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 text-sm text-white font-semibold">
-                                    <option value="USDC">USDC (USD Coin)</option>
-                                    <option value="EURC">EURC (Euro Coin)</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-xs text-gray-400 mb-1">Amount</label>
-                                <input type="number" id="borrowAmount" placeholder="0.0" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 text-sm text-white font-mono focus:outline-none focus:border-blue-500">
-                            </div>
-                            <div class="grid grid-cols-2 gap-3 pt-1">
-                                <button onclick="uiBorrow()" class="bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs py-2.5 rounded-lg transition shadow-md shadow-blue-600/20">
-                                    Execute Borrow
-                                </button>
-                                <button onclick="uiRepayBorrow()" class="bg-teal-600 hover:bg-teal-500 text-white font-semibold text-xs py-2.5 rounded-lg transition">
-                                    Repay Loan
-                                </button>
-                            </div>
-                        </div>
-                        <div class="p-3 bg-gray-800/40 rounded-lg border border-gray-700/50 text-[11px] text-gray-400">
-                            Max Loan-To-Value (LTV): <span class="text-gray-200 font-mono">75%</span> | Liquidation Threshold: <span class="text-gray-200 font-mono">80%</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ================= SECTION 4: CIRCLE BRIDGE ================= -->
-            <div id="section-bridge" class="glass-card rounded-2xl p-6 shadow-2xl hidden">
-                <div class="flex justify-between items-center mb-6">
-                    <div>
-                        <h2 class="text-xl font-bold text-white flex items-center space-x-2">
-                            <span>Circle Cross-Chain Bridge</span>
-                        </h2>
-                        <p class="text-xs text-gray-400 mt-1">Cross-chain transfers using Circle AppKit SDK (`kit.bridge(...)` & Viem adapter)</p>
-                    </div>
-                    <span class="bg-blue-500/10 text-blue-400 border border-blue-500/30 text-xs px-3 py-1 rounded-full font-semibold">Native CCTP Engine</span>
-                </div>
-
-                <div class="space-y-5">
-                    <!-- Source & Destination Network Selection -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="bg-gray-900/80 p-4 rounded-xl border border-gray-800">
-                            <label class="block text-xs text-gray-400 mb-2">Source Chain (From)</label>
-                            <select id="bridgeFromChain" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg p-3 text-sm font-semibold focus:outline-none focus:border-blue-500">
-                                <option value="Ethereum_Sepolia">Ethereum Sepolia (Testnet)</option>
-                                <option value="Solana_Devnet">Solana Devnet</option>
-                                <option value="Avalanche_Fuji">Avalanche Fuji</option>
-                            </select>
-                        </div>
-                        <div class="bg-gray-900/80 p-4 rounded-xl border border-gray-800">
-                            <label class="block text-xs text-gray-400 mb-2">Target Chain (To)</label>
-                            <select id="bridgeToChain" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg p-3 text-sm font-semibold focus:outline-none focus:border-blue-500">
-                                <option value="Arc_Testnet">Arc Testnet</option>
-                                <option value="Ethereum_Sepolia">Ethereum Sepolia</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <!-- Bridge Amount -->
-                    <div class="bg-gray-900/80 p-4 rounded-xl border border-gray-800">
-                        <div class="flex justify-between text-xs text-gray-400 mb-2">
-                            <span>Amount to Bridge (USDC)</span>
-                            <span>Min Transfer: <span class="font-mono text-gray-300">0.10 USDC</span></span>
-                        </div>
-                        <div class="flex items-center space-x-3">
-                            <input type="number" id="bridgeAmount" value="1.00" placeholder="1.00" class="w-full bg-transparent text-2xl font-mono text-white focus:outline-none">
-                            <span class="bg-gray-800 border border-gray-700 px-3 py-2 rounded-lg text-sm font-bold text-blue-400">USDC</span>
-                        </div>
-                    </div>
-
-                    <!-- Transfer Execution Info -->
-                    <div class="bg-gray-900/40 p-4 rounded-xl border border-gray-800/80 space-y-2 text-xs text-gray-400">
-                        <div class="flex justify-between">
-                            <span>Estimated Execution Time:</span>
-                            <span class="font-mono text-gray-200">~2-3 minutes</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span>Relayer Fee:</span>
-                            <span class="font-mono text-emerald-400">0.00 USDC (Sponsored)</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span>Bridge SDK Protocol:</span>
-                            <span class="font-mono text-blue-400">Circle AppKit v1.0</span>
-                        </div>
-                    </div>
-
-                    <!-- Execute Bridge Button -->
-                    <button onclick="executeBridge()" class="w-full bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold py-4 rounded-xl transition duration-200 shadow-lg shadow-blue-600/20 text-sm flex items-center justify-center space-x-2">
-                        <span>Initiate Circle AppKit Transfer</span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- ================= SECTION 5: PAY DIRECT ================= -->
-            <div id="section-pay" class="glass-card rounded-2xl p-6 shadow-2xl hidden">
-                <div class="flex justify-between items-center mb-6">
-                    <div>
-                        <h2 class="text-xl font-bold text-white">Direct Token Transfer</h2>
-                        <p class="text-xs text-gray-400 mt-1">Send USDC or EURC directly to any EVM wallet address on Arc</p>
-                    </div>
-                </div>
-
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-xs text-gray-400 mb-1">Select Token</label>
-                        <select id="payToken" class="w-full bg-gray-900 border border-gray-800 rounded-xl p-3 text-sm font-semibold text-white">
-                            <option value="USDC">USDC (USD Coin)</option>
-                            <option value="EURC">EURC (Euro Coin)</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs text-gray-400 mb-1">Recipient Address</label>
-                        <input type="text" id="payRecipient" placeholder="0x..." class="w-full bg-gray-900 border border-gray-800 rounded-xl p-3 text-sm text-white font-mono focus:outline-none focus:border-cyan-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs text-gray-400 mb-1">Amount</label>
-                        <input type="number" id="payAmount" placeholder="0.0" class="w-full bg-gray-900 border border-gray-800 rounded-xl p-3 text-sm text-white font-mono focus:outline-none focus:border-cyan-500">
-                    </div>
-                    <button onclick="executePayment()" class="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-3.5 rounded-xl transition duration-200 shadow-lg shadow-cyan-600/20 text-sm">
-                        Send Direct Transfer
-                    </button>
-                </div>
-            </div>
-
-            <!-- ================= SECTION 6: ANALYTICS ================= -->
-            <div id="section-analytics" class="glass-card rounded-2xl p-6 shadow-2xl hidden">
-                <h2 class="text-xl font-bold text-white mb-4">Protocol Metrics & Health</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-                    <div class="bg-gray-900/80 p-4 rounded-xl border border-gray-800 space-y-2">
-                        <span class="text-gray-400 block font-semibold">Contract Deployment Addresses</span>
-                        <div class="space-y-1 font-mono text-[11px] text-gray-300">
-                            <div>USDC: <span class="text-blue-400">0x32A214a1C1beDbb5723b18503Eb26A4A28fE75bE</span></div>
-                            <div>EURC: <span class="text-blue-400">0x1d2bDdc5bF1c22C1A92C1eB0f75eC599eC8d0cEb</span></div>
-                            <div>AMM Pool: <span class="text-purple-400">0x2C40B8b06B1FfFBAc0dACED1C52b4A2B2dA09825</span></div>
-                            <div>Lending Vault: <span class="text-indigo-400">0x89C638cCeE5EcED5e2c54Bf6667923Ec0fA10950</span></div>
-                        </div>
-                    </div>
-                    <div class="bg-gray-900/80 p-4 rounded-xl border border-gray-800 space-y-2">
-                        <span class="text-gray-400 block font-semibold">Reserve Balances</span>
-                        <div class="flex justify-between py-1 border-b border-gray-800">
-                            <span>Pool Reserves USDC:</span>
-                            <span class="font-mono text-emerald-400">5,000,000 USDC</span>
-                        </div>
-                        <div class="flex justify-between py-1">
-                            <span>Pool Reserves EURC:</span>
-                            <span class="font-mono text-purple-400">4,600,000 EURC</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TERMINAL LOG OUTPUT PANEL -->
-            <div class="glass-card rounded-2xl p-4 shadow-xl">
-                <div class="flex justify-between items-center mb-2">
-                    <div class="flex items-center space-x-2">
-                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-                        <span class="text-xs font-semibold text-gray-300 uppercase tracking-wider font-mono">System Console Log</span>
-                    </div>
-                    <button onclick="document.getElementById('logOutput').innerHTML=''" class="text-[11px] text-gray-500 hover:text-gray-300 transition">Clear Log</button>
-                </div>
-                <div id="logOutput" class="h-32 overflow-y-auto font-mono text-xs text-emerald-400 bg-gray-950/90 p-3 rounded-xl border border-gray-800 space-y-1">
-                    <div>[System] Arc Hub initialized. Ready for transactions.</div>
-                </div>
-            </div>
-
+            <button class="btn-action" onclick="updateAllBalances()">🔄 Refresh Data</button>
         </div>
 
-        <!-- RIGHT PANEL (PORTFOLIO, QUICK FACUET & AI COPILOT - 4 COLS) -->
-        <div class="lg:col-span-4 space-y-6">
-
-            <!-- USER PORTFOLIO CARD -->
-            <div class="glass-card rounded-2xl p-6 shadow-xl">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="font-bold text-gray-200 text-sm">Your Wallet Balances</h3>
-                    <button onclick="updateAllBalances()" class="text-xs text-blue-400 hover:text-blue-300 flex items-center space-x-1">
-                        <span>🔄</span>
-                        <span>Refresh</span>
-                    </button>
-                </div>
-                
-                <div class="space-y-3">
-                    <div class="flex justify-between items-center bg-gray-900/80 p-3.5 rounded-xl border border-gray-800">
-                        <div class="flex items-center space-x-3">
-                            <div class="w-8 h-8 rounded-full bg-blue-600/20 border border-blue-500/40 flex items-center justify-center font-bold text-xs text-blue-400">
-                                $
-                            </div>
-                            <div>
-                                <span class="text-sm font-semibold text-white block">USDC</span>
-                                <span class="text-[10px] text-gray-400">USD Coin</span>
-                            </div>
-                        </div>
-                        <span id="balUsdc" class="font-mono font-bold text-emerald-400 text-base">0.00</span>
-                    </div>
-
-                    <div class="flex justify-between items-center bg-gray-900/80 p-3.5 rounded-xl border border-gray-800">
-                        <div class="flex items-center space-x-3">
-                            <div class="w-8 h-8 rounded-full bg-purple-600/20 border border-purple-500/40 flex items-center justify-center font-bold text-xs text-purple-400">
-                                €
-                            </div>
-                            <div>
-                                <span class="text-sm font-semibold text-white block">EURC</span>
-                                <span class="text-[10px] text-gray-400">Euro Coin</span>
-                            </div>
-                        </div>
-                        <span id="balEurc" class="font-mono font-bold text-purple-400 text-base">0.00</span>
-                    </div>
-                </div>
-
-                <!-- Testnet Faucet Quick Button -->
-                <button onclick="requestTestnetFaucet()" class="w-full mt-4 bg-gray-800 hover:bg-gray-700 text-xs text-gray-300 font-semibold py-2.5 rounded-xl border border-gray-700 transition flex items-center justify-center space-x-2">
-                    <span>🚰</span>
-                    <span>Request Testnet Tokens (Faucet)</span>
-                </button>
+        <!-- SWAP TAB -->
+        <div id="swap-tab" class="tab-content">
+            <h3>Swap Tokens</h3>
+            <div class="input-group">
+                <label>From Token</label>
+                <select id="swapFromToken" onchange="handleSwapFromChange()">
+                    <option value="USDC">USDC</option>
+                    <option value="EURC" selected>EURC</option>
+                </select>
             </div>
 
-            <!-- AI COPILOT CHATBOT PANEL -->
-            <div class="glass-card rounded-2xl p-4 shadow-xl flex flex-col h-[420px]">
-                <div class="flex items-center justify-between border-b border-gray-800 pb-3 mb-3">
-                    <div class="flex items-center space-x-2">
-                        <div class="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse"></div>
-                        <span class="font-bold text-sm text-gray-200">Arc AI Copilot</span>
-                    </div>
-                    <span class="text-[10px] bg-blue-900/60 text-blue-300 px-2 py-0.5 rounded-md border border-blue-700">DeFi Assistant</span>
-                </div>
-
-                <div id="chatBody" class="flex-1 overflow-y-auto space-y-3 pr-1 text-xs flex flex-col">
-                    <div class="msg msg-agent p-3 max-w-[85%]">
-                        Hello! I can guide you through swapping assets, providing liquidity, or using Circle Bridge Kit on Arc Testnet. How can I help you today?
-                    </div>
-                </div>
-
-                <div class="mt-3 flex space-x-2 border-t border-gray-800 pt-3">
-                    <input type="text" id="chatInput" placeholder="Ask AI Assistant..." onkeypress="if(event.key==='Enter') sendAgentMessage()" class="flex-1 bg-gray-900 border border-gray-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
-                    <button onclick="sendAgentMessage()" class="bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 rounded-xl text-xs font-semibold transition">
-                        Send
-                    </button>
+            <div class="input-group">
+                <label>
+                    <span>Amount to Sell</span>
+                    <span>Wallet: <span id="balance-swap" class="balance-val">0.0000</span></span>
+                </label>
+                <input type="number" id="swapAmountIn" placeholder="0.0" value="2" step="any">
+                <div class="pct-group">
+                    <button class="btn-pct" onclick="setQuickPct('swapAmountIn', 'balance-swap', 0.25)">25%</button>
+                    <button class="btn-pct" onclick="setQuickPct('swapAmountIn', 'balance-swap', 0.50)">50%</button>
+                    <button class="btn-pct" onclick="setQuickPct('swapAmountIn', 'balance-swap', 0.75)">75%</button>
+                    <button class="btn-pct" onclick="setQuickPct('swapAmountIn', 'balance-swap', 1.00)">MAX</button>
                 </div>
             </div>
 
+            <div class="input-group">
+                <label>To Token</label>
+                <select id="swapToToken" onchange="handleSwapToChange()">
+                    <option value="EURC">EURC</option>
+                    <option value="USDC" selected>USDC</option>
+                </select>
+            </div>
+
+            <button class="btn-action" onclick="uiSwap()">Confirm Swap</button>
         </div>
 
-    </main>
-
-    <!-- FOOTER -->
-    <footer class="bg-gray-900/80 border-t border-gray-800 py-4 px-6 text-center text-xs text-gray-500">
-        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-2">
-            <div>© 2026 Arc Testnet Portal. Integrated with Circle AppKit SDK.</div>
-            <div class="flex space-x-4">
-                <a href="#" class="hover:text-gray-400">Docs</a>
-                <a href="#" class="hover:text-gray-400">Explorer</a>
-                <a href="#" class="hover:text-gray-400">GitHub</a>
+        <!-- LIQUIDITY TAB -->
+        <div id="liquidity-tab" class="tab-content">
+            <h3>Liquidity Pool</h3>
+            <div class="input-group">
+                <label>
+                    <span>USDC Amount</span>
+                    <span>Wallet: <span id="balance-liq-usdc" class="balance-val">0.0000</span></span>
+                </label>
+                <input type="number" id="liquidityUsdcAmount" placeholder="0.0" step="any">
             </div>
-        </div>
-    </footer>
 
-    <!-- MODULE SCRIPT: Circle AppKit SDK & Reliable Web3 Wallet Connector -->
+            <div class="input-group">
+                <label>
+                    <span>EURC Amount</span>
+                    <span>Wallet: <span id="balance-liq-eurc" class="balance-val">0.0000</span></span>
+                </label>
+                <input type="number" id="liquidityEurcAmount" placeholder="0.0" step="any">
+            </div>
+            
+            <button class="btn-action btn-secondary" onclick="approveUSDC()">Approve USDC</button>
+            <button class="btn-action btn-secondary" onclick="approveEURC()">Approve EURC</button>
+            <button class="btn-action" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);" onclick="executeAddLiquidity()">+ Add Liquidity</button>
+            <button class="btn-action btn-danger" onclick="executeRemoveLiquidity()">- Withdraw / Remove Liquidity</button>
+        </div>
+
+        <!-- LENDING TAB -->
+        <div id="lending-tab" class="tab-content">
+            <h3>Lending Pool</h3>
+            <div class="input-group">
+                <label>Select Asset</label>
+                <select id="lendingToken" onchange="updateAllBalances()">
+                    <option value="USDC">USDC</option>
+                    <option value="EURC">EURC</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label>
+                    <span>Amount</span>
+                    <span>Wallet: <span id="balance-lending" class="balance-val">0.0000</span></span>
+                </label>
+                <input type="number" id="lendingAmount" placeholder="0.0" step="any">
+                <div class="pct-group">
+                    <button class="btn-pct" onclick="setQuickPct('lendingAmount', 'balance-lending', 0.50)">50%</button>
+                    <button class="btn-pct" onclick="setQuickPct('lendingAmount', 'balance-lending', 1.00)">MAX</button>
+                </div>
+            </div>
+            
+            <button class="btn-action btn-secondary" onclick="approveLending()">Approve Token</button>
+            <button class="btn-action" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);" onclick="executeLendingDeposit()">Deposit Collateral</button>
+            <button class="btn-action btn-danger" onclick="executeLendingWithdraw()">Withdraw Deposit</button>
+        </div>
+
+        <!-- BORROW TAB -->
+        <div id="borrow-tab" class="tab-content">
+            <h3>Borrow / Repay Asset</h3>
+            <div class="input-group">
+                <label>Select Asset</label>
+                <select id="borrowToken" onchange="updateAllBalances()">
+                    <option value="USDC">USDC</option>
+                    <option value="EURC">EURC</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label>
+                    <span>Amount</span>
+                    <span>Wallet: <span id="balance-borrow" class="balance-val">0.0000</span></span>
+                </label>
+                <input type="number" id="borrowAmount" placeholder="0.0" step="any">
+            </div>
+
+            <button class="btn-action" onclick="uiBorrow()">Borrow Asset</button>
+            <button class="btn-action btn-secondary" style="margin-top:8px;" onclick="uiRepayBorrow()">Repay Borrowed Asset</button>
+        </div>
+
+        <!-- BRIDGE TAB (AppKit Multi-Chain Standard) -->
+        <div id="bridge-tab" class="tab-content">
+            <h3>Cross-Chain Bridge (Arc ↔ External)</h3>
+            
+            <div style="margin-bottom: 16px; display: flex; justify-content: center;">
+                <appkit-button></appkit-button>
+            </div>
+
+            <div class="input-group">
+                <label>Destination Chain</label>
+                <select id="bridgeTargetChain">
+                    <option value="11155111">Ethereum Sepolia</option>
+                    <option value="84532">Base Sepolia</option>
+                    <option value="421614">Arbitrum Sepolia</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label>Select Token</label>
+                <select id="bridgeToken" onchange="updateAllBalances()">
+                    <option value="USDC">USDC</option>
+                    <option value="EURC">EURC</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label>
+                    <span>Amount to Bridge</span>
+                    <span>Wallet: <span id="balance-bridge" class="balance-val">0.0000</span></span>
+                </label>
+                <input type="number" id="bridgeAmount" placeholder="0.0" step="any">
+            </div>
+
+            <div class="input-group">
+                <label>Recipient Address</label>
+                <input type="text" id="bridgeRecipient" placeholder="0x..." style="font-size: 13px;">
+            </div>
+            
+            <button class="btn-action btn-secondary" onclick="approveBridge()">Approve Bridge Token</button>
+            <button class="btn-action" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);" onclick="executeBridge()">Initiate Cross-Chain Transfer</button>
+        </div>
+
+        <!-- PAYMENTS TAB -->
+        <div id="payments-tab" class="tab-content">
+            <h3>Instant Web3 Transfer</h3>
+            <div class="input-group">
+                <label>Select Token</label>
+                <select id="payToken">
+                    <option value="USDC">USDC</option>
+                    <option value="EURC">EURC</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label>Recipient Address</label>
+                <input type="text" id="payRecipient" placeholder="0x..." style="font-size: 13px;">
+            </div>
+
+            <div class="input-group">
+                <label>Amount</label>
+                <input type="number" id="payAmount" placeholder="0.0" step="any">
+            </div>
+
+            <button class="btn-action" style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);" onclick="executePayment()">Send Payment</button>
+        </div>
+
+        <!-- ANALYTICS TAB -->
+        <div id="analytics-tab" class="tab-content">
+            <h3>Protocol Analytics</h3>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-title">Total Value Locked (TVL)</div>
+                    <div class="stat-value">$1,248,500</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">24h Trading Volume</div>
+                    <div class="stat-value">$342,110</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">USDC Supply APY</div>
+                    <div class="stat-value" style="color:#10b981;">8.4%</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">EURC Supply APY</div>
+                    <div class="stat-value" style="color:#10b981;">6.2%</div>
+                </div>
+            </div>
+            <div style="font-size:12px; color:var(--text-muted); text-align:center;">Network Status: Arc Testnet Operational 🟢</div>
+        </div>
+
+        <div class="status-box" id="statusConsole">System: Ready to connect Arc Network.</div>
+    </div>
+
+    <!-- AI Agent Chatbot UI Widget -->
+    <button class="ai-chat-toggle" onclick="toggleChatWindow()">🤖</button>
+    <div class="ai-chat-window hidden" id="aiChatWindow">
+        <div class="ai-chat-header">
+            <span>Arc Agent</span>
+            <button onclick="toggleChatWindow()" style="background:none; border:none; color:#fff; cursor:pointer;">✕</button>
+        </div>
+        <div class="ai-chat-body" id="chatBody">
+            <div class="msg msg-agent">Hello! I am your Arc Agent. How can I assist with your DeFi operations today?</div>
+        </div>
+        <div class="ai-chat-footer">
+            <input type="text" id="chatInput" placeholder="Enter prompt..." onkeydown="if(event.key === 'Enter') sendAgentMessage()">
+            <button onclick="sendAgentMessage()">Send</button>
+        </div>
+    </div>
+
+    <!-- AppKit Module Integration -->
     <script type="module">
-        import { AppKit } from 'https://esm.sh/@circle-fin/app-kit@1.0.0';
-        import { createViemAdapterFromProvider } from 'https://esm.sh/@circle-fin/adapter-viem-v2@1.0.0';
+        import { createAppKit } from 'https://esm.sh/@reown/appkit@1.6.5';
+        import { mainnet, sepolia, baseSepolia, arbitrumSepolia } from 'https://esm.sh/@reown/appkit/networks@1.6.5';
+        import { EthersAdapter } from 'https://esm.sh/@reown/appkit-adapter-ethers@1.6.5';
 
-        // Initialize Circle AppKit
-        try {
-            const kit = new AppKit();
-            window.circleKit = kit;
-            kit.on("*", (payload) => {
-                console.log("Circle Bridge Event:", payload);
-                if (window.updateLog) window.updateLog(`[Bridge Event] ${payload.type || 'In Progress'}`);
-            });
-        } catch (e) {
-            console.warn("AppKit Init Warning:", e);
-        }
-
-        // Bridge Execution Helper
-        window.executeBridge = async function() {
-            if (!window.circleKit) {
-                window.updateLog("Error: Circle AppKit is not initialized.");
-                return;
-            }
-
-            const fromChain = document.getElementById('bridgeFromChain').value;
-            const toChain = document.getElementById('bridgeToChain').value;
-            const amountStr = document.getElementById('bridgeAmount').value;
-
-            if (!amountStr || parseFloat(amountStr) <= 0) {
-                window.updateLog("Please enter a valid bridge amount.");
-                return;
-            }
-
-            try {
-                if (!window.ethereum) throw new Error("No EVM Wallet found.");
-                window.updateLog(`Creating Viem Adapter for Circle Bridge...`);
-                
-                const adapter = await createViemAdapterFromProvider({ provider: window.ethereum });
-                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-
-                window.updateLog(`Initiating Circle Bridge: ${amountStr} USDC (${fromChain} -> ${toChain})`);
-
-                const result = await window.circleKit.bridge({
-                    from: { chain: fromChain, adapter: adapter },
-                    to: { chain: toChain, recipientAddress: accounts[0] },
-                    amount: amountStr,
-                });
-
-                window.updateLog(`Bridge transaction completed! Result: ${JSON.stringify(result)}`);
-            } catch (err) {
-                console.error(err);
-                window.updateLog("Bridge Execution Error: " + err.message);
-            }
+        const arcTestnet = {
+            id: 50,
+            name: 'Arc Testnet',
+            nativeCurrency: { name: 'Arc Token', symbol: 'ARC', decimals: 18 },
+            rpcUrls: { default: { http: ['https://rpc.testnet.arcscan.app'] } },
+            blockExplorers: { default: { name: 'ArcScan', url: 'https://testnet.arcscan.app' } }
         };
+
+        const projectId = 'YOUR_PROJECT_ID';
+
+        const appKit = createAppKit({
+            adapters: [new EthersAdapter()],
+            networks: [arcTestnet, sepolia, baseSepolia, arbitrumSepolia],
+            metadata: {
+                name: 'MULTI-DEFI-HUB',
+                description: 'Multi-DeFi Platform with Arc Network Integration',
+                url: window.location.origin,
+                icons: ['https://assets.reown.com/reown-profile-pic.png']
+            },
+            projectId
+        });
+
+        window.appKit = appKit;
     </script>
 
-    <!-- CLASSIC APPLICATION LOGIC & DIRECT ETHERS.JS WALLET CONNECTION -->
+    <!-- Core Business Logic Script -->
     <script>
-        // Smart Contract Addresses
-        const ADDRESSES = {
-            USDC: "0x32A214a1C1beDbb5723b18503Eb26A4A28fE75bE",
-            EURC: "0x1d2bDdc5bF1c22C1A92C1eB0f75eC599eC8d0cEb",
-            AmmPool: "0x2C40B8b06B1FfFBAc0dACED1C52b4A2B2dA09825",
-            LendingVault: "0x89C638cCeE5EcED5e2c54Bf6667923Ec0fA10950"
+        const RAW_CONTRACTS = {
+            USDC_TOKEN: "0x3600000000000000000000000000000000000000", 
+            EURC_TOKEN: "0x89B50855Aa3bE2F677cD6303Cec089B5F319D72a", 
+            SWAP_POOL_ROUTER: "0x8D02E191dDa6da9a2F8De7bd46caF795D3e3Bc9c", 
+            BRIDGE_CONTRACT: "0xfdB761CDB47093cEe833b8f20C6aDe50e5FbbC02",
+            LENDING_POOL: "0x398E4b2A5d5F534e1bfe64DC515DCf829620cFf5"
         };
 
-        // ABIs
+        function getSafeAddress(addr) {
+            if (!addr) return ethers.ZeroAddress;
+            return ethers.getAddress(addr.trim().toLowerCase());
+        }
+
         const ERC20_ABI = [
-            "function balanceOf(address account) view returns (uint256)",
-            "function approve(address spender, uint256 amount) returns (bool)",
-            "function allowance(address owner, address spender) view returns (uint256)",
-            "function transfer(address to, uint256 amount) returns (bool)"
+            "function approve(address spender, uint256 amount) public returns (bool)",
+            "function allowance(address owner, address spender) public view returns (uint256)",
+            "function balanceOf(address account) public view returns (uint256)",
+            "function transfer(address recipient, uint256 amount) public returns (bool)"
         ];
 
-        const AMM_ABI = [
-            "function swap(address tokenIn, uint256 amountIn) external returns (uint256 amountOut)",
-            "function addLiquidity(uint256 amountUSDC, uint256 amountEURC) external returns (uint256 liquidity)",
-            "function removeLiquidity(uint256 liquidityAmount) external returns (uint256 amountUSDC, uint256 amountEURC)"
+        const SWAP_POOL_ABI = [
+            "function trade(address _tokenAddress, uint256 _amountIn) external", 
+            "function addLiquidity(uint256 _amountUSDC, uint256 _amountEURC) external",
+            "function removeLiquidity(uint256 _amount) external"
         ];
 
-        const LENDING_ABI = [
+        const BRIDGE_ABI = [
+            "function bridgeAsset(uint256 _targetChainId, address _token, uint256 _amount, address _recipient) external"
+        ];
+
+        const LENDING_POOL_ABI = [
             "function deposit(address token, uint256 amount) external",
             "function withdraw(address token, uint256 amount) external",
             "function borrow(address token, uint256 amount) external",
             "function repay(address token, uint256 amount) external"
         ];
 
-        // System Log Update
-        window.updateLog = function(msg) {
-            const logBox = document.getElementById('logOutput');
-            if (!logBox) return;
-            const time = new Date().toLocaleTimeString();
-            const div = document.createElement('div');
-            div.innerText = `[${time}] ${msg}`;
-            logBox.appendChild(div);
-            logBox.scrollTop = logBox.scrollHeight;
-        };
+        let userAddress = null;
 
-        // Direct EIP-1193 Connect Wallet Handler (Hoạt động 100% với MetaMask / Rabby / OKX)
-        async function handleWalletConnect() {
-            if (!window.ethereum) {
-                alert("Vui lòng cài đặt MetaMask hoặc ví Web3 trên trình duyệt!");
-                updateLog("Error: No Ethereum provider detected.");
-                return;
+        function updateLog(msg) {
+            document.getElementById('statusConsole').innerText = "Log: " + msg;
+            console.log(msg);
+        }
+
+        function setQuickPct(inputId, balanceSpanId, pct) {
+            const balText = document.getElementById(balanceSpanId).innerText;
+            const bal = parseFloat(balText) || 0;
+            if (bal > 0) {
+                document.getElementById(inputId).value = (bal * pct).toFixed(4);
             }
+        }
 
+        function switchTab(e, tabId) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            if (e && e.currentTarget) {
+                e.currentTarget.classList.add('active');
+            }
+            updateAllBalances();
+        }
+
+        async function handleSwapFromChange() {
+            const fromToken = document.getElementById('swapFromToken').value;
+            document.getElementById('swapToToken').value = fromToken === "USDC" ? "EURC" : "USDC";
+            await updateAllBalances();
+        }
+
+        async function handleSwapToChange() {
+            const toToken = document.getElementById('swapToToken').value;
+            document.getElementById('swapFromToken').value = toToken === "USDC" ? "EURC" : "USDC";
+            await updateAllBalances();
+        }
+
+        async function getTokenBalance(tokenAddress, account) {
             try {
-                updateLog("Requesting wallet connection...");
-                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-                
-                if (accounts && accounts.length > 0) {
-                    window.userAddress = accounts[0];
-                    const shortAddr = `${accounts[0].substring(0, 6)}...${accounts[0].substring(accounts[0].length - 4)}`;
-                    
-                    document.getElementById('btnWalletText').innerText = shortAddr;
-                    document.getElementById('btnConnectWallet').classList.remove('from-blue-600', 'to-indigo-600');
-                    document.getElementById('btnConnectWallet').classList.add('from-emerald-600', 'to-teal-600');
-                    
-                    updateLog(`Wallet connected: ${accounts[0]}`);
-                    updateAllBalances();
-                }
+                if(!window.ethereum || !account) return "0.0000";
+                const provider = new ethers.BrowserProvider(window.ethereum);
+                const contract = new ethers.Contract(getSafeAddress(tokenAddress), ERC20_ABI, provider);
+                const balance = await contract.balanceOf(getSafeAddress(account));
+                return ethers.formatUnits(balance, 6);
             } catch (err) {
-                console.error("Wallet Connection Error:", err);
-                updateLog("Connection Error: " + (err.message || err));
+                return "0.0000";
             }
         }
 
-        // Switch Navigation Tabs
-        function switchTab(tabName) {
-            const tabs = ['swap', 'liquidity', 'lending', 'bridge', 'pay', 'analytics'];
-            tabs.forEach(t => {
-                const sec = document.getElementById(`section-${t}`);
-                const tabBtn = document.getElementById(`tab-${t}`);
-                if (sec) sec.classList.add('hidden');
-                if (tabBtn) tabBtn.classList.remove('active');
-            });
-
-            const targetSec = document.getElementById(`section-${tabName}`);
-            const targetTab = document.getElementById(`tab-${tabName}`);
-            if (targetSec) targetSec.classList.remove('hidden');
-            if (targetTab) targetTab.classList.add('active');
-        }
-
-        // Get Signer via Ethers v6
-        async function getSigner() {
-            if (!window.ethereum) throw new Error("MetaMask or Web3 wallet non-detected");
-            const provider = new ethers.BrowserProvider(window.ethereum);
-            return await provider.getSigner();
-        }
-
-        // Update Wallet Balances
         async function updateAllBalances() {
-            if (!window.userAddress) {
-                updateLog("Please connect wallet first.");
-                return;
+            if (!userAddress || !window.ethereum) return;
+            try {
+                const balUsdc = await getTokenBalance(RAW_CONTRACTS.USDC_TOKEN, userAddress);
+                const balEurc = await getTokenBalance(RAW_CONTRACTS.EURC_TOKEN, userAddress);
+
+                document.getElementById('dash-usdc').innerText = parseFloat(balUsdc).toFixed(2);
+                document.getElementById('dash-eurc').innerText = parseFloat(balEurc).toFixed(2);
+
+                const swapFrom = document.getElementById('swapFromToken').value;
+                const swapTokenAddress = swapFrom === "USDC" ? RAW_CONTRACTS.USDC_TOKEN : RAW_CONTRACTS.EURC_TOKEN;
+                const balanceSwapRaw = await getTokenBalance(swapTokenAddress, userAddress);
+                document.getElementById('balance-swap').innerText = parseFloat(balanceSwapRaw).toFixed(4);
+
+                document.getElementById('balance-liq-usdc').innerText = parseFloat(balUsdc).toFixed(4);
+                document.getElementById('balance-liq-eurc').innerText = parseFloat(balEurc).toFixed(4);
+
+                const lendToken = document.getElementById('lendingToken').value;
+                const lendTokenAddress = lendToken === "USDC" ? RAW_CONTRACTS.USDC_TOKEN : RAW_CONTRACTS.EURC_TOKEN;
+                const balLend = await getTokenBalance(lendTokenAddress, userAddress);
+                document.getElementById('balance-lending').innerText = parseFloat(balLend).toFixed(4);
+
+                const borrowToken = document.getElementById('borrowToken').value;
+                const borrowTokenAddress = borrowToken === "USDC" ? RAW_CONTRACTS.USDC_TOKEN : RAW_CONTRACTS.EURC_TOKEN;
+                const balBorrow = await getTokenBalance(borrowTokenAddress, userAddress);
+                document.getElementById('balance-borrow').innerText = parseFloat(balBorrow).toFixed(4);
+
+                const bridgeToken = document.getElementById('bridgeToken').value;
+                const bridgeTokenAddress = bridgeToken === "USDC" ? RAW_CONTRACTS.USDC_TOKEN : RAW_CONTRACTS.EURC_TOKEN;
+                const balBridge = await getTokenBalance(bridgeTokenAddress, userAddress);
+                document.getElementById('balance-bridge').innerText = parseFloat(balBridge).toFixed(4);
+            } catch (error) {
+                console.error(error);
             }
+        }
+
+        async function connectWallet() {
+            if (!window.ethereum) return alert("Please install MetaMask!");
             try {
                 const provider = new ethers.BrowserProvider(window.ethereum);
-                const usdcContract = new ethers.Contract(ADDRESSES.USDC, ERC20_ABI, provider);
-                const eurcContract = new ethers.Contract(ADDRESSES.EURC, ERC20_ABI, provider);
-
-                const usdcBal = await usdcContract.balanceOf(window.userAddress);
-                const eurcBal = await eurcContract.balanceOf(window.userAddress);
-
-                const formattedUsdc = ethers.formatUnits(usdcBal, 6);
-                const formattedEurc = ethers.formatUnits(eurcBal, 6);
-
-                document.getElementById('balUsdc').innerText = formattedUsdc;
-                document.getElementById('balEurc').innerText = formattedEurc;
-
-                const swapFromBal = document.getElementById('swapFromBalance');
-                if (swapFromBal) swapFromBal.innerText = formattedUsdc;
-
-                updateLog("Wallet balances successfully updated.");
+                const accounts = await provider.send("eth_requestAccounts", []);
+                userAddress = accounts[0];
+                document.getElementById('connectBtn').innerText = userAddress.substring(0, 6) + "..." + userAddress.substring(38);
+                document.getElementById('disconnectBtn').style.display = "inline-block";
+                updateLog("Connected: " + userAddress);
+                await updateAllBalances();
             } catch (err) {
-                updateLog("Reading balances (Simulator Mode): Web3 provider or network testnet required.");
+                updateLog("Connection error: " + err.message);
             }
         }
 
-        // Faucet Request Simulator
-        function requestTestnetFaucet() {
-            updateLog("Requesting 100 USDC and 100 EURC from Arc Faucet...");
-            setTimeout(() => {
-                updateLog("Faucet tokens sent successfully!");
-                document.getElementById('balUsdc').innerText = "100.00";
-                document.getElementById('balEurc').innerText = "100.00";
-                document.getElementById('swapFromBalance').innerText = "100.00";
-            }, 1200);
+        function disconnectWallet() {
+            userAddress = null;
+            document.getElementById('connectBtn').innerText = "Connect Wallet";
+            document.getElementById('disconnectBtn').style.display = "none";
+            updateLog("Wallet disconnected.");
         }
 
-        // Swap Calculation
-        function calculateSwapQuote() {
-            const amt = document.getElementById('swapAmountIn').value;
-            const outInput = document.getElementById('swapAmountOut');
-            if (!amt || parseFloat(amt) <= 0) {
-                outInput.value = '';
-                return;
+        async function getLegacyGasParam(provider) {
+            try {
+                const feeData = await provider.getFeeData();
+                let targetGasPrice = feeData.gasPrice ? (feeData.gasPrice * 200n) / 100n : ethers.parseUnits("25", "gwei");
+                return { gasPrice: targetGasPrice };
+            } catch (e) {
+                return { gasPrice: ethers.parseUnits("25", "gwei") };
             }
-            const token = document.getElementById('swapFromToken').value;
-            if (token === 'USDC') {
-                outInput.value = (parseFloat(amt) * 0.92).toFixed(4);
-            } else {
-                outInput.value = (parseFloat(amt) * 1.087).toFixed(4);
-            }
-        }
-
-        function switchSwapDirection() {
-            const from = document.getElementById('swapFromToken');
-            const to = document.getElementById('swapToToken');
-            const temp = from.value;
-            from.value = to.value;
-            to.value = temp;
-            calculateSwapQuote();
-        }
-
-        function toggleSwapTokens() {
-            const from = document.getElementById('swapFromToken').value;
-            document.getElementById('swapToToken').value = from === 'USDC' ? 'EURC' : 'USDC';
-            calculateSwapQuote();
-        }
-
-        // Smart Contract Approvals & Operations
-        async function approveToken(tokenAddress, spenderAddress, amountStr) {
-            const signer = await getSigner();
-            const contract = new ethers.Contract(tokenAddress, ERC20_ABI, signer);
-            const parsed = ethers.parseUnits(amountStr, 6);
-            updateLog(`Approving ${amountStr} tokens for contract ${spenderAddress.substring(0, 8)}...`);
-            const tx = await contract.approve(spenderAddress, parsed);
-            await tx.wait();
-            updateLog("Approval successful!");
-        }
-
-        async function approveUSDC() {
-            const amt = document.getElementById('liquidityUsdcAmount').value || "100";
-            await approveToken(ADDRESSES.USDC, ADDRESSES.AmmPool, amt);
-        }
-
-        async function approveEURC() {
-            const amt = document.getElementById('liquidityEurcAmount').value || "100";
-            await approveToken(ADDRESSES.EURC, ADDRESSES.AmmPool, amt);
-        }
-
-        async function approveLending() {
-            const tokenSymbol = document.getElementById('lendingToken').value;
-            const amt = document.getElementById('lendingAmount').value || "100";
-            const tokenAddr = tokenSymbol === 'USDC' ? ADDRESSES.USDC : ADDRESSES.EURC;
-            await approveToken(tokenAddr, ADDRESSES.LendingVault, amt);
         }
 
         async function uiSwap() {
+            if (!userAddress || !window.ethereum) return alert("Please connect wallet!");
+            const fromSymbol = document.getElementById('swapFromToken').value;
+            const amountIn = document.getElementById('swapAmountIn').value;
+            if (!amountIn || parseFloat(amountIn) <= 0) return alert("Invalid amount!");
+
+            const fromAddress = getSafeAddress(fromSymbol === "USDC" ? RAW_CONTRACTS.USDC_TOKEN : RAW_CONTRACTS.EURC_TOKEN);
+            const targetRouter = getSafeAddress(RAW_CONTRACTS.SWAP_POOL_ROUTER);
+
             try {
-                const tokenSymbol = document.getElementById('swapFromToken').value;
-                const amtStr = document.getElementById('swapAmountIn').value;
-                if (!amtStr) return updateLog("Please enter a swap amount.");
+                const provider = new ethers.BrowserProvider(window.ethereum);
+                const signer = await provider.getSigner();
+                const tokenInContract = new ethers.Contract(fromAddress, ERC20_ABI, signer);
+                const parsedAmount = ethers.parseUnits(amountIn, 6);
 
-                const tokenAddr = tokenSymbol === 'USDC' ? ADDRESSES.USDC : ADDRESSES.EURC;
-                const signer = await getSigner();
-                
-                await approveToken(tokenAddr, ADDRESSES.AmmPool, amtStr);
+                updateLog("Approving token...");
+                const gasOpts = await getLegacyGasParam(provider);
+                const txApprove = await tokenInContract.approve(targetRouter, parsedAmount, gasOpts);
+                await txApprove.wait();
 
-                const amm = new ethers.Contract(ADDRESSES.AmmPool, AMM_ABI, signer);
-                updateLog(`Executing AMM Swap: ${amtStr} ${tokenSymbol}...`);
-                const tx = await amm.swap(tokenAddr, ethers.parseUnits(amtStr, 6));
-                await tx.wait();
-                updateLog("Swap transaction executed successfully!");
-                updateAllBalances();
-            } catch (e) {
-                updateLog("Swap Execution Error: " + e.message);
+                updateLog("Executing Swap...");
+                const routerContract = new ethers.Contract(targetRouter, SWAP_POOL_ABI, signer);
+                const txTrade = await routerContract.trade(fromAddress, parsedAmount, gasOpts);
+                await txTrade.wait();
+
+                updateLog("Swap successful!");
+                await updateAllBalances();
+            } catch (err) {
+                updateLog("Swap failed: " + err.message);
             }
+        }
+
+        async function approveUSDC() {
+            if (!userAddress) return alert("Connect wallet!");
+            try {
+                const provider = new ethers.BrowserProvider(window.ethereum);
+                const signer = await provider.getSigner();
+                const contract = new ethers.Contract(getSafeAddress(RAW_CONTRACTS.USDC_TOKEN), ERC20_ABI, signer);
+                const gasOpts = await getLegacyGasParam(provider);
+                const tx = await contract.approve(getSafeAddress(RAW_CONTRACTS.SWAP_POOL_ROUTER), ethers.MaxUint256, gasOpts);
+                updateLog("Approving USDC...");
+                await tx.wait();
+                updateLog("USDC Approved!");
+            } catch (err) { updateLog(err.message); }
+        }
+
+        async function approveEURC() {
+            if (!userAddress) return alert("Connect wallet!");
+            try {
+                const provider = new ethers.BrowserProvider(window.ethereum);
+                const signer = await provider.getSigner();
+                const contract = new ethers.Contract(getSafeAddress(RAW_CONTRACTS.EURC_TOKEN), ERC20_ABI, signer);
+                const gasOpts = await getLegacyGasParam(provider);
+                const tx = await contract.approve(getSafeAddress(RAW_CONTRACTS.SWAP_POOL_ROUTER), ethers.MaxUint256, gasOpts);
+                updateLog("Approving EURC...");
+                await tx.wait();
+                updateLog("EURC Approved!");
+            } catch (err) { updateLog(err.message); }
         }
 
         async function executeAddLiquidity() {
+            if (!userAddress) return alert("Connect wallet!");
+            const usdcAmt = document.getElementById('liquidityUsdcAmount').value;
+            const eurcAmt = document.getElementById('liquidityEurcAmount').value;
             try {
-                const usdcAmt = document.getElementById('liquidityUsdcAmount').value;
-                const eurcAmt = document.getElementById('liquidityEurcAmount').value;
-                if (!usdcAmt || !eurcAmt) return updateLog("Please enter both USDC and EURC amounts.");
-
-                const signer = await getSigner();
-                const amm = new ethers.Contract(ADDRESSES.AmmPool, AMM_ABI, signer);
-                
-                updateLog("Adding liquidity to pool...");
-                const tx = await amm.addLiquidity(ethers.parseUnits(usdcAmt, 6), ethers.parseUnits(eurcAmt, 6));
+                const provider = new ethers.BrowserProvider(window.ethereum);
+                const signer = await provider.getSigner();
+                const contract = new ethers.Contract(getSafeAddress(RAW_CONTRACTS.SWAP_POOL_ROUTER), SWAP_POOL_ABI, signer);
+                const gasOpts = await getLegacyGasParam(provider);
+                const tx = await contract.addLiquidity(ethers.parseUnits(usdcAmt || "0", 6), ethers.parseUnits(eurcAmt || "0", 6), gasOpts);
+                updateLog("Adding liquidity...");
                 await tx.wait();
-                updateLog("Liquidity added successfully!");
-                updateAllBalances();
-            } catch (e) {
-                updateLog("Add Liquidity Error: " + e.message);
-            }
+                updateLog("Liquidity Added!");
+                await updateAllBalances();
+            } catch (err) { updateLog(err.message); }
         }
 
         async function executeRemoveLiquidity() {
+            if (!userAddress) return alert("Connect wallet!");
+            const usdcAmt = document.getElementById('liquidityUsdcAmount').value;
             try {
-                const lpAmt = document.getElementById('removeLpAmount').value || "10";
-                const signer = await getSigner();
-                const amm = new ethers.Contract(ADDRESSES.AmmPool, AMM_ABI, signer);
-                updateLog(`Removing ${lpAmt} LP tokens...`);
-                const tx = await amm.removeLiquidity(ethers.parseUnits(lpAmt, 6));
+                const provider = new ethers.BrowserProvider(window.ethereum);
+                const signer = await provider.getSigner();
+                const contract = new ethers.Contract(getSafeAddress(RAW_CONTRACTS.SWAP_POOL_ROUTER), SWAP_POOL_ABI, signer);
+                const gasOpts = await getLegacyGasParam(provider);
+                const tx = await contract.removeLiquidity(ethers.parseUnits(usdcAmt || "0", 6), gasOpts);
+                updateLog("Removing liquidity...");
                 await tx.wait();
-                updateLog("Liquidity removed successfully!");
-                updateAllBalances();
-            } catch (e) {
-                updateLog("Remove Liquidity Error: " + e.message);
-            }
+                updateLog("Liquidity Removed!");
+                await updateAllBalances();
+            } catch (err) { updateLog(err.message); }
+        }
+
+        async function approveLending() {
+            if (!userAddress) return alert("Connect wallet!");
+            const token = document.getElementById('lendingToken').value;
+            const tokenAddr = token === "USDC" ? RAW_CONTRACTS.USDC_TOKEN : RAW_CONTRACTS.EURC_TOKEN;
+            try {
+                const provider = new ethers.BrowserProvider(window.ethereum);
+                const signer = await provider.getSigner();
+                const contract = new ethers.Contract(getSafeAddress(tokenAddr), ERC20_ABI, signer);
+                const gasOpts = await getLegacyGasParam(provider);
+                const tx = await contract.approve(getSafeAddress(RAW_CONTRACTS.LENDING_POOL), ethers.MaxUint256, gasOpts);
+                updateLog("Approving Lending...");
+                await tx.wait();
+                updateLog("Lending Approved!");
+            } catch (err) { updateLog(err.message); }
         }
 
         async function executeLendingDeposit() {
+            if (!userAddress) return alert("Connect wallet!");
+            const token = document.getElementById('lendingToken').value;
+            const amt = document.getElementById('lendingAmount').value;
+            const tokenAddr = token === "USDC" ? RAW_CONTRACTS.USDC_TOKEN : RAW_CONTRACTS.EURC_TOKEN;
             try {
-                const tokenSymbol = document.getElementById('lendingToken').value;
-                const amt = document.getElementById('lendingAmount').value;
-                if (!amt) return updateLog("Enter deposit amount.");
-                const tokenAddr = tokenSymbol === 'USDC' ? ADDRESSES.USDC : ADDRESSES.EURC;
-
-                const signer = await getSigner();
-                const vault = new ethers.Contract(ADDRESSES.LendingVault, LENDING_ABI, signer);
-
-                updateLog(`Depositing ${amt} ${tokenSymbol} into Vault...`);
-                const tx = await vault.deposit(tokenAddr, ethers.parseUnits(amt, 6));
+                const provider = new ethers.BrowserProvider(window.ethereum);
+                const signer = await provider.getSigner();
+                const contract = new ethers.Contract(getSafeAddress(RAW_CONTRACTS.LENDING_POOL), LENDING_POOL_ABI, signer);
+                const gasOpts = await getLegacyGasParam(provider);
+                const tx = await contract.deposit(getSafeAddress(tokenAddr), ethers.parseUnits(amt, 6), gasOpts);
+                updateLog("Depositing collateral...");
                 await tx.wait();
-                updateLog("Collateral deposit successful!");
-                updateAllBalances();
-            } catch (e) {
-                updateLog("Deposit Error: " + e.message);
-            }
+                updateLog("Collateral Deposited!");
+                await updateAllBalances();
+            } catch (err) { updateLog(err.message); }
         }
 
         async function executeLendingWithdraw() {
+            if (!userAddress) return alert("Connect wallet!");
+            const token = document.getElementById('lendingToken').value;
+            const amt = document.getElementById('lendingAmount').value;
+            const tokenAddr = token === "USDC" ? RAW_CONTRACTS.USDC_TOKEN : RAW_CONTRACTS.EURC_TOKEN;
             try {
-                const tokenSymbol = document.getElementById('lendingToken').value;
-                const amt = document.getElementById('lendingAmount').value;
-                if (!amt) return updateLog("Enter withdraw amount.");
-                const tokenAddr = tokenSymbol === 'USDC' ? ADDRESSES.USDC : ADDRESSES.EURC;
-
-                const signer = await getSigner();
-                const vault = new ethers.Contract(ADDRESSES.LendingVault, LENDING_ABI, signer);
-
-                updateLog(`Withdrawing ${amt} ${tokenSymbol}...`);
-                const tx = await vault.withdraw(tokenAddr, ethers.parseUnits(amt, 6));
+                const provider = new ethers.BrowserProvider(window.ethereum);
+                const signer = await provider.getSigner();
+                const contract = new ethers.Contract(getSafeAddress(RAW_CONTRACTS.LENDING_POOL), LENDING_POOL_ABI, signer);
+                const gasOpts = await getLegacyGasParam(provider);
+                const tx = await contract.withdraw(getSafeAddress(tokenAddr), ethers.parseUnits(amt, 6), gasOpts);
+                updateLog("Withdrawing deposit...");
                 await tx.wait();
-                updateLog("Withdrawal successful!");
-                updateAllBalances();
-            } catch (e) {
-                updateLog("Withdraw Error: " + e.message);
-            }
+                updateLog("Withdrawal Complete!");
+                await updateAllBalances();
+            } catch (err) { updateLog(err.message); }
         }
 
         async function uiBorrow() {
+            if (!userAddress) return alert("Connect wallet!");
+            const token = document.getElementById('borrowToken').value;
+            const amt = document.getElementById('borrowAmount').value;
+            const tokenAddr = token === "USDC" ? RAW_CONTRACTS.USDC_TOKEN : RAW_CONTRACTS.EURC_TOKEN;
             try {
-                const tokenSymbol = document.getElementById('borrowToken').value;
-                const amt = document.getElementById('borrowAmount').value;
-                if (!amt) return updateLog("Enter borrow amount.");
-                const tokenAddr = tokenSymbol === 'USDC' ? ADDRESSES.USDC : ADDRESSES.EURC;
-
-                const signer = await getSigner();
-                const vault = new ethers.Contract(ADDRESSES.LendingVault, LENDING_ABI, signer);
-
-                updateLog(`Borrowing ${amt} ${tokenSymbol}...`);
-                const tx = await vault.borrow(tokenAddr, ethers.parseUnits(amt, 6));
+                const provider = new ethers.BrowserProvider(window.ethereum);
+                const signer = await provider.getSigner();
+                const contract = new ethers.Contract(getSafeAddress(RAW_CONTRACTS.LENDING_POOL), LENDING_POOL_ABI, signer);
+                const gasOpts = await getLegacyGasParam(provider);
+                const tx = await contract.borrow(getSafeAddress(tokenAddr), ethers.parseUnits(amt, 6), gasOpts);
+                updateLog("Borrowing asset...");
                 await tx.wait();
-                updateLog("Borrow transaction complete!");
-                updateAllBalances();
-            } catch (e) {
-                updateLog("Borrow Error: " + e.message);
-            }
+                updateLog("Borrow Successful!");
+                await updateAllBalances();
+            } catch (err) { updateLog(err.message); }
         }
 
         async function uiRepayBorrow() {
+            if (!userAddress) return alert("Connect wallet!");
+            const token = document.getElementById('borrowToken').value;
+            const amt = document.getElementById('borrowAmount').value;
+            const tokenAddr = token === "USDC" ? RAW_CONTRACTS.USDC_TOKEN : RAW_CONTRACTS.EURC_TOKEN;
             try {
-                const tokenSymbol = document.getElementById('borrowToken').value;
-                const amt = document.getElementById('borrowAmount').value;
-                if (!amt) return updateLog("Enter repay amount.");
-                const tokenAddr = tokenSymbol === 'USDC' ? ADDRESSES.USDC : ADDRESSES.EURC;
-
-                const signer = await getSigner();
-                const vault = new ethers.Contract(ADDRESSES.LendingVault, LENDING_ABI, signer);
-
-                await approveToken(tokenAddr, ADDRESSES.LendingVault, amt);
-
-                updateLog(`Repaying loan: ${amt} ${tokenSymbol}...`);
-                const tx = await vault.repay(tokenAddr, ethers.parseUnits(amt, 6));
+                const provider = new ethers.BrowserProvider(window.ethereum);
+                const signer = await provider.getSigner();
+                const contract = new ethers.Contract(getSafeAddress(RAW_CONTRACTS.LENDING_POOL), LENDING_POOL_ABI, signer);
+                const gasOpts = await getLegacyGasParam(provider);
+                const tx = await contract.repay(getSafeAddress(tokenAddr), ethers.parseUnits(amt, 6), gasOpts);
+                updateLog("Repaying loan...");
                 await tx.wait();
-                updateLog("Repayment complete!");
-                updateAllBalances();
-            } catch (e) {
-                updateLog("Repay Error: " + e.message);
-            }
+                updateLog("Loan Repaid!");
+                await updateAllBalances();
+            } catch (err) { updateLog(err.message); }
+        }
+
+        async function approveBridge() {
+            if (!userAddress) return alert("Connect wallet!");
+            const token = document.getElementById('bridgeToken').value;
+            const tokenAddr = token === "USDC" ? RAW_CONTRACTS.USDC_TOKEN : RAW_CONTRACTS.EURC_TOKEN;
+            try {
+                const provider = new ethers.BrowserProvider(window.ethereum);
+                const signer = await provider.getSigner();
+                const contract = new ethers.Contract(getSafeAddress(tokenAddr), ERC20_ABI, signer);
+                const gasOpts = await getLegacyGasParam(provider);
+                const tx = await contract.approve(getSafeAddress(RAW_CONTRACTS.BRIDGE_CONTRACT), ethers.MaxUint256, gasOpts);
+                updateLog("Approving Bridge...");
+                await tx.wait();
+                updateLog("Bridge Approved!");
+            } catch (err) { updateLog(err.message); }
+        }
+
+        async function executeBridge() {
+            if (!userAddress) return alert("Connect wallet!");
+            const chainId = document.getElementById('bridgeTargetChain').value;
+            const token = document.getElementById('bridgeToken').value;
+            const amt = document.getElementById('bridgeAmount').value;
+            const recipient = document.getElementById('bridgeRecipient').value || userAddress;
+            const tokenAddr = token === "USDC" ? RAW_CONTRACTS.USDC_TOKEN : RAW_CONTRACTS.EURC_TOKEN;
+            try {
+                const provider = new ethers.BrowserProvider(window.ethereum);
+                const signer = await provider.getSigner();
+                const contract = new ethers.Contract(getSafeAddress(RAW_CONTRACTS.BRIDGE_CONTRACT), BRIDGE_ABI, signer);
+                const gasOpts = await getLegacyGasParam(provider);
+                const tx = await contract.bridgeAsset(chainId, getSafeAddress(tokenAddr), ethers.parseUnits(amt, 6), getSafeAddress(recipient), gasOpts);
+                updateLog("Bridging asset cross-chain...");
+                await tx.wait();
+                updateLog("Bridge Initiated Successfully!");
+                await updateAllBalances();
+            } catch (err) { updateLog(err.message); }
         }
 
         async function executePayment() {
+            if (!userAddress) return alert("Connect wallet!");
+            const token = document.getElementById('payToken').value;
+            const recipient = document.getElementById('payRecipient').value;
+            const amt = document.getElementById('payAmount').value;
+            const tokenAddr = token === "USDC" ? RAW_CONTRACTS.USDC_TOKEN : RAW_CONTRACTS.EURC_TOKEN;
             try {
-                const tokenSymbol = document.getElementById('payToken').value;
-                const recipient = document.getElementById('payRecipient').value;
-                const amt = document.getElementById('payAmount').value;
-
-                if (!recipient || !amt) return updateLog("Specify recipient address and amount.");
-
-                const tokenAddr = tokenSymbol === 'USDC' ? ADDRESSES.USDC : ADDRESSES.EURC;
-                const signer = await getSigner();
-                const contract = new ethers.Contract(tokenAddr, ERC20_ABI, signer);
-
-                updateLog(`Transferring ${amt} ${tokenSymbol} -> ${recipient}...`);
-                const tx = await contract.transfer(recipient, ethers.parseUnits(amt, 6));
+                const provider = new ethers.BrowserProvider(window.ethereum);
+                const signer = await provider.getSigner();
+                const contract = new ethers.Contract(getSafeAddress(tokenAddr), ERC20_ABI, signer);
+                const gasOpts = await getLegacyGasParam(provider);
+                const tx = await contract.transfer(getSafeAddress(recipient), ethers.parseUnits(amt, 6), gasOpts);
+                updateLog("Sending payment...");
                 await tx.wait();
-                updateLog("Direct transfer confirmed!");
-                updateAllBalances();
-            } catch (e) {
-                updateLog("Transfer Error: " + e.message);
-            }
+                updateLog("Payment Sent Successfully!");
+                await updateAllBalances();
+            } catch (err) { updateLog(err.message); }
         }
 
-        // AI Copilot Interactive Engine
+        function toggleChatWindow() {
+            document.getElementById('aiChatWindow').classList.toggle('hidden');
+        }
+
         function sendAgentMessage() {
             const input = document.getElementById('chatInput');
-            const chatBody = document.getElementById('chatBody');
-            const text = input.value.trim();
-            if (!text) return;
-
-            const uDiv = document.createElement('div');
-            uDiv.className = 'msg msg-user p-3 max-w-[85%] text-xs';
-            uDiv.innerText = text;
-            chatBody.appendChild(uDiv);
-
+            const val = input.value.trim();
+            if (!val) return;
+            
+            const body = document.getElementById('chatBody');
+            
+            const userMsg = document.createElement('div');
+            userMsg.className = 'msg msg-user';
+            userMsg.innerText = val;
+            body.appendChild(userMsg);
+            
             input.value = '';
-            chatBody.scrollTop = chatBody.scrollHeight;
+            body.scrollTop = body.scrollHeight;
 
             setTimeout(() => {
-                const aDiv = document.createElement('div');
-                aDiv.className = 'msg msg-agent p-3 max-w-[85%] text-xs';
-
-                const lower = text.toLowerCase();
-                if (lower.includes('bridge') || lower.includes('circle')) {
-                    aDiv.innerText = "To transfer USDC cross-chain, open the 'Circle Bridge' tab. It connects via Circle AppKit SDK and Viem wallet adapter.";
-                } else if (lower.includes('swap')) {
-                    aDiv.innerText = "Navigate to the 'Swap' tab to exchange USDC and EURC. Rates update automatically based on pool liquidity.";
-                } else if (lower.includes('lend') || lower.includes('borrow')) {
-                    aDiv.innerText = "Check the 'Lending & Borrow' section. Make sure to approve tokens before depositing collateral.";
-                } else {
-                    aDiv.innerText = `AI Copilot: "${text}". I am monitoring smart contract status and ready to assist!`;
-                }
-
-                chatBody.appendChild(aDiv);
-                chatBody.scrollTop = chatBody.scrollHeight;
+                const agentMsg = document.createElement('div');
+                agentMsg.className = 'msg msg-agent';
+                agentMsg.innerText = "I have processed your request for: \"" + val + "\". Let me know if you need any transaction support!";
+                body.appendChild(agentMsg);
+                body.scrollTop = body.scrollHeight;
             }, 600);
         }
     </script>
