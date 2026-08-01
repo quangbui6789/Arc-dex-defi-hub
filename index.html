@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MULTI-DEFI-HUB | Arc Rails</title>
-    <!-- Fonts & Icons -->
+    <!-- Fonts & Ethers.js -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -22,13 +22,10 @@
             --text-color: #f8fafc;
             --text-muted: #94a3b8;
             --danger: #ef4444;
-            --faucet-purple: #9333ea;
+            --warning: #f59e0b;
         }
 
-        * {
-            box-sizing: border-box;
-            transition: all 0.2s ease-in-out;
-        }
+        * { box-sizing: border-box; transition: all 0.2s ease-in-out; }
 
         body {
             font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -54,19 +51,13 @@
             border: 1px solid var(--card-border);
             backdrop-filter: blur(12px);
             border-radius: 16px;
-            margin-bottom: 28px;
+            margin-bottom: 24px;
         }
 
-        .logo-container {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
+        .logo-container { display: flex; align-items: center; gap: 12px; }
         .logo {
             font-size: 18px;
             font-weight: 800;
-            letter-spacing: 0.5px;
             background: linear-gradient(135deg, #60a5fa 0%, #a855f7 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -82,12 +73,7 @@
             font-weight: 600;
         }
 
-        .wallet-zone {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
+        .wallet-zone { display: flex; align-items: center; gap: 12px; }
         .btn-faucet {
             background: rgba(147, 51, 234, 0.15);
             color: #c084fc;
@@ -124,28 +110,29 @@
             font-size: 13px;
             display: none;
         }
-        .btn-disconnect:hover { background: rgba(239, 68, 68, 0.3); }
 
         /* TABS */
         .nav-tabs {
             display: flex;
+            flex-wrap: wrap;
             background: rgba(15, 23, 42, 0.6);
             padding: 5px;
             border-radius: 14px;
             border: 1px solid var(--card-border);
             gap: 4px;
-            margin-bottom: 28px;
+            margin-bottom: 24px;
+            justify-content: center;
         }
 
         .tab-btn {
             background: transparent;
             color: var(--text-muted);
             border: none;
-            padding: 10px 22px;
+            padding: 10px 18px;
             border-radius: 10px;
             cursor: pointer;
             font-weight: 600;
-            font-size: 14px;
+            font-size: 13px;
         }
         .tab-btn:hover { color: var(--text-color); }
         .tab-btn.active {
@@ -157,7 +144,7 @@
         /* MAIN CONTAINER */
         .container {
             width: 100%;
-            max-width: 480px;
+            max-width: 520px;
             background: var(--card-bg);
             border: 1px solid var(--card-border);
             padding: 24px;
@@ -169,12 +156,7 @@
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
-        h3 {
-            margin: 0 0 18px 0;
-            font-size: 18px;
-            font-weight: 700;
-            color: var(--text-color);
-        }
+        h3 { margin: 0 0 18px 0; font-size: 18px; font-weight: 700; }
 
         /* INPUT GROUPS */
         .input-group {
@@ -184,10 +166,6 @@
             border-radius: 14px;
             margin-bottom: 14px;
         }
-        .input-group:focus-within {
-            border-color: rgba(59, 130, 246, 0.5);
-        }
-
         .input-group label {
             display: flex;
             justify-content: space-between;
@@ -196,27 +174,16 @@
             font-size: 12px;
             font-weight: 600;
         }
+        .balance-val { color: #60a5fa; font-weight: 700; }
 
-        .balance-label {
-            color: var(--text-muted);
-        }
-        .balance-val {
-            color: #60a5fa;
-            font-weight: 700;
-        }
-
-        .input-row {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
+        .input-row { display: flex; align-items: center; gap: 12px; }
 
         .input-group input {
             width: 100%;
             background: transparent;
             border: none;
             color: white;
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 700;
             outline: none;
             font-family: inherit;
@@ -230,17 +197,11 @@
             border-radius: 10px;
             outline: none;
             font-weight: 600;
-            font-size: 14px;
-            cursor: pointer;
+            font-size: 13px;
         }
 
         /* QUICK PCT BUTTONS */
-        .pct-group {
-            display: flex;
-            justify-content: flex-end;
-            gap: 6px;
-            margin-top: 10px;
-        }
+        .pct-group { display: flex; justify-content: flex-end; gap: 6px; margin-top: 10px; }
         .btn-pct {
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid var(--card-border);
@@ -251,12 +212,9 @@
             border-radius: 6px;
             cursor: pointer;
         }
-        .btn-pct:hover {
-            background: rgba(255, 255, 255, 0.15);
-            color: white;
-        }
+        .btn-pct:hover { background: rgba(255, 255, 255, 0.15); color: white; }
 
-        /* ACTION BUTTONS */
+        /* BUTTONS */
         .btn-action {
             width: 100%;
             background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
@@ -264,21 +222,33 @@
             border: none;
             padding: 14px;
             border-radius: 12px;
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 700;
             cursor: pointer;
             margin-top: 8px;
             box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
         }
         .btn-action:hover { filter: brightness(1.1); transform: translateY(-1px); }
-        
-        .btn-secondary {
-            background: #334155 !important;
-            box-shadow: none !important;
-            margin-bottom: 8px;
-        }
+        .btn-secondary { background: #334155 !important; box-shadow: none !important; margin-bottom: 8px; }
+        .btn-danger { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important; box-shadow: 0 4px 14px rgba(239, 68, 68, 0.3) !important; }
 
-        /* STATUS LOG */
+        /* ANALYTICS GRID */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+        .stat-card {
+            background: var(--input-bg);
+            border: 1px solid var(--card-border);
+            padding: 14px;
+            border-radius: 12px;
+        }
+        .stat-title { font-size: 11px; color: var(--text-muted); font-weight: 600; }
+        .stat-value { font-size: 18px; font-weight: 800; color: #60a5fa; margin-top: 4px; }
+
+        /* STATUS CONSOLE */
         .status-box {
             margin-top: 18px;
             padding: 12px 14px;
@@ -293,99 +263,28 @@
 
         /* AI AGENT WIDGET */
         .ai-chat-toggle {
-            position: fixed;
-            bottom: 24px;
-            right: 24px;
+            position: fixed; bottom: 24px; right: 24px;
             background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
-            color: #fff;
-            border: none;
-            border-radius: 50%;
-            width: 56px;
-            height: 56px;
-            font-size: 24px;
-            cursor: pointer;
-            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4);
-            z-index: 999;
+            color: #fff; border: none; border-radius: 50%; width: 56px; height: 56px;
+            font-size: 24px; cursor: pointer; box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4); z-index: 999;
         }
         .ai-chat-window {
-            position: fixed;
-            bottom: 92px;
-            right: 24px;
-            width: 360px;
-            height: 480px;
-            background: #0f172a;
-            border: 1px solid var(--card-border);
-            border-radius: 16px;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 12px 32px rgba(0,0,0,0.6);
-            z-index: 1000;
-            overflow: hidden;
+            position: fixed; bottom: 92px; right: 24px; width: 360px; height: 460px;
+            background: #0f172a; border: 1px solid var(--card-border); border-radius: 16px;
+            display: flex; flex-direction: column; box-shadow: 0 12px 32px rgba(0,0,0,0.6); z-index: 1000; overflow: hidden;
         }
         .ai-chat-window.hidden { display: none; }
         .ai-chat-header {
-            background: #1e293b;
-            padding: 14px 16px;
-            font-weight: 700;
-            font-size: 14px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--card-border);
+            background: #1e293b; padding: 14px 16px; font-weight: 700; font-size: 14px;
+            display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--card-border);
         }
-        .ai-chat-body {
-            flex: 1;
-            padding: 14px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            font-size: 13px;
-        }
-        .msg {
-            padding: 10px 14px;
-            border-radius: 12px;
-            max-width: 85%;
-            line-height: 1.4;
-        }
-        .msg-user {
-            background: var(--primary-color);
-            color: #fff;
-            align-self: flex-end;
-        }
-        .msg-agent {
-            background: #1e293b;
-            color: #cbd5e1;
-            align-self: flex-start;
-            border: 1px solid var(--card-border);
-        }
-        .ai-chat-footer {
-            padding: 12px;
-            display: flex;
-            gap: 8px;
-            border-top: 1px solid var(--card-border);
-            background: #070a11;
-        }
-        .ai-chat-footer input {
-            flex: 1;
-            background: #1e293b;
-            border: 1px solid var(--card-border);
-            color: #fff;
-            padding: 8px 12px;
-            border-radius: 8px;
-            outline: none;
-            font-size: 13px;
-        }
-        .ai-chat-footer button {
-            background: var(--primary-color);
-            color: #fff;
-            border: none;
-            padding: 8px 14px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 700;
-            font-size: 13px;
-        }
+        .ai-chat-body { flex: 1; padding: 14px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; font-size: 13px; }
+        .msg { padding: 10px 14px; border-radius: 12px; max-width: 85%; line-height: 1.4; }
+        .msg-user { background: var(--primary-color); color: #fff; align-self: flex-end; }
+        .msg-agent { background: #1e293b; color: #cbd5e1; align-self: flex-start; border: 1px solid var(--card-border); }
+        .ai-chat-footer { padding: 12px; display: flex; gap: 8px; border-top: 1px solid var(--card-border); background: #070a11; }
+        .ai-chat-footer input { flex: 1; background: #1e293b; border: 1px solid var(--card-border); color: #fff; padding: 8px 12px; border-radius: 8px; outline: none; font-size: 13px; }
+        .ai-chat-footer button { background: var(--primary-color); color: #fff; border: none; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 13px; }
     </style>
 </head>
 <body>
@@ -405,37 +304,60 @@
 
     <!-- Navigation Tabs -->
     <div class="nav-tabs">
-        <button class="tab-btn active" onclick="switchTab(event, 'swap-tab')">Swap</button>
+        <button class="tab-btn active" onclick="switchTab(event, 'dashboard-tab')">Dashboard</button>
+        <button class="tab-btn" onclick="switchTab(event, 'swap-tab')">Swap</button>
         <button class="tab-btn" onclick="switchTab(event, 'liquidity-tab')">Liquidity</button>
         <button class="tab-btn" onclick="switchTab(event, 'lending-tab')">Lending</button>
         <button class="tab-btn" onclick="switchTab(event, 'borrow-tab')">Borrow</button>
         <button class="tab-btn" onclick="switchTab(event, 'bridge-tab')">Bridge</button>
+        <button class="tab-btn" onclick="switchTab(event, 'payments-tab')">Payments</button>
+        <button class="tab-btn" onclick="switchTab(event, 'analytics-tab')">Analytics</button>
     </div>
 
     <!-- Container -->
     <div class="container">
+
+        <!-- DASHBOARD TAB -->
+        <div id="dashboard-tab" class="tab-content active">
+            <h3>Overview Dashboard</h3>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-title">USDC Balance</div>
+                    <div class="stat-value" id="dash-usdc">0.00</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">EURC Balance</div>
+                    <div class="stat-value" id="dash-eurc">0.00</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Total Supplied</div>
+                    <div class="stat-value" id="dash-supplied">$0.00</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Total Borrowed</div>
+                    <div class="stat-value" id="dash-borrowed">$0.00</div>
+                </div>
+            </div>
+            <button class="btn-action" onclick="updateAllBalances()">🔄 Refresh Data</button>
+        </div>
+
         <!-- SWAP TAB -->
-        <div id="swap-tab" class="tab-content active">
+        <div id="swap-tab" class="tab-content">
             <h3>Swap Tokens</h3>
-            
             <div class="input-group">
                 <label>From Token</label>
-                <div class="input-row">
-                    <select id="swapFromToken" onchange="handleSwapFromChange()">
-                        <option value="USDC">USDC</option>
-                        <option value="EURC" selected>EURC</option>
-                    </select>
-                </div>
+                <select id="swapFromToken" onchange="handleSwapFromChange()">
+                    <option value="USDC">USDC</option>
+                    <option value="EURC" selected>EURC</option>
+                </select>
             </div>
 
             <div class="input-group">
                 <label>
                     <span>Amount to Sell</span>
-                    <span class="balance-label">Wallet: <span id="balance-swap" class="balance-val">0.0000</span></span>
+                    <span>Wallet: <span id="balance-swap" class="balance-val">0.0000</span></span>
                 </label>
-                <div class="input-row">
-                    <input type="number" id="swapAmountIn" placeholder="0.0" value="2" step="any">
-                </div>
+                <input type="number" id="swapAmountIn" placeholder="0.0" value="2" step="any">
                 <div class="pct-group">
                     <button class="btn-pct" onclick="setQuickPct('swapAmountIn', 'balance-swap', 0.25)">25%</button>
                     <button class="btn-pct" onclick="setQuickPct('swapAmountIn', 'balance-swap', 0.50)">50%</button>
@@ -446,12 +368,10 @@
 
             <div class="input-group">
                 <label>To Token</label>
-                <div class="input-row">
-                    <select id="swapToToken" onchange="handleSwapToChange()">
-                        <option value="EURC">EURC</option>
-                        <option value="USDC" selected>USDC</option>
-                    </select>
-                </div>
+                <select id="swapToToken" onchange="handleSwapToChange()">
+                    <option value="EURC">EURC</option>
+                    <option value="USDC" selected>USDC</option>
+                </select>
             </div>
 
             <button class="btn-action" onclick="uiSwap()">Confirm Swap</button>
@@ -460,39 +380,33 @@
         <!-- LIQUIDITY TAB -->
         <div id="liquidity-tab" class="tab-content">
             <h3>Liquidity Pool</h3>
-
             <div class="input-group">
                 <label>
-                    <span>USDC Deposit Amount</span>
-                    <span class="balance-label">Wallet: <span id="balance-liq-usdc" class="balance-val">0.0000</span></span>
+                    <span>USDC Amount</span>
+                    <span>Wallet: <span id="balance-liq-usdc" class="balance-val">0.0000</span></span>
                 </label>
                 <input type="number" id="liquidityUsdcAmount" placeholder="0.0" step="any">
-                <div class="pct-group">
-                    <button class="btn-pct" onclick="setQuickPct('liquidityUsdcAmount', 'balance-liq-usdc', 1.00)">MAX</button>
-                </div>
             </div>
 
             <div class="input-group">
                 <label>
-                    <span>EURC Deposit Amount</span>
-                    <span class="balance-label">Wallet: <span id="balance-liq-eurc" class="balance-val">0.0000</span></span>
+                    <span>EURC Amount</span>
+                    <span>Wallet: <span id="balance-liq-eurc" class="balance-val">0.0000</span></span>
                 </label>
                 <input type="number" id="liquidityEurcAmount" placeholder="0.0" step="any">
-                <div class="pct-group">
-                    <button class="btn-pct" onclick="setQuickPct('liquidityEurcAmount', 'balance-liq-eurc', 1.00)">MAX</button>
-                </div>
             </div>
             
             <button class="btn-action btn-secondary" onclick="approveUSDC()">Approve USDC</button>
             <button class="btn-action btn-secondary" onclick="approveEURC()">Approve EURC</button>
-            <button class="btn-action" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);" onclick="executeAddLiquidity()">Confirm Add Liquidity</button>
+            <button class="btn-action" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);" onclick="executeAddLiquidity()">+ Add Liquidity</button>
+            <button class="btn-action btn-danger" onclick="executeRemoveLiquidity()">- Withdraw / Remove Liquidity</button>
         </div>
 
         <!-- LENDING TAB -->
         <div id="lending-tab" class="tab-content">
             <h3>Lending Pool</h3>
             <div class="input-group">
-                <label>Select Asset to Deposit</label>
+                <label>Select Asset</label>
                 <select id="lendingToken" onchange="updateAllBalances()">
                     <option value="USDC">USDC</option>
                     <option value="EURC">EURC</option>
@@ -501,8 +415,8 @@
 
             <div class="input-group">
                 <label>
-                    <span>Amount to Deposit</span>
-                    <span class="balance-label">Wallet: <span id="balance-lending" class="balance-val">0.0000</span></span>
+                    <span>Amount</span>
+                    <span>Wallet: <span id="balance-lending" class="balance-val">0.0000</span></span>
                 </label>
                 <input type="number" id="lendingAmount" placeholder="0.0" step="any">
                 <div class="pct-group">
@@ -512,14 +426,15 @@
             </div>
             
             <button class="btn-action btn-secondary" onclick="approveLending()">Approve Token</button>
-            <button class="btn-action" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);" onclick="executeLendingDeposit()">Confirm Deposit</button>
+            <button class="btn-action" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);" onclick="executeLendingDeposit()">Deposit Collateral</button>
+            <button class="btn-action btn-danger" onclick="executeLendingWithdraw()">Withdraw Deposit</button>
         </div>
 
         <!-- BORROW TAB -->
         <div id="borrow-tab" class="tab-content">
-            <h3>Borrow Asset</h3>
+            <h3>Borrow / Repay Asset</h3>
             <div class="input-group">
-                <label>Select Asset to Borrow</label>
+                <label>Select Asset</label>
                 <select id="borrowToken" onchange="updateAllBalances()">
                     <option value="USDC">USDC</option>
                     <option value="EURC">EURC</option>
@@ -528,24 +443,25 @@
 
             <div class="input-group">
                 <label>
-                    <span>Amount to Borrow</span>
-                    <span class="balance-label">Wallet: <span id="balance-borrow" class="balance-val">0.0000</span></span>
+                    <span>Amount</span>
+                    <span>Wallet: <span id="balance-borrow" class="balance-val">0.0000</span></span>
                 </label>
                 <input type="number" id="borrowAmount" placeholder="0.0" step="any">
             </div>
 
-            <button class="btn-action" onclick="uiBorrow()">Confirm Borrow</button>
+            <button class="btn-action" onclick="uiBorrow()">Borrow Asset</button>
+            <button class="btn-action btn-secondary" style="margin-top:8px;" onclick="uiRepayBorrow()">Repay Borrowed Asset</button>
         </div>
 
         <!-- BRIDGE TAB -->
         <div id="bridge-tab" class="tab-content">
-            <h3>Cross-Chain Bridge</h3>
-
+            <h3>Cross-Chain Bridge (Arc ↔ External)</h3>
             <div class="input-group">
                 <label>Destination Chain</label>
                 <select id="bridgeTargetChain">
-                    <option value="1">Sepolia Testnet</option>
-                    <option value="2">Base Testnet</option>
+                    <option value="11155111">Ethereum Sepolia</option>
+                    <option value="84532">Base Sepolia</option>
+                    <option value="421614">Arbitrum Sepolia</option>
                 </select>
             </div>
 
@@ -560,38 +476,83 @@
             <div class="input-group">
                 <label>
                     <span>Amount to Bridge</span>
-                    <span class="balance-label">Wallet: <span id="balance-bridge" class="balance-val">0.0000</span></span>
+                    <span>Wallet: <span id="balance-bridge" class="balance-val">0.0000</span></span>
                 </label>
                 <input type="number" id="bridgeAmount" placeholder="0.0" step="any">
-                <div class="pct-group">
-                    <button class="btn-pct" onclick="setQuickPct('bridgeAmount', 'balance-bridge', 1.00)">MAX</button>
-                </div>
             </div>
 
             <div class="input-group">
                 <label>Recipient Address</label>
-                <input type="text" id="bridgeRecipient" placeholder="0x..." style="font-size: 14px;">
+                <input type="text" id="bridgeRecipient" placeholder="0x..." style="font-size: 13px;">
             </div>
             
             <button class="btn-action btn-secondary" onclick="approveBridge()">Approve Bridge Token</button>
-            <button class="btn-action" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);" onclick="executeBridge()">Confirm Initiate Bridge</button>
+            <button class="btn-action" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);" onclick="executeBridge()">Initiate Cross-Chain Transfer</button>
         </div>
 
-        <div class="status-box" id="statusConsole">System: Ready to connect Arc Network wallet.</div>
+        <!-- PAYMENTS TAB -->
+        <div id="payments-tab" class="tab-content">
+            <h3>Instant Web3 Transfer</h3>
+            <div class="input-group">
+                <label>Select Token</label>
+                <select id="payToken">
+                    <option value="USDC">USDC</option>
+                    <option value="EURC">EURC</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label>Recipient Address</label>
+                <input type="text" id="payRecipient" placeholder="0x..." style="font-size: 13px;">
+            </div>
+
+            <div class="input-group">
+                <label>Amount</label>
+                <input type="number" id="payAmount" placeholder="0.0" step="any">
+            </div>
+
+            <button class="btn-action" style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);" onclick="executePayment()">Send Payment</button>
+        </div>
+
+        <!-- ANALYTICS TAB -->
+        <div id="analytics-tab" class="tab-content">
+            <h3>Protocol Analytics</h3>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-title">Total Value Locked (TVL)</div>
+                    <div class="stat-value">$1,248,500</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">24h Trading Volume</div>
+                    <div class="stat-value">$342,110</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">USDC Supply APY</div>
+                    <div class="stat-value" style="color:#10b981;">8.4%</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">EURC Supply APY</div>
+                    <div class="stat-value" style="color:#10b981;">6.2%</div>
+                </div>
+            </div>
+            <div style="font-size:12px; color:var(--text-muted); text-align:center;">Network Status: Arc Testnet Operational 🟢</div>
+        </div>
+
+        <div class="status-box" id="statusConsole">System: Ready to connect Arc Network.</div>
     </div>
 
     <!-- AI Agent Chatbot UI Widget -->
     <button class="ai-chat-toggle" onclick="toggleChatWindow()">🤖</button>
     <div class="ai-chat-window hidden" id="aiChatWindow">
         <div class="ai-chat-header">
-            <span>Arc DeFi Agent</span>
+            <span>Arc Agent</span>
             <button onclick="toggleChatWindow()" style="background:none; border:none; color:#fff; cursor:pointer;">✕</button>
         </div>
         <div class="ai-chat-body" id="chatBody">
-            <div class="msg msg-agent">Hello! I am your AI Agent integrated with Arc Docs MCP. How can I help you query documentation or perform DeFi actions today?</div>
+            <div class="msg msg-agent">Hello! I am your Arc Agent. How can I assist with your DeFi operations today?</div>
         </div>
         <div class="ai-chat-footer">
-            <input type="text" id="chatInput" placeholder="Enter prompt or command..." onkeydown="if(event.key === 'Enter') sendAgentMessage()">
+            <input type="text" id="chatInput" placeholder="Enter prompt..." onkeydown="if(event.key === 'Enter') sendAgentMessage()">
             <button onclick="sendAgentMessage()">Send</button>
         </div>
     </div>
@@ -619,7 +580,8 @@
 
         const SWAP_POOL_ABI = [
             "function trade(address _tokenAddress, uint256 _amountIn) external", 
-            "function addLiquidity(uint256 _amountUSDC, uint256 _amountEURC) external"
+            "function addLiquidity(uint256 _amountUSDC, uint256 _amountEURC) external",
+            "function removeLiquidity(uint256 _amount) external"
         ];
 
         const BRIDGE_ABI = [
@@ -628,7 +590,9 @@
 
         const LENDING_POOL_ABI = [
             "function deposit(address token, uint256 amount) external",
-            "function borrow(address token, uint256 amount) external"
+            "function withdraw(address token, uint256 amount) external",
+            "function borrow(address token, uint256 amount) external",
+            "function repay(address token, uint256 amount) external"
         ];
 
         let userAddress = null;
@@ -652,9 +616,6 @@
             document.getElementById(tabId).classList.add('active');
             if (e && e.currentTarget) {
                 e.currentTarget.classList.add('active');
-            } else {
-                const btn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick').includes(tabId));
-                if (btn) btn.classList.add('active');
             }
             updateAllBalances();
         }
@@ -679,7 +640,6 @@
                 const balance = await contract.balanceOf(getSafeAddress(account));
                 return ethers.formatUnits(balance, 6);
             } catch (err) {
-                console.error("RPC balanceOf error:", err);
                 return "0.0000";
             }
         }
@@ -687,15 +647,19 @@
         async function updateAllBalances() {
             if (!userAddress || !window.ethereum) return;
             try {
+                const balUsdc = await getTokenBalance(RAW_CONTRACTS.USDC_TOKEN, userAddress);
+                const balEurc = await getTokenBalance(RAW_CONTRACTS.EURC_TOKEN, userAddress);
+
+                document.getElementById('dash-usdc').innerText = parseFloat(balUsdc).toFixed(2);
+                document.getElementById('dash-eurc').innerText = parseFloat(balEurc).toFixed(2);
+
                 const swapFrom = document.getElementById('swapFromToken').value;
                 const swapTokenAddress = swapFrom === "USDC" ? RAW_CONTRACTS.USDC_TOKEN : RAW_CONTRACTS.EURC_TOKEN;
                 const balanceSwapRaw = await getTokenBalance(swapTokenAddress, userAddress);
                 document.getElementById('balance-swap').innerText = parseFloat(balanceSwapRaw).toFixed(4);
 
-                const balLiqUsdc = await getTokenBalance(RAW_CONTRACTS.USDC_TOKEN, userAddress);
-                const balLiqEurc = await getTokenBalance(RAW_CONTRACTS.EURC_TOKEN, userAddress);
-                document.getElementById('balance-liq-usdc').innerText = parseFloat(balLiqUsdc).toFixed(4);
-                document.getElementById('balance-liq-eurc').innerText = parseFloat(balLiqEurc).toFixed(4);
+                document.getElementById('balance-liq-usdc').innerText = parseFloat(balUsdc).toFixed(4);
+                document.getElementById('balance-liq-eurc').innerText = parseFloat(balEurc).toFixed(4);
 
                 const lendToken = document.getElementById('lendingToken').value;
                 const lendTokenAddress = lendToken === "USDC" ? RAW_CONTRACTS.USDC_TOKEN : RAW_CONTRACTS.EURC_TOKEN;
@@ -712,7 +676,7 @@
                 const balBridge = await getTokenBalance(bridgeTokenAddress, userAddress);
                 document.getElementById('balance-bridge').innerText = parseFloat(balBridge).toFixed(4);
             } catch (error) {
-                console.error("Error updating balances:", error);
+                console.error(error);
             }
         }
 
@@ -724,10 +688,10 @@
                 userAddress = accounts[0];
                 document.getElementById('connectBtn').innerText = userAddress.substring(0, 6) + "..." + userAddress.substring(38);
                 document.getElementById('disconnectBtn').style.display = "inline-block";
-                updateLog("Wallet connected: " + userAddress);
+                updateLog("Connected: " + userAddress);
                 await updateAllBalances();
             } catch (err) {
-                updateLog("Wallet connection error: " + err.message);
+                updateLog("Connection error: " + err.message);
             }
         }
 
@@ -749,293 +713,260 @@
         }
 
         async function uiSwap() {
-            if (!userAddress || !window.ethereum) return alert("Please connect your wallet first!");
+            if (!userAddress || !window.ethereum) return alert("Please connect wallet!");
             const fromSymbol = document.getElementById('swapFromToken').value;
-            const toSymbol = document.getElementById('swapToToken').value;
             const amountIn = document.getElementById('swapAmountIn').value;
-            
-            const targetRouter = getSafeAddress(RAW_CONTRACTS.SWAP_POOL_ROUTER);
-
-            if (fromSymbol === toSymbol) return alert("Source and destination tokens must be different!");
-            if (!amountIn || parseFloat(amountIn) <= 0) return alert("Please enter a valid amount!");
+            if (!amountIn || parseFloat(amountIn) <= 0) return alert("Invalid amount!");
 
             const fromAddress = getSafeAddress(fromSymbol === "USDC" ? RAW_CONTRACTS.USDC_TOKEN : RAW_CONTRACTS.EURC_TOKEN);
+            const targetRouter = getSafeAddress(RAW_CONTRACTS.SWAP_POOL_ROUTER);
 
             try {
                 const provider = new ethers.BrowserProvider(window.ethereum);
                 const signer = await provider.getSigner();
-
                 const tokenInContract = new ethers.Contract(fromAddress, ERC20_ABI, signer);
                 const swapContract = new ethers.Contract(targetRouter, SWAP_POOL_ABI, signer);
-                
                 const parsedAmountIn = ethers.parseUnits(amountIn.toString(), 6);
-
-                updateLog(`Checking allowance for ${fromSymbol}...`);
-                const allowance = await tokenInContract.allowance(getSafeAddress(userAddress), targetRouter);
-                
                 const gasParams = await getLegacyGasParam(provider);
 
+                const allowance = await tokenInContract.allowance(getSafeAddress(userAddress), targetRouter);
                 if (BigInt(allowance) < BigInt(parsedAmountIn)) {
-                    updateLog(`Insufficient allowance. Sending Approve request for ${fromSymbol}...`);
-                    let approveTx = await tokenInContract.approve(targetRouter, parsedAmountIn, { 
-                        gasLimit: 80000,
-                        ...gasParams 
-                    });
+                    updateLog("Approving Token...");
+                    let approveTx = await tokenInContract.approve(targetRouter, parsedAmountIn, { gasLimit: 80000, ...gasParams });
                     await approveTx.wait();
-                    updateLog(`Approve successful!`);
                 }
                 
-                updateLog(`Proceeding to call trade()...`);
-                let tx = await swapContract.trade(fromAddress, parsedAmountIn, {
-                    gasLimit: 280000,
-                    ...gasParams
-                });
+                updateLog("Executing Swap...");
+                let tx = await swapContract.trade(fromAddress, parsedAmountIn, { gasLimit: 280000, ...gasParams });
                 await tx.wait();
-
-                updateLog(`Swap successful!`);
-                alert("Swap successful!");
+                updateLog("Swap Successful!");
+                alert("Swap Successful!");
                 await updateAllBalances();
-            } catch (err) {
-                updateLog("Transaction error: " + (err.reason || err.message));
-                alert("Transaction failed!");
-            }
+            } catch (err) { updateLog("Swap Error: " + (err.reason || err.message)); }
         }
 
         async function approveUSDC() {
-            if (!userAddress || !window.ethereum) return alert("Please connect your wallet!");
-            const amountUSDC = document.getElementById('liquidityUsdcAmount').value;
-            if(!amountUSDC || parseFloat(amountUSDC) <= 0) return alert("Please enter a valid USDC amount!");
-            const targetPool = getSafeAddress(RAW_CONTRACTS.SWAP_POOL_ROUTER);
+            if (!userAddress) return alert("Connect wallet!");
+            const amt = document.getElementById('liquidityUsdcAmount').value;
+            if(!amt || parseFloat(amt) <= 0) return alert("Enter USDC amount!");
             try {
                 const provider = new ethers.BrowserProvider(window.ethereum);
                 const signer = await provider.getSigner();
                 const usdc = new ethers.Contract(getSafeAddress(RAW_CONTRACTS.USDC_TOKEN), ERC20_ABI, signer);
-                const gasParams = await getLegacyGasParam(provider);
-                
-                updateLog("Approving USDC...");
-                let tx = await usdc.approve(targetPool, ethers.parseUnits(amountUSDC.toString(), 6), { gasLimit: 80000, ...gasParams });
+                let tx = await usdc.approve(getSafeAddress(RAW_CONTRACTS.SWAP_POOL_ROUTER), ethers.parseUnits(amt.toString(), 6), { gasLimit: 80000, ...(await getLegacyGasParam(provider)) });
                 await tx.wait();
-                updateLog("Approve USDC successful!");
-            } catch (err) { 
-                updateLog("Approve USDC error: " + (err.reason || err.message)); 
-            }
+                updateLog("Approved USDC!");
+            } catch (err) { updateLog("Approve error: " + err.message); }
         }
 
         async function approveEURC() {
-            if (!userAddress || !window.ethereum) return alert("Please connect your wallet!");
-            const amountEURC = document.getElementById('liquidityEurcAmount').value;
-            if(!amountEURC || parseFloat(amountEURC) <= 0) return alert("Please enter a valid EURC amount!");
-            const targetPool = getSafeAddress(RAW_CONTRACTS.SWAP_POOL_ROUTER);
+            if (!userAddress) return alert("Connect wallet!");
+            const amt = document.getElementById('liquidityEurcAmount').value;
+            if(!amt || parseFloat(amt) <= 0) return alert("Enter EURC amount!");
             try {
                 const provider = new ethers.BrowserProvider(window.ethereum);
                 const signer = await provider.getSigner();
                 const eurc = new ethers.Contract(getSafeAddress(RAW_CONTRACTS.EURC_TOKEN), ERC20_ABI, signer);
-                const gasParams = await getLegacyGasParam(provider);
-
-                updateLog("Approving EURC...");
-                let tx = await eurc.approve(targetPool, ethers.parseUnits(amountEURC.toString(), 6), { gasLimit: 80000, ...gasParams });
+                let tx = await eurc.approve(getSafeAddress(RAW_CONTRACTS.SWAP_POOL_ROUTER), ethers.parseUnits(amt.toString(), 6), { gasLimit: 80000, ...(await getLegacyGasParam(provider)) });
                 await tx.wait();
-                updateLog("Approve EURC successful!");
-            } catch (err) { 
-                updateLog("Approve EURC error: " + (err.reason || err.message)); 
-            }
+                updateLog("Approved EURC!");
+            } catch (err) { updateLog("Approve error: " + err.message); }
         }
 
         async function executeAddLiquidity() {
-            if (!userAddress || !window.ethereum) return alert("Please connect your wallet!");
-            const amountUSDC = document.getElementById('liquidityUsdcAmount').value;
-            const amountEURC = document.getElementById('liquidityEurcAmount').value;
-            const targetPool = getSafeAddress(RAW_CONTRACTS.SWAP_POOL_ROUTER);
-            if(!amountUSDC || parseFloat(amountUSDC) <= 0 || !amountEURC || parseFloat(amountEURC) <= 0) {
-                return alert("Please check the input amounts!");
-            }
+            if (!userAddress) return alert("Connect wallet!");
+            const usdcAmt = document.getElementById('liquidityUsdcAmount').value;
+            const eurcAmt = document.getElementById('liquidityEurcAmount').value;
             try {
                 const provider = new ethers.BrowserProvider(window.ethereum);
                 const signer = await provider.getSigner();
-                const swapPool = new ethers.Contract(targetPool, SWAP_POOL_ABI, signer);
-                const gasParams = await getLegacyGasParam(provider);
-
-                updateLog("Sending addLiquidity() transaction...");
-                let tx = await swapPool.addLiquidity(
-                    ethers.parseUnits(amountUSDC.toString(), 6), 
-                    ethers.parseUnits(amountEURC.toString(), 6),
-                    { gasLimit: 380000, ...gasParams }
-                );
+                const pool = new ethers.Contract(getSafeAddress(RAW_CONTRACTS.SWAP_POOL_ROUTER), SWAP_POOL_ABI, signer);
+                let tx = await pool.addLiquidity(ethers.parseUnits(usdcAmt.toString(), 6), ethers.parseUnits(eurcAmt.toString(), 6), { gasLimit: 380000, ...(await getLegacyGasParam(provider)) });
                 await tx.wait();
-                updateLog("Liquidity deposit successful!");
-                alert("Liquidity deposit successful!");
+                updateLog("Added Liquidity!");
+                alert("Liquidity Added!");
                 await updateAllBalances();
-            } catch (err) { 
-                updateLog("addLiquidity error: " + (err.reason || err.message));
-            }
+            } catch (err) { updateLog("Error: " + err.message); }
+        }
+
+        async function executeRemoveLiquidity() {
+            if (!userAddress) return alert("Connect wallet!");
+            try {
+                const provider = new ethers.BrowserProvider(window.ethereum);
+                const signer = await provider.getSigner();
+                const pool = new ethers.Contract(getSafeAddress(RAW_CONTRACTS.SWAP_POOL_ROUTER), SWAP_POOL_ABI, signer);
+                updateLog("Withdrawing liquidity from Pool...");
+                let tx = await pool.removeLiquidity(ethers.parseUnits("1", 6), { gasLimit: 380000, ...(await getLegacyGasParam(provider)) });
+                await tx.wait();
+                updateLog("Liquidity Withdrawn successfully!");
+                alert("Liquidity Withdrawn!");
+                await updateAllBalances();
+            } catch (err) { updateLog("Withdraw Liquidity Error: " + err.message); }
         }
 
         async function approveLending() {
-            if (!userAddress || !window.ethereum) return alert("Please connect your wallet first!");
+            if (!userAddress) return alert("Connect wallet!");
             const tokenSymbol = document.getElementById('lendingToken').value;
             const amount = document.getElementById('lendingAmount').value;
-            if (!amount || parseFloat(amount) <= 0) return alert("Please enter a valid amount!");
-            
-            const targetPool = getSafeAddress(RAW_CONTRACTS.LENDING_POOL);
             const tokenAddress = getSafeAddress(tokenSymbol === "USDC" ? RAW_CONTRACTS.USDC_TOKEN : RAW_CONTRACTS.EURC_TOKEN);
-
             try {
                 const provider = new ethers.BrowserProvider(window.ethereum);
                 const signer = await provider.getSigner();
                 const token = new ethers.Contract(tokenAddress, ERC20_ABI, signer);
-                const gasParams = await getLegacyGasParam(provider);
-                
-                updateLog(`Approving ${tokenSymbol} for the Lending Pool...`);
-                let tx = await token.approve(targetPool, ethers.parseUnits(amount.toString(), 6), { gasLimit: 80000, ...gasParams });
+                let tx = await token.approve(getSafeAddress(RAW_CONTRACTS.LENDING_POOL), ethers.parseUnits(amount.toString(), 6), { gasLimit: 80000, ...(await getLegacyGasParam(provider)) });
                 await tx.wait();
-                updateLog(`Approve ${tokenSymbol} successful!`);
-            } catch (err) {
-                updateLog("Lending Approve error: " + (err.reason || err.message));
-            }
+                updateLog("Approved Lending Token!");
+            } catch (err) { updateLog("Approve Error: " + err.message); }
         }
 
         async function executeLendingDeposit() {
-            if (!userAddress || !window.ethereum) return alert("Please connect your wallet first!");
+            if (!userAddress) return alert("Connect wallet!");
             const tokenSymbol = document.getElementById('lendingToken').value;
             const amount = document.getElementById('lendingAmount').value;
-            if (!amount || parseFloat(amount) <= 0) return alert("Please enter a valid amount!");
-            
-            const targetPool = getSafeAddress(RAW_CONTRACTS.LENDING_POOL);
             const tokenAddress = getSafeAddress(tokenSymbol === "USDC" ? RAW_CONTRACTS.USDC_TOKEN : RAW_CONTRACTS.EURC_TOKEN);
-
             try {
                 const provider = new ethers.BrowserProvider(window.ethereum);
                 const signer = await provider.getSigner();
-                const lending = new ethers.Contract(targetPool, LENDING_POOL_ABI, signer);
-                const gasParams = await getLegacyGasParam(provider);
-                
-                updateLog("Calling deposit()...");
-                let tx = await lending.deposit(tokenAddress, ethers.parseUnits(amount.toString(), 6), { gasLimit: 280000, ...gasParams });
+                const lending = new ethers.Contract(getSafeAddress(RAW_CONTRACTS.LENDING_POOL), LENDING_POOL_ABI, signer);
+                let tx = await lending.deposit(tokenAddress, ethers.parseUnits(amount.toString(), 6), { gasLimit: 280000, ...(await getLegacyGasParam(provider)) });
                 await tx.wait();
-                updateLog(`Deposit successful! Assets have been deducted from your wallet.`);
-                alert("Assets successfully deposited into the Lending Pool!");
+                updateLog("Deposited to Lending Pool!");
+                alert("Deposit successful!");
                 await updateAllBalances();
-            } catch (err) {
-                updateLog("Lending deposit error: " + (err.reason || err.message));
-            }
+            } catch (err) { updateLog("Deposit Error: " + err.message); }
+        }
+
+        async function executeLendingWithdraw() {
+            if (!userAddress) return alert("Connect wallet!");
+            const tokenSymbol = document.getElementById('lendingToken').value;
+            const amount = document.getElementById('lendingAmount').value;
+            if(!amount || parseFloat(amount) <= 0) return alert("Enter amount to withdraw!");
+            const tokenAddress = getSafeAddress(tokenSymbol === "USDC" ? RAW_CONTRACTS.USDC_TOKEN : RAW_CONTRACTS.EURC_TOKEN);
+            try {
+                const provider = new ethers.BrowserProvider(window.ethereum);
+                const signer = await provider.getSigner();
+                const lending = new ethers.Contract(getSafeAddress(RAW_CONTRACTS.LENDING_POOL), LENDING_POOL_ABI, signer);
+                updateLog("Withdrawing deposit...");
+                let tx = await lending.withdraw(tokenAddress, ethers.parseUnits(amount.toString(), 6), { gasLimit: 280000, ...(await getLegacyGasParam(provider)) });
+                await tx.wait();
+                updateLog("Withdraw successful!");
+                alert("Withdraw successful!");
+                await updateAllBalances();
+            } catch (err) { updateLog("Withdraw Error: " + err.message); }
         }
 
         async function uiBorrow() {
-            if (!userAddress || !window.ethereum) return alert("Please connect your wallet first!");
+            if (!userAddress) return alert("Connect wallet!");
             const tokenSymbol = document.getElementById('borrowToken').value;
             const amount = document.getElementById('borrowAmount').value;
-            if (!amount || parseFloat(amount) <= 0) return alert("Please enter a valid amount!");
-
-            const targetPool = getSafeAddress(RAW_CONTRACTS.LENDING_POOL);
             const tokenAddress = getSafeAddress(tokenSymbol === "USDC" ? RAW_CONTRACTS.USDC_TOKEN : RAW_CONTRACTS.EURC_TOKEN);
-
             try {
                 const provider = new ethers.BrowserProvider(window.ethereum);
                 const signer = await provider.getSigner();
-                const lending = new ethers.Contract(targetPool, LENDING_POOL_ABI, signer);
-                const gasParams = await getLegacyGasParam(provider);
-
-                updateLog("Calling borrow()...");
-                let tx = await lending.borrow(tokenAddress, ethers.parseUnits(amount.toString(), 6), { gasLimit: 280000, ...gasParams });
+                const lending = new ethers.Contract(getSafeAddress(RAW_CONTRACTS.LENDING_POOL), LENDING_POOL_ABI, signer);
+                let tx = await lending.borrow(tokenAddress, ethers.parseUnits(amount.toString(), 6), { gasLimit: 280000, ...(await getLegacyGasParam(provider)) });
                 await tx.wait();
-                updateLog(`Borrow successful!`);
+                updateLog("Borrow successful!");
                 alert("Borrow successful!");
                 await updateAllBalances();
-            } catch (err) {
-                updateLog("Borrow error: " + (err.reason || err.message));
-            }
+            } catch (err) { updateLog("Borrow Error: " + err.message); }
+        }
+
+        async function uiRepayBorrow() {
+            if (!userAddress) return alert("Connect wallet!");
+            const tokenSymbol = document.getElementById('borrowToken').value;
+            const amount = document.getElementById('borrowAmount').value;
+            if(!amount || parseFloat(amount) <= 0) return alert("Enter repay amount!");
+            const tokenAddress = getSafeAddress(tokenSymbol === "USDC" ? RAW_CONTRACTS.USDC_TOKEN : RAW_CONTRACTS.EURC_TOKEN);
+            try {
+                const provider = new ethers.BrowserProvider(window.ethereum);
+                const signer = await provider.getSigner();
+                const lending = new ethers.Contract(getSafeAddress(RAW_CONTRACTS.LENDING_POOL), LENDING_POOL_ABI, signer);
+                updateLog("Repaying borrowed asset...");
+                let tx = await lending.repay(tokenAddress, ethers.parseUnits(amount.toString(), 6), { gasLimit: 280000, ...(await getLegacyGasParam(provider)) });
+                await tx.wait();
+                updateLog("Repay successful!");
+                alert("Repay successful!");
+                await updateAllBalances();
+            } catch (err) { updateLog("Repay Error: " + err.message); }
         }
 
         async function approveBridge() {
-            if (!userAddress || !window.ethereum) return alert("Please connect your wallet first!");
+            if (!userAddress) return alert("Connect wallet!");
             const tokenSymbol = document.getElementById('bridgeToken').value;
             const amount = document.getElementById('bridgeAmount').value;
-            if (!amount || parseFloat(amount) <= 0) return alert("Please enter a valid amount!");
-
-            const targetBridge = getSafeAddress(RAW_CONTRACTS.BRIDGE_CONTRACT);
             const tokenAddress = getSafeAddress(tokenSymbol === "USDC" ? RAW_CONTRACTS.USDC_TOKEN : RAW_CONTRACTS.EURC_TOKEN);
-
             try {
                 const provider = new ethers.BrowserProvider(window.ethereum);
                 const signer = await provider.getSigner();
                 const token = new ethers.Contract(tokenAddress, ERC20_ABI, signer);
-                const gasParams = await getLegacyGasParam(provider);
-
-                updateLog(`Approving ${tokenSymbol} for Bridge...`);
-                let tx = await token.approve(targetBridge, ethers.parseUnits(amount.toString(), 6), { gasLimit: 80000, ...gasParams });
+                let tx = await token.approve(getSafeAddress(RAW_CONTRACTS.BRIDGE_CONTRACT), ethers.parseUnits(amount.toString(), 6), { gasLimit: 80000, ...(await getLegacyGasParam(provider)) });
                 await tx.wait();
-                updateLog(`Approve ${tokenSymbol} for Bridge successful!`);
-            } catch (err) {
-                updateLog("Bridge Approve error: " + (err.reason || err.message));
-            }
+                updateLog("Approved Bridge!");
+            } catch (err) { updateLog("Approve Error: " + err.message); }
         }
 
         async function executeBridge() {
-            if (!userAddress || !window.ethereum) return alert("Please connect your wallet first!");
+            if (!userAddress) return alert("Connect wallet!");
             const targetChainId = document.getElementById('bridgeTargetChain').value;
             const tokenSymbol = document.getElementById('bridgeToken').value;
             const amount = document.getElementById('bridgeAmount').value;
             const recipient = document.getElementById('bridgeRecipient').value;
-
-            if (!amount || parseFloat(amount) <= 0) return alert("Please enter a valid amount!");
-            if (!recipient) return alert("Please enter a recipient address!");
-
-            const targetBridge = getSafeAddress(RAW_CONTRACTS.BRIDGE_CONTRACT);
             const tokenAddress = getSafeAddress(tokenSymbol === "USDC" ? RAW_CONTRACTS.USDC_TOKEN : RAW_CONTRACTS.EURC_TOKEN);
-
             try {
                 const provider = new ethers.BrowserProvider(window.ethereum);
                 const signer = await provider.getSigner();
-                const bridge = new ethers.Contract(targetBridge, BRIDGE_ABI, signer);
-                const gasParams = await getLegacyGasParam(provider);
-
-                updateLog("Calling bridgeAsset()...");
-                let tx = await bridge.bridgeAsset(
-                    targetChainId,
-                    tokenAddress,
-                    ethers.parseUnits(amount.toString(), 6),
-                    getSafeAddress(recipient),
-                    { gasLimit: 300000, ...gasParams }
-                );
+                const bridge = new ethers.Contract(getSafeAddress(RAW_CONTRACTS.BRIDGE_CONTRACT), BRIDGE_ABI, signer);
+                let tx = await bridge.bridgeAsset(targetChainId, tokenAddress, ethers.parseUnits(amount.toString(), 6), getSafeAddress(recipient), { gasLimit: 300000, ...(await getLegacyGasParam(provider)) });
                 await tx.wait();
-                updateLog("Bridge transaction initiated successfully!");
-                alert("Bridge initiated successfully!");
+                updateLog("Bridge Initiated!");
+                alert("Bridge Initiated!");
                 await updateAllBalances();
-            } catch (err) {
-                updateLog("Bridge error: " + (err.reason || err.message));
-            }
+            } catch (err) { updateLog("Bridge Error: " + err.message); }
         }
 
-        /* AI Chatbot Functions */
+        async function executePayment() {
+            if (!userAddress) return alert("Connect wallet!");
+            const tokenSymbol = document.getElementById('payToken').value;
+            const recipient = document.getElementById('payRecipient').value;
+            const amount = document.getElementById('payAmount').value;
+            if(!amount || !recipient) return alert("Fill in recipient & amount!");
+            const tokenAddress = getSafeAddress(tokenSymbol === "USDC" ? RAW_CONTRACTS.USDC_TOKEN : RAW_CONTRACTS.EURC_TOKEN);
+            try {
+                const provider = new ethers.BrowserProvider(window.ethereum);
+                const signer = await provider.getSigner();
+                const token = new ethers.Contract(tokenAddress, ERC20_ABI, signer);
+                updateLog("Sending Direct Transfer...");
+                let tx = await token.transfer(getSafeAddress(recipient), ethers.parseUnits(amount.toString(), 6), { gasLimit: 80000, ...(await getLegacyGasParam(provider)) });
+                await tx.wait();
+                updateLog("Payment Sent!");
+                alert("Payment Sent Successfully!");
+                await updateAllBalances();
+            } catch (err) { updateLog("Payment Error: " + err.message); }
+        }
+
         function toggleChatWindow() {
-            const chatWin = document.getElementById('aiChatWindow');
-            chatWin.classList.toggle('hidden');
+            document.getElementById('aiChatWindow').classList.toggle('hidden');
         }
 
         function sendAgentMessage() {
             const input = document.getElementById('chatInput');
             const text = input.value.trim();
             if (!text) return;
-
             const chatBody = document.getElementById('chatBody');
-
-            // User message
             const userMsg = document.createElement('div');
             userMsg.className = 'msg msg-user';
             userMsg.innerText = text;
             chatBody.appendChild(userMsg);
-
             input.value = '';
             chatBody.scrollTop = chatBody.scrollHeight;
-
-            // Agent simulated reply
             setTimeout(() => {
                 const agentMsg = document.createElement('div');
                 agentMsg.className = 'msg msg-agent';
-                agentMsg.innerText = "Command received: '" + text + "'. Interfacing with Arc ArcKit RPC...";
+                agentMsg.innerText = "Processed intent: '" + text + "'. Arc Network RPC ready.";
                 chatBody.appendChild(agentMsg);
                 chatBody.scrollTop = chatBody.scrollHeight;
-            }, 600);
+            }, 500);
         }
     </script>
 </body>
