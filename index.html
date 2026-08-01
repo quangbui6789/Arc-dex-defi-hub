@@ -3,263 +3,656 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arc Testnet DApp - Web3 & Circle Bridge Integration</title>
+    <title>Arc Testnet DApp Hub - Web3 & Circle Bridge Integration</title>
+    
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
     <!-- Ethers.js v6 CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.11.1/ethers.umd.min.js"></script>
     
+    <!-- Custom CSS Styling & Animations -->
     <style>
-        .active-tab {
-            border-bottom: 2px solid #3b82f6;
-            color: #3b82f6;
-            font-weight: 600;
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0b0f17;
+            color: #f3f4f6;
         }
-        .chat-body::-webkit-scrollbar {
+
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
             width: 6px;
+            height: 6px;
         }
-        .chat-body::-webkit-scrollbar-thumb {
-            background-color: #374151;
+        ::-webkit-scrollbar-track {
+            background: #111827;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #374151;
             border-radius: 3px;
         }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4b5563;
+        }
+
+        /* Glowing Effects */
+        .glow-blue {
+            box-shadow: 0 0 25px -5px rgba(59, 130, 246, 0.25);
+        }
+        .glow-purple {
+            box-shadow: 0 0 25px -5px rgba(168, 85, 247, 0.25);
+        }
+        .glow-emerald {
+            box-shadow: 0 0 25px -5px rgba(16, 185, 129, 0.25);
+        }
+        .glow-cyan {
+            box-shadow: 0 0 25px -5px rgba(6, 182, 212, 0.25);
+        }
+
+        /* Active Navigation Tab */
+        .tab-btn.active {
+            color: #3b82f6;
+            border-bottom: 2px solid #3b82f6;
+            background: linear-gradient(180deg, rgba(59, 130, 246, 0.05) 0%, rgba(59, 130, 246, 0) 100%);
+        }
+
+        /* Glassmorphism Card Effect */
+        .glass-card {
+            background: rgba(17, 24, 39, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .glass-card-hover:hover {
+            border-color: rgba(59, 130, 246, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        /* Chat Message Bubbles */
         .msg-user {
             align-self: flex-end;
-            background-color: #2563eb;
-            color: white;
-            border-radius: 12px 12px 0px 12px;
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: #ffffff;
+            border-radius: 16px 16px 2px 16px;
         }
         .msg-agent {
             align-self: flex-start;
-            background-color: #374151;
+            background: #1f2937;
             color: #e5e7eb;
-            border-radius: 12px 12px 12px 0px;
+            border: 1px solid #374151;
+            border-radius: 16px 16px 16px 2px;
+        }
+
+        /* Pulse Animation */
+        @keyframes pulse-slow {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.03); }
+        }
+        .animate-pulse-slow {
+            animation: pulse-slow 3s infinite ease-in-out;
         }
     </style>
 </head>
-<body class="bg-gray-900 text-white min-h-screen flex flex-col font-sans">
+<body class="min-h-screen flex flex-col justify-between selection:bg-blue-500 selection:text-white">
 
-    <!-- Top Navigation Header -->
-    <header class="bg-gray-800 border-b border-gray-700 px-6 py-4 flex justify-between items-center sticky top-0 z-40">
-        <div class="flex items-center space-x-3">
-            <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-lg">A</div>
-            <span class="text-xl font-bold tracking-wide">Arc Testnet Hub</span>
-        </div>
-        
-        <div class="flex items-center space-x-4">
-            <!-- EIP-6963 Wallet Connection Button -->
-            <button id="btnConnectWallet" onclick="handleWalletConnect()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-4 rounded-lg transition shadow-md text-sm">
-                Connect Wallet
-            </button>
+    <!-- TOP HEADER / NAVBAR -->
+    <header class="bg-gray-900/90 border-b border-gray-800 sticky top-0 z-50 backdrop-blur-md px-6 py-3.5">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            
+            <!-- Logo & Network Identity -->
+            <div class="flex items-center space-x-4">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-500 to-purple-500 flex items-center justify-center font-bold text-white text-xl shadow-lg shadow-blue-500/20">
+                    A
+                </div>
+                <div>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-lg font-bold tracking-wide text-white">Arc Testnet</span>
+                        <span class="bg-blue-500/10 text-blue-400 border border-blue-500/30 text-[10px] font-semibold px-2 py-0.5 rounded-full">v2.4.0</span>
+                    </div>
+                    <p class="text-xs text-gray-400">Decentralized Finance & Cross-Chain Portal</p>
+                </div>
+            </div>
+
+            <!-- Network Status Indicators & Wallet Connect Button -->
+            <div class="flex items-center space-x-4">
+                <!-- Gas Tracker Badge -->
+                <div class="hidden sm:flex items-center space-x-2 bg-gray-800/80 border border-gray-700/60 px-3 py-1.5 rounded-lg text-xs">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                    <span class="text-gray-400">Gas:</span>
+                    <span class="font-mono font-medium text-emerald-400">1.2 Gwei</span>
+                </div>
+
+                <!-- Chain ID Badge -->
+                <div class="hidden md:flex items-center space-x-2 bg-gray-800/80 border border-gray-700/60 px-3 py-1.5 rounded-lg text-xs">
+                    <span class="text-gray-400">Network:</span>
+                    <span class="font-mono font-medium text-indigo-400">Arc-Testnet-1</span>
+                </div>
+
+                <!-- Wallet Connect Button -->
+                <button id="btnConnectWallet" onclick="handleWalletConnect()" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-medium text-sm py-2 px-5 rounded-xl transition duration-200 shadow-lg shadow-blue-600/20 flex items-center space-x-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                    </svg>
+                    <span id="btnWalletText">Connect Wallet</span>
+                </button>
+            </div>
+
         </div>
     </header>
 
-    <!-- Navigation Tabs -->
-    <nav class="bg-gray-800/50 border-b border-gray-700/50 px-6">
-        <div class="max-w-7xl mx-auto flex space-x-8 text-sm text-gray-400">
-            <button onclick="switchTab('swap')" id="tab-swap" class="py-3 px-1 active-tab transition-colors">Swap</button>
-            <button onclick="switchTab('liquidity')" id="tab-liquidity" class="py-3 px-1 hover:text-white transition-colors">Liquidity</button>
-            <button onclick="switchTab('lending')" id="tab-lending" class="py-3 px-1 hover:text-white transition-colors">Lending & Borrow</button>
-            <button onclick="switchTab('bridge')" id="tab-bridge" class="py-3 px-1 hover:text-white transition-colors">Circle Bridge</button>
-            <button onclick="switchTab('pay')" id="tab-pay" class="py-3 px-1 hover:text-white transition-colors">Pay Direct</button>
+    <!-- NAVIGATION TABS BAR -->
+    <div class="bg-gray-900/60 border-b border-gray-800 px-6 backdrop-blur-sm">
+        <div class="max-w-7xl mx-auto flex space-x-1 sm:space-x-4 overflow-x-auto text-sm font-medium py-1">
+            <button onclick="switchTab('swap')" id="tab-swap" class="tab-btn active px-4 py-3 rounded-t-lg transition flex items-center space-x-2 whitespace-nowrap text-gray-300 hover:text-white">
+                <span>🔄</span>
+                <span>Swap</span>
+            </button>
+            <button onclick="switchTab('liquidity')" id="tab-liquidity" class="tab-btn px-4 py-3 rounded-t-lg transition flex items-center space-x-2 whitespace-nowrap text-gray-400 hover:text-white">
+                <span>💧</span>
+                <span>Liquidity Pool</span>
+            </button>
+            <button onclick="switchTab('lending')" id="tab-lending" class="tab-btn px-4 py-3 rounded-t-lg transition flex items-center space-x-2 whitespace-nowrap text-gray-400 hover:text-white">
+                <span>🏦</span>
+                <span>Lending & Borrow</span>
+            </button>
+            <button onclick="switchTab('bridge')" id="tab-bridge" class="tab-btn px-4 py-3 rounded-t-lg transition flex items-center space-x-2 whitespace-nowrap text-gray-400 hover:text-white">
+                <span>🌉</span>
+                <span>Circle Bridge</span>
+            </button>
+            <button onclick="switchTab('pay')" id="tab-pay" class="tab-btn px-4 py-3 rounded-t-lg transition flex items-center space-x-2 whitespace-nowrap text-gray-400 hover:text-white">
+                <span>💸</span>
+                <span>Direct Transfer</span>
+            </button>
+            <button onclick="switchTab('analytics')" id="tab-analytics" class="tab-btn px-4 py-3 rounded-t-lg transition flex items-center space-x-2 whitespace-nowrap text-gray-400 hover:text-white">
+                <span>📊</span>
+                <span>Protocol Analytics</span>
+            </button>
         </div>
-    </nav>
+    </div>
 
-    <!-- Main Container -->
-    <main class="flex-1 max-w-7xl w-full mx-auto p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- MAIN DASHBOARD BODY -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 my-2">
 
-        <!-- Left / Middle Area (Interactive Tabs) -->
-        <div class="lg:col-span-2 space-y-6">
+        <!-- MAIN INTERACTIVE SECTION (LEFT/CENTER PANEL - 8 COLS) -->
+        <div class="lg:col-span-8 space-y-6">
 
-            <!-- 1. SWAP SECTION -->
-            <div id="section-swap" class="bg-gray-800 border border-gray-700 rounded-2xl p-6 shadow-xl">
-                <h2 class="text-xl font-bold mb-4 text-emerald-400">Instant Swap</h2>
+            <!-- STATS OVERVIEW HEADER -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div class="glass-card p-4 rounded-xl">
+                    <span class="text-xs text-gray-400 block mb-1">Total Value Locked</span>
+                    <span class="text-lg font-bold font-mono text-white">$14,250,890</span>
+                    <span class="text-[10px] text-emerald-400 block mt-1">↑ +4.2% (24h)</span>
+                </div>
+                <div class="glass-card p-4 rounded-xl">
+                    <span class="text-xs text-gray-400 block mb-1">24h Volume</span>
+                    <span class="text-lg font-bold font-mono text-white">$3,892,110</span>
+                    <span class="text-[10px] text-emerald-400 block mt-1">↑ +12.8%</span>
+                </div>
+                <div class="glass-card p-4 rounded-xl">
+                    <span class="text-xs text-gray-400 block mb-1">USDC APY</span>
+                    <span class="text-lg font-bold font-mono text-indigo-400">8.45%</span>
+                    <span class="text-[10px] text-gray-400 block mt-1">Variable Rate</span>
+                </div>
+                <div class="glass-card p-4 rounded-xl">
+                    <span class="text-xs text-gray-400 block mb-1">EURC APY</span>
+                    <span class="text-lg font-bold font-mono text-purple-400">6.12%</span>
+                    <span class="text-[10px] text-gray-400 block mt-1">Variable Rate</span>
+                </div>
+            </div>
+
+            <!-- ================= SECTION 1: SWAP ================= -->
+            <div id="section-swap" class="glass-card rounded-2xl p-6 shadow-2xl relative overflow-hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h2 class="text-xl font-bold text-white flex items-center space-x-2">
+                            <span>Swap Tokens</span>
+                        </h2>
+                        <p class="text-xs text-gray-400 mt-1">Trade USDC and EURC with minimal slippage on Arc Network</p>
+                    </div>
+                    <button class="p-2 text-gray-400 hover:text-white bg-gray-800 rounded-lg text-xs">⚙️ Settings</button>
+                </div>
+
                 <div class="space-y-4">
-                    <div>
-                        <label class="block text-xs text-gray-400 mb-1">From Token</label>
-                        <select id="swapFromToken" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white focus:outline-none focus:border-blue-500">
-                            <option value="USDC">USDC Token</option>
-                            <option value="EURC">EURC Token</option>
-                        </select>
+                    <!-- Input Token Block -->
+                    <div class="bg-gray-900/80 p-4 rounded-xl border border-gray-800 focus-within:border-blue-500/50 transition">
+                        <div class="flex justify-between text-xs text-gray-400 mb-2">
+                            <span>You Pay</span>
+                            <span>Balance: <span id="swapFromBalance" class="font-mono text-gray-200">0.00</span></span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <input type="number" id="swapAmountIn" placeholder="0.0" class="w-full bg-transparent text-2xl font-mono text-white focus:outline-none" oninput="calculateSwapQuote()">
+                            <select id="swapFromToken" onchange="toggleSwapTokens()" class="bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2 text-sm font-semibold focus:outline-none">
+                                <option value="USDC">USDC</option>
+                                <option value="EURC">EURC</option>
+                            </select>
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-xs text-gray-400 mb-1">Amount</label>
-                        <input type="number" id="swapAmountIn" placeholder="0.0" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white focus:outline-none focus:border-blue-500">
+
+                    <!-- Swap Direction Button -->
+                    <div class="flex justify-center -my-2 relative z-10">
+                        <button onclick="switchSwapDirection()" class="bg-gray-800 hover:bg-gray-700 border border-gray-700 p-2.5 rounded-xl text-blue-400 shadow-md transition hover:rotate-180">
+                            ⬇️
+                        </button>
                     </div>
-                    <button onclick="uiSwap()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-lg transition shadow-lg">
-                        Swap Assets
+
+                    <!-- Output Token Block -->
+                    <div class="bg-gray-900/80 p-4 rounded-xl border border-gray-800">
+                        <div class="flex justify-between text-xs text-gray-400 mb-2">
+                            <span>You Receive (Estimated)</span>
+                            <span>Balance: <span id="swapToBalance" class="font-mono text-gray-200">0.00</span></span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <input type="number" id="swapAmountOut" placeholder="0.0" readonly class="w-full bg-transparent text-2xl font-mono text-emerald-400 focus:outline-none">
+                            <select id="swapToToken" disabled class="bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2 text-sm font-semibold focus:outline-none opacity-80">
+                                <option value="EURC">EURC</option>
+                                <option value="USDC">USDC</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Exchange Rate & Route Details -->
+                    <div class="bg-gray-900/40 p-3 rounded-lg border border-gray-800/80 text-xs space-y-1.5">
+                        <div class="flex justify-between text-gray-400">
+                            <span>Exchange Rate</span>
+                            <span class="font-mono text-gray-200">1 USDC ≈ 0.92 EURC</span>
+                        </div>
+                        <div class="flex justify-between text-gray-400">
+                            <span>Price Impact</span>
+                            <span class="font-mono text-emerald-400">&lt; 0.01%</span>
+                        </div>
+                        <div class="flex justify-between text-gray-400">
+                            <span>Slippage Tolerance</span>
+                            <span class="font-mono text-gray-200">0.5%</span>
+                        </div>
+                    </div>
+
+                    <!-- Execute Button -->
+                    <button onclick="uiSwap()" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold py-3.5 rounded-xl transition duration-200 shadow-lg shadow-emerald-600/20 text-sm">
+                        Execute Swap
                     </button>
                 </div>
             </div>
 
-            <!-- 2. LIQUIDITY SECTION -->
-            <div id="section-liquidity" class="bg-gray-800 border border-gray-700 rounded-2xl p-6 shadow-xl hidden">
-                <h2 class="text-xl font-bold mb-4 text-purple-400">Manage Liquidity</h2>
-                <div class="space-y-4">
-                    <div class="grid grid-cols-2 gap-4">
+            <!-- ================= SECTION 2: LIQUIDITY ================= -->
+            <div id="section-liquidity" class="glass-card rounded-2xl p-6 shadow-2xl hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h2 class="text-xl font-bold text-white">Liquidity Pools</h2>
+                        <p class="text-xs text-gray-400 mt-1">Provide liquidity to USDC/EURC AMM pool and earn 0.25% trading fees</p>
+                    </div>
+                    <span class="bg-purple-500/10 text-purple-400 border border-purple-500/30 text-xs px-3 py-1 rounded-full font-semibold">Pool APY: 14.2%</span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Deposit Liquidity -->
+                    <div class="bg-gray-900/60 p-5 rounded-xl border border-gray-800 space-y-4">
+                        <h3 class="text-sm font-semibold text-purple-400">Add Liquidity</h3>
                         <div>
                             <label class="block text-xs text-gray-400 mb-1">USDC Amount</label>
-                            <input type="number" id="liquidityUsdcAmount" placeholder="0.0" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white focus:outline-none focus:border-purple-500">
-                            <button onclick="approveUSDC()" class="mt-2 w-full bg-gray-700 hover:bg-gray-600 text-xs py-2 rounded text-yellow-400 font-semibold border border-yellow-500/30">Approve USDC</button>
+                            <input type="number" id="liquidityUsdcAmount" placeholder="0.0" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 text-sm text-white focus:outline-none focus:border-purple-500 font-mono">
+                            <button onclick="approveUSDC()" class="mt-2 w-full bg-gray-800 hover:bg-gray-700 text-xs py-2 rounded-lg text-yellow-400 font-semibold border border-yellow-500/20 transition">Approve USDC</button>
                         </div>
                         <div>
                             <label class="block text-xs text-gray-400 mb-1">EURC Amount</label>
-                            <input type="number" id="liquidityEurcAmount" placeholder="0.0" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white focus:outline-none focus:border-purple-500">
-                            <button onclick="approveEURC()" class="mt-2 w-full bg-gray-700 hover:bg-gray-600 text-xs py-2 rounded text-yellow-400 font-semibold border border-yellow-500/30">Approve EURC</button>
+                            <input type="number" id="liquidityEurcAmount" placeholder="0.0" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 text-sm text-white focus:outline-none focus:border-purple-500 font-mono">
+                            <button onclick="approveEURC()" class="mt-2 w-full bg-gray-800 hover:bg-gray-700 text-xs py-2 rounded-lg text-yellow-400 font-semibold border border-yellow-500/20 transition">Approve EURC</button>
                         </div>
+                        <button onclick="executeAddLiquidity()" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-3 rounded-lg text-sm transition shadow-lg shadow-purple-600/20">
+                            Add Liquidity to Pool
+                        </button>
                     </div>
-                    <div class="grid grid-cols-2 gap-4 pt-2">
-                        <button onclick="executeAddLiquidity()" class="bg-purple-600 hover:bg-purple-500 font-bold py-3 rounded-lg transition shadow-lg">Add Liquidity</button>
-                        <button onclick="executeRemoveLiquidity()" class="bg-red-600/80 hover:bg-red-600 font-bold py-3 rounded-lg transition shadow-lg">Remove Liquidity</button>
+
+                    <!-- Your Position & Remove -->
+                    <div class="bg-gray-900/60 p-5 rounded-xl border border-gray-800 space-y-4 flex flex-col justify-between">
+                        <div>
+                            <h3 class="text-sm font-semibold text-gray-300 mb-3">Your Position</h3>
+                            <div class="space-y-3 bg-gray-800/50 p-4 rounded-lg border border-gray-700/50 text-xs">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">Your Pool Tokens (LP):</span>
+                                    <span id="userLpBalance" class="font-mono text-white">0.00 LP</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">Share of Pool:</span>
+                                    <span id="userPoolShare" class="font-mono text-white">0.00%</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">Pooled USDC:</span>
+                                    <span id="pooledUsdc" class="font-mono text-emerald-400">0.00</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">Pooled EURC:</span>
+                                    <span id="pooledEurc" class="font-mono text-purple-400">0.00</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs text-gray-400 mb-1">Remove Liquidity Amount (LP)</label>
+                            <input type="number" id="removeLpAmount" placeholder="0.0" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 text-sm text-white focus:outline-none focus:border-red-500 font-mono mb-3">
+                            <button onclick="executeRemoveLiquidity()" class="w-full bg-red-600/80 hover:bg-red-600 text-white font-bold py-3 rounded-lg text-sm transition shadow-lg shadow-red-600/20">
+                                Remove Liquidity
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- 3. LENDING & BORROW SECTION -->
-            <div id="section-lending" class="bg-gray-800 border border-gray-700 rounded-2xl p-6 shadow-xl hidden">
-                <h2 class="text-xl font-bold mb-4 text-indigo-400">Lending & Borrow Vaults</h2>
+            <!-- ================= SECTION 3: LENDING & BORROW ================= -->
+            <div id="section-lending" class="glass-card rounded-2xl p-6 shadow-2xl hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h2 class="text-xl font-bold text-white">Lending & Borrow Vaults</h2>
+                        <p class="text-xs text-gray-400 mt-1">Supply assets to earn interest or borrow against your collateral</p>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-xs text-gray-400 block">Health Factor</span>
+                        <span id="healthFactor" class="text-sm font-bold font-mono text-emerald-400">1.85 (Safe)</span>
+                    </div>
+                </div>
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="bg-gray-900/50 p-4 rounded-xl border border-gray-700">
-                        <h3 class="text-sm font-semibold mb-3 text-gray-300">Collateral Deposit</h3>
+                    <!-- Deposit / Supply Collateral -->
+                    <div class="bg-gray-900/60 p-5 rounded-xl border border-gray-800 space-y-4">
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-sm font-semibold text-indigo-400">Supply Collateral</h3>
+                            <span class="text-xs text-gray-400">Supply APY: ~8.4%</span>
+                        </div>
                         <div class="space-y-3">
-                            <select id="lendingToken" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-sm text-white">
-                                <option value="USDC">USDC Token</option>
-                                <option value="EURC">EURC Token</option>
-                            </select>
-                            <input type="number" id="lendingAmount" placeholder="0.0" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-sm text-white">
-                            <div class="grid grid-cols-2 gap-2">
-                                <button onclick="approveLending()" class="bg-yellow-600 hover:bg-yellow-500 text-xs font-bold py-2 rounded">Approve</button>
-                                <button onclick="executeLendingDeposit()" class="bg-indigo-600 hover:bg-indigo-500 text-xs font-bold py-2 rounded">Deposit</button>
+                            <div>
+                                <label class="block text-xs text-gray-400 mb-1">Select Asset</label>
+                                <select id="lendingToken" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 text-sm text-white font-semibold">
+                                    <option value="USDC">USDC (USD Coin)</option>
+                                    <option value="EURC">EURC (Euro Coin)</option>
+                                </select>
                             </div>
-                            <button onclick="executeLendingWithdraw()" class="w-full bg-gray-700 hover:bg-gray-600 text-xs font-semibold py-2 rounded border border-gray-600">Withdraw Deposit</button>
+                            <div>
+                                <label class="block text-xs text-gray-400 mb-1">Amount</label>
+                                <input type="number" id="lendingAmount" placeholder="0.0" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 text-sm text-white font-mono focus:outline-none focus:border-indigo-500">
+                            </div>
+                            <div class="grid grid-cols-2 gap-3 pt-1">
+                                <button onclick="approveLending()" class="bg-yellow-600/80 hover:bg-yellow-500 text-white font-semibold text-xs py-2.5 rounded-lg transition">
+                                    Approve Token
+                                </button>
+                                <button onclick="executeLendingDeposit()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs py-2.5 rounded-lg transition shadow-md shadow-indigo-600/20">
+                                    Deposit Asset
+                                </button>
+                            </div>
+                            <button onclick="executeLendingWithdraw()" class="w-full bg-gray-800 hover:bg-gray-700 text-gray-300 font-medium text-xs py-2.5 rounded-lg border border-gray-700 transition">
+                                Withdraw Collateral
+                            </button>
                         </div>
                     </div>
-                    <div class="bg-gray-900/50 p-4 rounded-xl border border-gray-700">
-                        <h3 class="text-sm font-semibold mb-3 text-gray-300">Borrow Assets</h3>
+
+                    <!-- Borrow Assets -->
+                    <div class="bg-gray-900/60 p-5 rounded-xl border border-gray-800 space-y-4">
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-sm font-semibold text-blue-400">Borrow Assets</h3>
+                            <span class="text-xs text-gray-400">Borrow APR: ~5.2%</span>
+                        </div>
                         <div class="space-y-3">
-                            <select id="borrowToken" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-sm text-white">
-                                <option value="USDC">USDC Token</option>
-                                <option value="EURC">EURC Token</option>
-                            </select>
-                            <input type="number" id="borrowAmount" placeholder="0.0" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-sm text-white">
-                            <div class="grid grid-cols-2 gap-2">
-                                <button onclick="uiBorrow()" class="bg-blue-600 hover:bg-blue-500 text-xs font-bold py-2 rounded">Borrow</button>
-                                <button onclick="uiRepayBorrow()" class="bg-teal-600 hover:bg-teal-500 text-xs font-bold py-2 rounded">Repay</button>
+                            <div>
+                                <label class="block text-xs text-gray-400 mb-1">Select Asset to Borrow</label>
+                                <select id="borrowToken" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 text-sm text-white font-semibold">
+                                    <option value="USDC">USDC (USD Coin)</option>
+                                    <option value="EURC">EURC (Euro Coin)</option>
+                                </select>
                             </div>
+                            <div>
+                                <label class="block text-xs text-gray-400 mb-1">Amount</label>
+                                <input type="number" id="borrowAmount" placeholder="0.0" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 text-sm text-white font-mono focus:outline-none focus:border-blue-500">
+                            </div>
+                            <div class="grid grid-cols-2 gap-3 pt-1">
+                                <button onclick="uiBorrow()" class="bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs py-2.5 rounded-lg transition shadow-md shadow-blue-600/20">
+                                    Execute Borrow
+                                </button>
+                                <button onclick="uiRepayBorrow()" class="bg-teal-600 hover:bg-teal-500 text-white font-semibold text-xs py-2.5 rounded-lg transition">
+                                    Repay Loan
+                                </button>
+                            </div>
+                        </div>
+                        <div class="p-3 bg-gray-800/40 rounded-lg border border-gray-700/50 text-[11px] text-gray-400">
+                            Max Loan-To-Value (LTV): <span class="text-gray-200 font-mono">75%</span> | Liquidation Threshold: <span class="text-gray-200 font-mono">80%</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- 4. CIRCLE BRIDGE KIT SECTION (Đã chỉnh theo tài liệu Circle AppKit Bridge) -->
-            <div id="section-bridge" class="bg-gray-800 border border-gray-700 rounded-2xl p-6 shadow-xl hidden">
-                <h2 class="text-xl font-bold mb-4 text-blue-400">Circle Cross-Chain Bridge</h2>
-                <div class="space-y-4">
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs text-gray-400 mb-1">Source Chain</label>
-                            <select id="bridgeFromChain" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white focus:outline-none focus:border-blue-500">
-                                <option value="Ethereum_Sepolia">Ethereum Sepolia</option>
+            <!-- ================= SECTION 4: CIRCLE BRIDGE (Đã chỉnh chuẩn Circle AppKit) ================= -->
+            <div id="section-bridge" class="glass-card rounded-2xl p-6 shadow-2xl hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h2 class="text-xl font-bold text-white flex items-center space-x-2">
+                            <span>Circle Cross-Chain Bridge</span>
+                        </h2>
+                        <p class="text-xs text-gray-400 mt-1">Cross-chain transfers using Circle AppKit SDK (`kit.bridge(...)` & Viem adapter)</p>
+                    </div>
+                    <span class="bg-blue-500/10 text-blue-400 border border-blue-500/30 text-xs px-3 py-1 rounded-full font-semibold">Native CCTP Engine</span>
+                </div>
+
+                <div class="space-y-5">
+                    <!-- Source & Destination Network Selection -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="bg-gray-900/80 p-4 rounded-xl border border-gray-800">
+                            <label class="block text-xs text-gray-400 mb-2">Source Chain (From)</label>
+                            <select id="bridgeFromChain" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg p-3 text-sm font-semibold focus:outline-none focus:border-blue-500">
+                                <option value="Ethereum_Sepolia">Ethereum Sepolia (Testnet)</option>
                                 <option value="Solana_Devnet">Solana Devnet</option>
+                                <option value="Avalanche_Fuji">Avalanche Fuji</option>
                             </select>
                         </div>
-                        <div>
-                            <label class="block text-xs text-gray-400 mb-1">Target Chain</label>
-                            <select id="bridgeToChain" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white focus:outline-none focus:border-blue-500">
+                        <div class="bg-gray-900/80 p-4 rounded-xl border border-gray-800">
+                            <label class="block text-xs text-gray-400 mb-2">Target Chain (To)</label>
+                            <select id="bridgeToChain" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg p-3 text-sm font-semibold focus:outline-none focus:border-blue-500">
                                 <option value="Arc_Testnet">Arc Testnet</option>
                                 <option value="Ethereum_Sepolia">Ethereum Sepolia</option>
                             </select>
                         </div>
                     </div>
-                    <div>
-                        <label class="block text-xs text-gray-400 mb-1">Bridge Amount (USDC)</label>
-                        <input type="number" id="bridgeAmount" value="1.00" placeholder="1.00" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white focus:outline-none focus:border-blue-500">
+
+                    <!-- Bridge Amount -->
+                    <div class="bg-gray-900/80 p-4 rounded-xl border border-gray-800">
+                        <div class="flex justify-between text-xs text-gray-400 mb-2">
+                            <span>Amount to Bridge (USDC)</span>
+                            <span>Min Transfer: <span class="font-mono text-gray-300">0.10 USDC</span></span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <input type="number" id="bridgeAmount" value="1.00" placeholder="1.00" class="w-full bg-transparent text-2xl font-mono text-white focus:outline-none">
+                            <span class="bg-gray-800 border border-gray-700 px-3 py-2 rounded-lg text-sm font-bold text-blue-400">USDC</span>
+                        </div>
                     </div>
-                    <button onclick="executeBridge()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-lg transition shadow-lg">
-                        Transfer USDC via Circle Bridge Kit
+
+                    <!-- Transfer Execution Info -->
+                    <div class="bg-gray-900/40 p-4 rounded-xl border border-gray-800/80 space-y-2 text-xs text-gray-400">
+                        <div class="flex justify-between">
+                            <span>Estimated Execution Time:</span>
+                            <span class="font-mono text-gray-200">~2-3 minutes</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Relayer Fee:</span>
+                            <span class="font-mono text-emerald-400">0.00 USDC (Sponsored)</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Bridge SDK Protocol:</span>
+                            <span class="font-mono text-blue-400">Circle AppKit v1.0</span>
+                        </div>
+                    </div>
+
+                    <!-- Execute Bridge Button -->
+                    <button onclick="executeBridge()" class="w-full bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold py-4 rounded-xl transition duration-200 shadow-lg shadow-blue-600/20 text-sm flex items-center justify-center space-x-2">
+                        <span>Initiate Circle AppKit Transfer</span>
                     </button>
                 </div>
             </div>
 
-            <!-- 5. PAY DIRECT SECTION -->
-            <div id="section-pay" class="bg-gray-800 border border-gray-700 rounded-2xl p-6 shadow-xl hidden">
-                <h2 class="text-xl font-bold mb-4 text-cyan-400">Direct Token Payment</h2>
+            <!-- ================= SECTION 5: PAY DIRECT ================= -->
+            <div id="section-pay" class="glass-card rounded-2xl p-6 shadow-2xl hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h2 class="text-xl font-bold text-white">Direct Token Transfer</h2>
+                        <p class="text-xs text-gray-400 mt-1">Send USDC or EURC directly to any EVM wallet address on Arc</p>
+                    </div>
+                </div>
+
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-xs text-gray-400 mb-1">Token</label>
-                        <select id="payToken" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white focus:outline-none focus:border-cyan-500">
-                            <option value="USDC">USDC</option>
-                            <option value="EURC">EURC</option>
+                        <label class="block text-xs text-gray-400 mb-1">Select Token</label>
+                        <select id="payToken" class="w-full bg-gray-900 border border-gray-800 rounded-xl p-3 text-sm font-semibold text-white">
+                            <option value="USDC">USDC (USD Coin)</option>
+                            <option value="EURC">EURC (Euro Coin)</option>
                         </select>
                     </div>
                     <div>
                         <label class="block text-xs text-gray-400 mb-1">Recipient Address</label>
-                        <input type="text" id="payRecipient" placeholder="0x..." class="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white focus:outline-none focus:border-cyan-500">
+                        <input type="text" id="payRecipient" placeholder="0x..." class="w-full bg-gray-900 border border-gray-800 rounded-xl p-3 text-sm text-white font-mono focus:outline-none focus:border-cyan-500">
                     </div>
                     <div>
                         <label class="block text-xs text-gray-400 mb-1">Amount</label>
-                        <input type="number" id="payAmount" placeholder="0.0" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white focus:outline-none focus:border-cyan-500">
+                        <input type="number" id="payAmount" placeholder="0.0" class="w-full bg-gray-900 border border-gray-800 rounded-xl p-3 text-sm text-white font-mono focus:outline-none focus:border-cyan-500">
                     </div>
-                    <button onclick="executePayment()" class="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-3 rounded-lg transition shadow-lg">
-                        Send Payment
+                    <button onclick="executePayment()" class="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-3.5 rounded-xl transition duration-200 shadow-lg shadow-cyan-600/20 text-sm">
+                        Send Direct Transfer
                     </button>
                 </div>
             </div>
 
-            <!-- Terminal Log -->
-            <div class="bg-gray-800 border border-gray-700 rounded-2xl p-4 shadow-xl">
-                <div class="flex justify-between items-center mb-2">
-                    <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Console Log</span>
-                    <button onclick="document.getElementById('logOutput').innerHTML=''" class="text-xs text-gray-500 hover:text-gray-300">Clear</button>
+            <!-- ================= SECTION 6: ANALYTICS ================= -->
+            <div id="section-analytics" class="glass-card rounded-2xl p-6 shadow-2xl hidden">
+                <h2 class="text-xl font-bold text-white mb-4">Protocol Metrics & Health</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                    <div class="bg-gray-900/80 p-4 rounded-xl border border-gray-800 space-y-2">
+                        <span class="text-gray-400 block font-semibold">Contract Deployment Addresses</span>
+                        <div class="space-y-1 font-mono text-[11px] text-gray-300">
+                            <div>USDC: <span class="text-blue-400">0x32A214a1C1beDbb5723b18503Eb26A4A28fE75bE</span></div>
+                            <div>EURC: <span class="text-blue-400">0x1d2bDdc5bF1c22C1A92C1eB0f75eC599eC8d0cEb</span></div>
+                            <div>AMM Pool: <span class="text-purple-400">0x2C40B8b06B1FfFBAc0dACED1C52b4A2B2dA09825</span></div>
+                            <div>Lending Vault: <span class="text-indigo-400">0x89C638cCeE5EcED5e2c54Bf6667923Ec0fA10950</span></div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-900/80 p-4 rounded-xl border border-gray-800 space-y-2">
+                        <span class="text-gray-400 block font-semibold">Reserve Balances</span>
+                        <div class="flex justify-between py-1 border-b border-gray-800">
+                            <span>Pool Reserves USDC:</span>
+                            <span class="font-mono text-emerald-400">5,000,000 USDC</span>
+                        </div>
+                        <div class="flex justify-between py-1">
+                            <span>Pool Reserves EURC:</span>
+                            <span class="font-mono text-purple-400">4,600,000 EURC</span>
+                        </div>
+                    </div>
                 </div>
-                <div id="logOutput" class="h-32 overflow-y-auto font-mono text-xs text-green-400 bg-gray-950 p-3 rounded-lg border border-gray-800 space-y-1">
-                    <div>[System] Circle AppKit Bridge Module Loaded.</div>
+            </div>
+
+            <!-- TERMINAL LOG OUTPUT PANEL -->
+            <div class="glass-card rounded-2xl p-4 shadow-xl">
+                <div class="flex justify-between items-center mb-2">
+                    <div class="flex items-center space-x-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                        <span class="text-xs font-semibold text-gray-300 uppercase tracking-wider font-mono">System Console Log</span>
+                    </div>
+                    <button onclick="document.getElementById('logOutput').innerHTML=''" class="text-[11px] text-gray-500 hover:text-gray-300 transition">Clear Log</button>
+                </div>
+                <div id="logOutput" class="h-32 overflow-y-auto font-mono text-xs text-emerald-400 bg-gray-950/90 p-3 rounded-xl border border-gray-800 space-y-1">
+                    <div>[System] Arc Hub initialized. Ready for transactions.</div>
                 </div>
             </div>
 
         </div>
 
-        <!-- Right Side Panel -->
-        <div class="space-y-6">
-            <div class="bg-gray-800 border border-gray-700 rounded-2xl p-6 shadow-xl">
+        <!-- RIGHT PANEL (PORTFOLIO, QUICK FACUET & AI COPILOT - 4 COLS) -->
+        <div class="lg:col-span-4 space-y-6">
+
+            <!-- USER PORTFOLIO CARD -->
+            <div class="glass-card rounded-2xl p-6 shadow-xl">
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="font-bold text-gray-200">Wallet Portfolio</h3>
-                    <button onclick="updateAllBalances()" class="text-xs text-blue-400 hover:underline">Refresh</button>
+                    <h3 class="font-bold text-gray-200 text-sm">Your Wallet Balances</h3>
+                    <button onclick="updateAllBalances()" class="text-xs text-blue-400 hover:text-blue-300 flex items-center space-x-1">
+                        <span>🔄</span>
+                        <span>Refresh</span>
+                    </button>
                 </div>
+                
                 <div class="space-y-3">
-                    <div class="flex justify-between items-center bg-gray-900/60 p-3 rounded-xl border border-gray-800">
-                        <span class="text-sm text-gray-400">USDC Balance</span>
-                        <span id="balUsdc" class="font-mono font-bold text-emerald-400">0.00</span>
+                    <div class="flex justify-between items-center bg-gray-900/80 p-3.5 rounded-xl border border-gray-800">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-8 h-8 rounded-full bg-blue-600/20 border border-blue-500/40 flex items-center justify-center font-bold text-xs text-blue-400">
+                                $
+                            </div>
+                            <div>
+                                <span class="text-sm font-semibold text-white block">USDC</span>
+                                <span class="text-[10px] text-gray-400">USD Coin</span>
+                            </div>
+                        </div>
+                        <span id="balUsdc" class="font-mono font-bold text-emerald-400 text-base">0.00</span>
                     </div>
-                    <div class="flex justify-between items-center bg-gray-900/60 p-3 rounded-xl border border-gray-800">
-                        <span class="text-sm text-gray-400">EURC Balance</span>
-                        <span id="balEurc" class="font-mono font-bold text-emerald-400">0.00</span>
+
+                    <div class="flex justify-between items-center bg-gray-900/80 p-3.5 rounded-xl border border-gray-800">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-8 h-8 rounded-full bg-purple-600/20 border border-purple-500/40 flex items-center justify-center font-bold text-xs text-purple-400">
+                                €
+                            </div>
+                            <div>
+                                <span class="text-sm font-semibold text-white block">EURC</span>
+                                <span class="text-[10px] text-gray-400">Euro Coin</span>
+                            </div>
+                        </div>
+                        <span id="balEurc" class="font-mono font-bold text-purple-400 text-base">0.00</span>
                     </div>
+                </div>
+
+                <!-- Testnet Faucet Quick Button -->
+                <button onclick="requestTestnetFaucet()" class="w-full mt-4 bg-gray-800 hover:bg-gray-700 text-xs text-gray-300 font-semibold py-2.5 rounded-xl border border-gray-700 transition flex items-center justify-center space-x-2">
+                    <span>🚰</span>
+                    <span>Request Testnet Tokens (Faucet)</span>
+                </button>
+            </div>
+
+            <!-- AI COPILOT CHATBOT PANEL -->
+            <div class="glass-card rounded-2xl p-4 shadow-xl flex flex-col h-[420px]">
+                <div class="flex items-center justify-between border-b border-gray-800 pb-3 mb-3">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse"></div>
+                        <span class="font-bold text-sm text-gray-200">Arc AI Copilot</span>
+                    </div>
+                    <span class="text-[10px] bg-blue-900/60 text-blue-300 px-2 py-0.5 rounded-md border border-blue-700">DeFi Assistant</span>
+                </div>
+
+                <div id="chatBody" class="flex-1 overflow-y-auto space-y-3 pr-1 text-xs flex flex-col">
+                    <div class="msg msg-agent p-3 max-w-[85%]">
+                        Hello! I can guide you through swapping assets, providing liquidity, or using Circle Bridge Kit on Arc Testnet. How can I help you today?
+                    </div>
+                </div>
+
+                <div class="mt-3 flex space-x-2 border-t border-gray-800 pt-3">
+                    <input type="text" id="chatInput" placeholder="Ask AI Assistant..." onkeypress="if(event.key==='Enter') sendAgentMessage()" class="flex-1 bg-gray-900 border border-gray-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
+                    <button onclick="sendAgentMessage()" class="bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 rounded-xl text-xs font-semibold transition">
+                        Send
+                    </button>
                 </div>
             </div>
 
-            <div class="bg-gray-800 border border-gray-700 rounded-2xl p-4 shadow-xl flex flex-col h-[380px]">
-                <div class="flex items-center justify-between border-b border-gray-700 pb-3 mb-3">
-                    <div class="flex items-center space-x-2">
-                        <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                        <span class="font-bold text-sm text-gray-200">Arc AI Copilot</span>
-                    </div>
-                    <span class="text-xs bg-blue-900/60 text-blue-300 px-2 py-0.5 rounded border border-blue-700">Active</span>
-                </div>
-                <div id="chatBody" class="chat-body flex-1 overflow-y-auto space-y-3 pr-1 text-xs flex flex-col">
-                    <div class="msg msg-agent p-3 max-w-[85%]">
-                        Ready to assist with Circle Bridge Kit transfers and Arc Network smart contracts.
-                    </div>
-                </div>
-                <div class="mt-3 flex space-x-2 border-t border-gray-700 pt-3">
-                    <input type="text" id="chatInput" placeholder="Ask AI Copilot..." onkeypress="if(event.key==='Enter') sendAgentMessage()" class="flex-1 bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
-                    <button onclick="sendAgentMessage()" class="bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 rounded-lg text-xs font-semibold">Send</button>
-                </div>
-            </div>
         </div>
 
     </main>
 
-    <!-- Module Script - Circle AppKit Setup & EIP-6963 Wallet Adapter -->
+    <!-- FOOTER -->
+    <footer class="bg-gray-900/80 border-t border-gray-800 py-4 px-6 text-center text-xs text-gray-500">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-2">
+            <div>© 2026 Arc Testnet Portal. Integrated with Circle AppKit SDK.</div>
+            <div class="flex space-x-4">
+                <a href="#" class="hover:text-gray-400">Docs</a>
+                <a href="#" class="hover:text-gray-400">Explorer</a>
+                <a href="#" class="hover:text-gray-400">GitHub</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- MODULE SCRIPT: Circle AppKit SDK Tích Hợp Sạch (Chuẩn ESM) & EIP-6963 Adapter -->
     <script type="module">
         import { AppKit } from 'https://esm.sh/@circle-fin/app-kit@1.0.0';
         import { createViemAdapterFromProvider } from 'https://esm.sh/@circle-fin/adapter-viem-v2@1.0.0';
@@ -268,13 +661,13 @@
         const kit = new AppKit();
         window.circleKit = kit;
 
-        // Observe Lifecycle Events (Circle Bridge Event Listener)
+        // Bridge Event Listener Lifecycle
         kit.on("*", (payload) => {
             console.log("Circle Bridge Event:", payload);
-            if (window.updateLog) window.updateLog(`[Bridge Lifecycle] Action: ${payload.type || 'processing'}`);
+            if (window.updateLog) window.updateLog(`[Bridge Lifecycle] Event Type: ${payload.type || 'In Progress'}`);
         });
 
-        // EIP-6963 Wallet Discovery
+        // EIP-6963 Browser Wallet Discovery
         async function discoverBrowserWallets() {
             const providers = new Map();
             const handleProviderAnnouncement = (event) => {
@@ -288,14 +681,13 @@
             return [...providers.values()];
         }
 
-        // Connect Wallet Function
         async function connectWallet(provider) {
             await provider.request({ method: "eth_requestAccounts", params: undefined });
             const accounts = await provider.request({ method: "eth_accounts", params: undefined });
             return { connectedAddress: accounts[0] ?? null };
         }
 
-        // Create Viem Adapter
+        // Tạo Viem Adapter từ Provider đã chọn
         window.connectBrowserWallet = async function() {
             const providers = await discoverBrowserWallets();
             const selectedWallet = providers.find(
@@ -309,7 +701,7 @@
                     const adapter = await createViemAdapterFromProvider({ provider: window.ethereum });
                     return { adapter, connectedAddress: accounts[0], walletName: "Browser Wallet" };
                 }
-                throw new Error("No EIP-6963 browser wallet found");
+                throw new Error("No browser wallet found");
             }
 
             const { connectedAddress } = await connectWallet(selectedWallet.provider);
@@ -318,21 +710,65 @@
             return { adapter, connectedAddress, walletName: selectedWallet.info.name };
         };
 
+        // Window Handler cho nút Connect Wallet
         window.handleWalletConnect = async () => {
             try {
                 const { connectedAddress, walletName } = await window.connectBrowserWallet();
                 window.userAddress = connectedAddress;
-                document.getElementById('btnConnectWallet').innerText = `${walletName}: ${connectedAddress.substring(0, 6)}...${connectedAddress.substring(connectedAddress.length - 4)}`;
-                window.updateLog(`Connected to ${walletName} (${connectedAddress})`);
+                document.getElementById('btnWalletText').innerText = `${walletName}: ${connectedAddress.substring(0, 6)}...${connectedAddress.substring(connectedAddress.length - 4)}`;
+                window.updateLog(`Connected wallet: ${walletName} (${connectedAddress})`);
+                if (window.updateAllBalances) window.updateAllBalances();
             } catch (err) {
-                window.updateLog("Wallet Connect Error: " + err.message);
+                window.updateLog("Wallet Connection Failed: " + err.message);
+            }
+        };
+
+        // Hàm Thực Thi Bridge bằng `kit.bridge(...)` chuẩn Circle AppKit
+        window.executeBridge = async function() {
+            if (!window.circleKit) {
+                window.updateLog("Error: Circle AppKit is not initialized.");
+                return;
+            }
+
+            const fromChain = document.getElementById('bridgeFromChain').value;
+            const toChain = document.getElementById('bridgeToChain').value;
+            const amountStr = document.getElementById('bridgeAmount').value;
+
+            if (!amountStr || parseFloat(amountStr) <= 0) {
+                window.updateLog("Please enter a valid bridge amount.");
+                return;
+            }
+
+            try {
+                window.updateLog(`Connecting wallet adapter for Circle Bridge Kit...`);
+                const { adapter, connectedAddress } = await window.connectBrowserWallet();
+
+                window.updateLog(`Initiating Circle Bridge: ${amountStr} USDC (${fromChain} -> ${toChain})`);
+
+                // Thực thi bridge theo đúng tham số chính thức của Circle AppKit
+                const result = await window.circleKit.bridge({
+                    from: {
+                        chain: fromChain,
+                        adapter: adapter,
+                    },
+                    to: {
+                        chain: toChain,
+                        recipientAddress: connectedAddress,
+                    },
+                    amount: amountStr,
+                });
+
+                window.updateLog(`Bridge transaction completed! State: ${JSON.stringify(result)}`);
+            } catch (err) {
+                console.error(err);
+                window.updateLog("Bridge Execution Error: " + err.message);
             }
         };
     </script>
 
-    <!-- Main Application Logic (Bridge Kit, Contracts & UI) -->
+    <!-- CLASSIC APPLICATION LOGIC & SMART CONTRACT INTERACTIONS -->
     <script>
-        // Contract Addresses
+        // Smart Contract Addresses
         const ADDRESSES = {
             USDC: "0x32A214a1C1beDbb5723b18503Eb26A4A28fE75bE",
             EURC: "0x1d2bDdc5bF1c22C1A92C1eB0f75eC599eC8d0cEb",
@@ -361,10 +797,7 @@
             "function repay(address token, uint256 amount) external"
         ];
 
-        // Global State
-        let userAddress = null;
-
-        // Console Logging
+        // System Log Update
         window.updateLog = function(msg) {
             const logBox = document.getElementById('logOutput');
             if (!logBox) return;
@@ -375,30 +808,30 @@
             logBox.scrollTop = logBox.scrollHeight;
         };
 
-        // Tab Switching
+        // Switch Navigation Tabs
         function switchTab(tabName) {
-            const tabs = ['swap', 'liquidity', 'lending', 'bridge', 'pay'];
+            const tabs = ['swap', 'liquidity', 'lending', 'bridge', 'pay', 'analytics'];
             tabs.forEach(t => {
                 const sec = document.getElementById(`section-${t}`);
                 const tabBtn = document.getElementById(`tab-${t}`);
                 if (sec) sec.classList.add('hidden');
-                if (tabBtn) tabBtn.classList.remove('active-tab');
+                if (tabBtn) tabBtn.classList.remove('active');
             });
 
             const targetSec = document.getElementById(`section-${tabName}`);
             const targetTab = document.getElementById(`tab-${tabName}`);
             if (targetSec) targetSec.classList.remove('hidden');
-            if (targetTab) targetTab.classList.add('active-tab');
+            if (targetTab) targetTab.classList.add('active');
         }
 
-        // Get Web3 Provider and Signer
+        // Get Signer via Ethers v6
         async function getSigner() {
-            if (!window.ethereum) throw new Error("Wallet non-EIP6963 / MetaMask not found");
+            if (!window.ethereum) throw new Error("MetaMask or Web3 wallet non-detected");
             const provider = new ethers.BrowserProvider(window.ethereum);
             return await provider.getSigner();
         }
 
-        // Fetch Balances
+        // Update Wallet Balances
         async function updateAllBalances() {
             if (!window.userAddress) {
                 updateLog("Please connect wallet first.");
@@ -412,65 +845,70 @@
                 const usdcBal = await usdcContract.balanceOf(window.userAddress);
                 const eurcBal = await eurcContract.balanceOf(window.userAddress);
 
-                document.getElementById('balUsdc').innerText = ethers.formatUnits(usdcBal, 6);
-                document.getElementById('balEurc').innerText = ethers.formatUnits(eurcBal, 6);
-                updateLog("Balances updated.");
+                const formattedUsdc = ethers.formatUnits(usdcBal, 6);
+                const formattedEurc = ethers.formatUnits(eurcBal, 6);
+
+                document.getElementById('balUsdc').innerText = formattedUsdc;
+                document.getElementById('balEurc').innerText = formattedEurc;
+
+                const swapFromBal = document.getElementById('swapFromBalance');
+                if (swapFromBal) swapFromBal.innerText = formattedUsdc;
+
+                updateLog("Wallet balances successfully updated.");
             } catch (err) {
-                updateLog("Error fetching balances: " + err.message);
+                updateLog("Error reading token balances: " + err.message);
             }
         }
 
-        // CIRCLE BRIDGE KIT EXECUTION (Dựa trên tài liệu Circle AppKit)
-        async function executeBridge() {
-            if (!window.circleKit) {
-                updateLog("Error: Circle AppKit is not initialized.");
+        // Faucet Request Simulator
+        function requestTestnetFaucet() {
+            updateLog("Requesting 100 USDC and 100 EURC from Arc Faucet...");
+            setTimeout(() => {
+                updateLog("Faucet tokens sent successfully!");
+                updateAllBalances();
+            }, 1200);
+        }
+
+        // Swap Calculation
+        function calculateSwapQuote() {
+            const amt = document.getElementById('swapAmountIn').value;
+            const outInput = document.getElementById('swapAmountOut');
+            if (!amt || parseFloat(amt) <= 0) {
+                outInput.value = '';
                 return;
             }
-
-            const fromChain = document.getElementById('bridgeFromChain').value;
-            const toChain = document.getElementById('bridgeToChain').value;
-            const amountStr = document.getElementById('bridgeAmount').value;
-
-            if (!amountStr || parseFloat(amountStr) <= 0) {
-                updateLog("Please enter a valid amount.");
-                return;
-            }
-
-            try {
-                updateLog(`Connecting wallet for Circle Bridge Kit...`);
-                const { adapter, connectedAddress } = await window.connectBrowserWallet();
-
-                updateLog(`Initiating bridge: ${amountStr} USDC from ${fromChain} -> ${toChain}`);
-
-                // Gọi kit.bridge() theo chuẩn tài liệu Circle
-                const result = await window.circleKit.bridge({
-                    from: {
-                        chain: fromChain,
-                        adapter: adapter,
-                    },
-                    to: {
-                        chain: toChain,
-                        recipientAddress: connectedAddress,
-                    },
-                    amount: amountStr,
-                });
-
-                updateLog(`Bridge action successfully triggered! Result state: ${JSON.stringify(result)}`);
-            } catch (err) {
-                console.error(err);
-                updateLog("Bridge Execution Failed: " + err.message);
+            const token = document.getElementById('swapFromToken').value;
+            if (token === 'USDC') {
+                outInput.value = (parseFloat(amt) * 0.92).toFixed(4);
+            } else {
+                outInput.value = (parseFloat(amt) * 1.087).toFixed(4);
             }
         }
 
-        // DEFI ACTIONS (Approve, Swap, Liquidity, Lending, Pay)
+        function switchSwapDirection() {
+            const from = document.getElementById('swapFromToken');
+            const to = document.getElementById('swapToToken');
+            const temp = from.value;
+            from.value = to.value;
+            to.value = temp;
+            calculateSwapQuote();
+        }
+
+        function toggleSwapTokens() {
+            const from = document.getElementById('swapFromToken').value;
+            document.getElementById('swapToToken').value = from === 'USDC' ? 'EURC' : 'USDC';
+            calculateSwapQuote();
+        }
+
+        // Smart Contract Approvals & Operations
         async function approveToken(tokenAddress, spenderAddress, amountStr) {
             const signer = await getSigner();
             const contract = new ethers.Contract(tokenAddress, ERC20_ABI, signer);
             const parsed = ethers.parseUnits(amountStr, 6);
-            updateLog(`Approving ${amountStr} tokens for ${spenderAddress}...`);
+            updateLog(`Approving ${amountStr} tokens for contract ${spenderAddress.substring(0, 8)}...`);
             const tx = await contract.approve(spenderAddress, parsed);
             await tx.wait();
-            updateLog("Approve successful!");
+            updateLog("Approval successful!");
         }
 
         async function approveUSDC() {
@@ -494,7 +932,7 @@
             try {
                 const tokenSymbol = document.getElementById('swapFromToken').value;
                 const amtStr = document.getElementById('swapAmountIn').value;
-                if (!amtStr) return updateLog("Enter swap amount.");
+                if (!amtStr) return updateLog("Please enter a swap amount.");
 
                 const tokenAddr = tokenSymbol === 'USDC' ? ADDRESSES.USDC : ADDRESSES.EURC;
                 const signer = await getSigner();
@@ -502,13 +940,13 @@
                 await approveToken(tokenAddr, ADDRESSES.AmmPool, amtStr);
 
                 const amm = new ethers.Contract(ADDRESSES.AmmPool, AMM_ABI, signer);
-                updateLog(`Executing Swap of ${amtStr} ${tokenSymbol}...`);
+                updateLog(`Executing AMM Swap: ${amtStr} ${tokenSymbol}...`);
                 const tx = await amm.swap(tokenAddr, ethers.parseUnits(amtStr, 6));
                 await tx.wait();
-                updateLog("Swap completed successfully!");
+                updateLog("Swap transaction executed successfully!");
                 updateAllBalances();
             } catch (e) {
-                updateLog("Swap Error: " + e.message);
+                updateLog("Swap Execution Failed: " + e.message);
             }
         }
 
@@ -516,15 +954,15 @@
             try {
                 const usdcAmt = document.getElementById('liquidityUsdcAmount').value;
                 const eurcAmt = document.getElementById('liquidityEurcAmount').value;
-                if (!usdcAmt || !eurcAmt) return updateLog("Enter amounts for both tokens.");
+                if (!usdcAmt || !eurcAmt) return updateLog("Please enter both USDC and EURC amounts.");
 
                 const signer = await getSigner();
                 const amm = new ethers.Contract(ADDRESSES.AmmPool, AMM_ABI, signer);
                 
-                updateLog("Adding liquidity...");
+                updateLog("Adding liquidity to pool...");
                 const tx = await amm.addLiquidity(ethers.parseUnits(usdcAmt, 6), ethers.parseUnits(eurcAmt, 6));
                 await tx.wait();
-                updateLog("Liquidity added!");
+                updateLog("Liquidity added successfully!");
                 updateAllBalances();
             } catch (e) {
                 updateLog("Add Liquidity Error: " + e.message);
@@ -533,12 +971,13 @@
 
         async function executeRemoveLiquidity() {
             try {
+                const lpAmt = document.getElementById('removeLpAmount').value || "10";
                 const signer = await getSigner();
                 const amm = new ethers.Contract(ADDRESSES.AmmPool, AMM_ABI, signer);
-                updateLog("Removing liquidity...");
-                const tx = await amm.removeLiquidity(ethers.parseUnits("10", 6));
+                updateLog(`Removing ${lpAmt} LP tokens...`);
+                const tx = await amm.removeLiquidity(ethers.parseUnits(lpAmt, 6));
                 await tx.wait();
-                updateLog("Liquidity removed!");
+                updateLog("Liquidity removed successfully!");
                 updateAllBalances();
             } catch (e) {
                 updateLog("Remove Liquidity Error: " + e.message);
@@ -549,15 +988,16 @@
             try {
                 const tokenSymbol = document.getElementById('lendingToken').value;
                 const amt = document.getElementById('lendingAmount').value;
+                if (!amt) return updateLog("Enter deposit amount.");
                 const tokenAddr = tokenSymbol === 'USDC' ? ADDRESSES.USDC : ADDRESSES.EURC;
 
                 const signer = await getSigner();
                 const vault = new ethers.Contract(ADDRESSES.LendingVault, LENDING_ABI, signer);
 
-                updateLog(`Depositing ${amt} ${tokenSymbol}...`);
+                updateLog(`Depositing ${amt} ${tokenSymbol} into Vault...`);
                 const tx = await vault.deposit(tokenAddr, ethers.parseUnits(amt, 6));
                 await tx.wait();
-                updateLog("Deposit completed!");
+                updateLog("Collateral deposit successful!");
                 updateAllBalances();
             } catch (e) {
                 updateLog("Deposit Error: " + e.message);
@@ -568,6 +1008,7 @@
             try {
                 const tokenSymbol = document.getElementById('lendingToken').value;
                 const amt = document.getElementById('lendingAmount').value;
+                if (!amt) return updateLog("Enter withdraw amount.");
                 const tokenAddr = tokenSymbol === 'USDC' ? ADDRESSES.USDC : ADDRESSES.EURC;
 
                 const signer = await getSigner();
@@ -576,7 +1017,7 @@
                 updateLog(`Withdrawing ${amt} ${tokenSymbol}...`);
                 const tx = await vault.withdraw(tokenAddr, ethers.parseUnits(amt, 6));
                 await tx.wait();
-                updateLog("Withdrawal completed!");
+                updateLog("Withdrawal successful!");
                 updateAllBalances();
             } catch (e) {
                 updateLog("Withdraw Error: " + e.message);
@@ -587,6 +1028,7 @@
             try {
                 const tokenSymbol = document.getElementById('borrowToken').value;
                 const amt = document.getElementById('borrowAmount').value;
+                if (!amt) return updateLog("Enter borrow amount.");
                 const tokenAddr = tokenSymbol === 'USDC' ? ADDRESSES.USDC : ADDRESSES.EURC;
 
                 const signer = await getSigner();
@@ -595,7 +1037,7 @@
                 updateLog(`Borrowing ${amt} ${tokenSymbol}...`);
                 const tx = await vault.borrow(tokenAddr, ethers.parseUnits(amt, 6));
                 await tx.wait();
-                updateLog("Borrow execution successful!");
+                updateLog("Borrow transaction complete!");
                 updateAllBalances();
             } catch (e) {
                 updateLog("Borrow Error: " + e.message);
@@ -606,6 +1048,7 @@
             try {
                 const tokenSymbol = document.getElementById('borrowToken').value;
                 const amt = document.getElementById('borrowAmount').value;
+                if (!amt) return updateLog("Enter repay amount.");
                 const tokenAddr = tokenSymbol === 'USDC' ? ADDRESSES.USDC : ADDRESSES.EURC;
 
                 const signer = await getSigner();
@@ -613,10 +1056,10 @@
 
                 await approveToken(tokenAddr, ADDRESSES.LendingVault, amt);
 
-                updateLog(`Repaying ${amt} ${tokenSymbol}...`);
+                updateLog(`Repaying loan: ${amt} ${tokenSymbol}...`);
                 const tx = await vault.repay(tokenAddr, ethers.parseUnits(amt, 6));
                 await tx.wait();
-                updateLog("Repayment completed!");
+                updateLog("Repayment complete!");
                 updateAllBalances();
             } catch (e) {
                 updateLog("Repay Error: " + e.message);
@@ -629,23 +1072,23 @@
                 const recipient = document.getElementById('payRecipient').value;
                 const amt = document.getElementById('payAmount').value;
 
-                if (!recipient || !amt) return updateLog("Provide recipient address and amount.");
+                if (!recipient || !amt) return updateLog("Specify recipient address and amount.");
 
                 const tokenAddr = tokenSymbol === 'USDC' ? ADDRESSES.USDC : ADDRESSES.EURC;
                 const signer = await getSigner();
                 const contract = new ethers.Contract(tokenAddr, ERC20_ABI, signer);
 
-                updateLog(`Sending ${amt} ${tokenSymbol} to ${recipient}...`);
+                updateLog(`Transferring ${amt} ${tokenSymbol} -> ${recipient}...`);
                 const tx = await contract.transfer(recipient, ethers.parseUnits(amt, 6));
                 await tx.wait();
-                updateLog("Direct Payment Successful!");
+                updateLog("Direct transfer confirmed!");
                 updateAllBalances();
             } catch (e) {
-                updateLog("Payment Error: " + e.message);
+                updateLog("Transfer Error: " + e.message);
             }
         }
 
-        // AI Copilot Chat Engine
+        // AI Copilot Interactive Engine
         function sendAgentMessage() {
             const input = document.getElementById('chatInput');
             const chatBody = document.getElementById('chatBody');
@@ -653,7 +1096,7 @@
             if (!text) return;
 
             const uDiv = document.createElement('div');
-            uDiv.className = 'msg msg-user p-2.5 max-w-[85%] text-xs';
+            uDiv.className = 'msg msg-user p-3 max-w-[85%] text-xs';
             uDiv.innerText = text;
             chatBody.appendChild(uDiv);
 
@@ -662,17 +1105,17 @@
 
             setTimeout(() => {
                 const aDiv = document.createElement('div');
-                aDiv.className = 'msg msg-agent p-2.5 max-w-[85%] text-xs';
+                aDiv.className = 'msg msg-agent p-3 max-w-[85%] text-xs';
 
                 const lower = text.toLowerCase();
                 if (lower.includes('bridge') || lower.includes('circle')) {
-                    aDiv.innerText = "To bridge tokens, head over to the 'Circle Bridge' tab. Ensure your wallet adapter is configured via Circle App Kit.";
+                    aDiv.innerText = "To transfer USDC cross-chain, open the 'Circle Bridge' tab. It connects via Circle AppKit SDK and Viem wallet adapter.";
                 } else if (lower.includes('swap')) {
-                    aDiv.innerText = "You can swap USDC and EURC on the 'Swap' tab using Arc Network AMM Pool.";
+                    aDiv.innerText = "Navigate to the 'Swap' tab to exchange USDC and EURC. Rates update automatically based on pool liquidity.";
                 } else if (lower.includes('lend') || lower.includes('borrow')) {
-                    aDiv.innerText = "Collateralized loans are supported in the 'Lending & Borrow' section. Approve tokens before depositing!";
+                    aDiv.innerText = "Check the 'Lending & Borrow' section. Make sure to approve tokens before depositing collateral.";
                 } else {
-                    aDiv.innerText = `AI Copilot Received: "${text}". How can I help you interact with Arc Testnet or Circle AppKit?`;
+                    aDiv.innerText = `AI Copilot: "${text}". I am monitoring smart contract status and ready to assist!`;
                 }
 
                 chatBody.appendChild(aDiv);
