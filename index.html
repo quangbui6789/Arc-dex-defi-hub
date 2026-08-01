@@ -453,20 +453,15 @@
             <button class="btn-action btn-secondary" style="margin-top:8px;" onclick="uiRepayBorrow()">Repay Borrowed Asset</button>
         </div>
 
-        <!-- BRIDGE TAB (AppKit Multi-Chain Standard) -->
+        <!-- BRIDGE TAB (ARC APPKIT BRIDGE) -->
         <div id="bridge-tab" class="tab-content">
-            <h3>Cross-Chain Bridge (Arc ↔ External)</h3>
-            
-            <div style="margin-bottom: 16px; display: flex; justify-content: center;">
-                <appkit-button></appkit-button>
-            </div>
-
+            <h3>Arc AppKit Cross-Chain Bridge</h3>
             <div class="input-group">
                 <label>Destination Chain</label>
                 <select id="bridgeTargetChain">
-                    <option value="11155111">Ethereum Sepolia</option>
-                    <option value="84532">Base Sepolia</option>
-                    <option value="421614">Arbitrum Sepolia</option>
+                    <option value="11155111">Ethereum Sepolia (11155111)</option>
+                    <option value="84532">Base Sepolia (84532)</option>
+                    <option value="421614">Arbitrum Sepolia (421614)</option>
                 </select>
             </div>
 
@@ -484,15 +479,19 @@
                     <span>Wallet: <span id="balance-bridge" class="balance-val">0.0000</span></span>
                 </label>
                 <input type="number" id="bridgeAmount" placeholder="0.0" step="any">
+                <div class="pct-group">
+                    <button class="btn-pct" onclick="setQuickPct('bridgeAmount', 'balance-bridge', 0.50)">50%</button>
+                    <button class="btn-pct" onclick="setQuickPct('bridgeAmount', 'balance-bridge', 1.00)">MAX</button>
+                </div>
             </div>
 
             <div class="input-group">
-                <label>Recipient Address</label>
+                <label>Recipient Address (Optional - Defaults to current wallet)</label>
                 <input type="text" id="bridgeRecipient" placeholder="0x..." style="font-size: 13px;">
             </div>
             
             <button class="btn-action btn-secondary" onclick="approveBridge()">Approve Bridge Token</button>
-            <button class="btn-action" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);" onclick="executeBridge()">Initiate Cross-Chain Transfer</button>
+            <button class="btn-action" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);" onclick="executeBridge()">Initiate Arc Bridge Transfer</button>
         </div>
 
         <!-- PAYMENTS TAB -->
@@ -562,38 +561,6 @@
         </div>
     </div>
 
-    <!-- AppKit Module Integration -->
-    <script type="module">
-        import { createAppKit } from 'https://esm.sh/@reown/appkit@1.6.5';
-        import { mainnet, sepolia, baseSepolia, arbitrumSepolia } from 'https://esm.sh/@reown/appkit/networks@1.6.5';
-        import { EthersAdapter } from 'https://esm.sh/@reown/appkit-adapter-ethers@1.6.5';
-
-        const arcTestnet = {
-            id: 50,
-            name: 'Arc Testnet',
-            nativeCurrency: { name: 'Arc Token', symbol: 'ARC', decimals: 18 },
-            rpcUrls: { default: { http: ['https://rpc.testnet.arcscan.app'] } },
-            blockExplorers: { default: { name: 'ArcScan', url: 'https://testnet.arcscan.app' } }
-        };
-
-        const projectId = 'YOUR_PROJECT_ID';
-
-        const appKit = createAppKit({
-            adapters: [new EthersAdapter()],
-            networks: [arcTestnet, sepolia, baseSepolia, arbitrumSepolia],
-            metadata: {
-                name: 'MULTI-DEFI-HUB',
-                description: 'Multi-DeFi Platform with Arc Network Integration',
-                url: window.location.origin,
-                icons: ['https://assets.reown.com/reown-profile-pic.png']
-            },
-            projectId
-        });
-
-        window.appKit = appKit;
-    </script>
-
-    <!-- Core Business Logic Script -->
     <script>
         const RAW_CONTRACTS = {
             USDC_TOKEN: "0x3600000000000000000000000000000000000000", 
@@ -762,255 +729,359 @@
                 const provider = new ethers.BrowserProvider(window.ethereum);
                 const signer = await provider.getSigner();
                 const tokenInContract = new ethers.Contract(fromAddress, ERC20_ABI, signer);
+                const swapContract = new ethers.Contract(targetRouter, SWAP_POOL_ABI, signer);
                 const parsedAmount = ethers.parseUnits(amountIn, 6);
+                const gasParams = await getLegacyGasParam(provider);
 
-                updateLog("Approving token...");
-                const gasOpts = await getLegacyGasParam(provider);
-                const txApprove = await tokenInContract.approve(targetRouter, parsedAmount, gasOpts);
-                await txApprove.wait();
+                updateLog("Checking allowance...");
+                const allowance = await tokenInContract.allowance(userAddress, targetRouter);
+                if (allowance < parsedAmount) {
+                    updateLog("Approving token for Swap...");
+                    const txApprove = await tokenInContract.approve(targetRouter, ethers.MaxUint256, gasParams);
+                    await txApprove.wait();
+                    updateLog("Approval successful!");
+                }
 
                 updateLog("Executing Swap...");
-                const routerContract = new ethers.Contract(targetRouter, SWAP_POOL_ABI, signer);
-                const txTrade = await routerContract.trade(fromAddress, parsedAmount, gasOpts);
-                await txTrade.wait();
-
-                updateLog("Swap successful!");
+                const txSwap = await swapContract.trade(fromAddress, parsedAmount, gasParams);
+                updateLog("Swap tx sent: " + txSwap.hash);
+                await txSwap.wait();
+                updateLog("Swap completed successfully! 🎉");
                 await updateAllBalances();
             } catch (err) {
-                updateLog("Swap failed: " + err.message);
+                updateLog("Swap Error: " + (err.reason || err.message));
             }
         }
 
         async function approveUSDC() {
-            if (!userAddress) return alert("Connect wallet!");
+            if (!userAddress || !window.ethereum) return alert("Please connect wallet!");
             try {
                 const provider = new ethers.BrowserProvider(window.ethereum);
                 const signer = await provider.getSigner();
-                const contract = new ethers.Contract(getSafeAddress(RAW_CONTRACTS.USDC_TOKEN), ERC20_ABI, signer);
-                const gasOpts = await getLegacyGasParam(provider);
-                const tx = await contract.approve(getSafeAddress(RAW_CONTRACTS.SWAP_POOL_ROUTER), ethers.MaxUint256, gasOpts);
+                const usdcContract = new ethers.Contract(getSafeAddress(RAW_CONTRACTS.USDC_TOKEN), ERC20_ABI, signer);
+                const gasParams = await getLegacyGasParam(provider);
+
                 updateLog("Approving USDC...");
+                const tx = await usdcContract.approve(getSafeAddress(RAW_CONTRACTS.SWAP_POOL_ROUTER), ethers.MaxUint256, gasParams);
                 await tx.wait();
-                updateLog("USDC Approved!");
-            } catch (err) { updateLog(err.message); }
+                updateLog("USDC Approved successfully!");
+            } catch (err) {
+                updateLog("Approval Error: " + (err.reason || err.message));
+            }
         }
 
         async function approveEURC() {
-            if (!userAddress) return alert("Connect wallet!");
+            if (!userAddress || !window.ethereum) return alert("Please connect wallet!");
             try {
                 const provider = new ethers.BrowserProvider(window.ethereum);
                 const signer = await provider.getSigner();
-                const contract = new ethers.Contract(getSafeAddress(RAW_CONTRACTS.EURC_TOKEN), ERC20_ABI, signer);
-                const gasOpts = await getLegacyGasParam(provider);
-                const tx = await contract.approve(getSafeAddress(RAW_CONTRACTS.SWAP_POOL_ROUTER), ethers.MaxUint256, gasOpts);
+                const eurcContract = new ethers.Contract(getSafeAddress(RAW_CONTRACTS.EURC_TOKEN), ERC20_ABI, signer);
+                const gasParams = await getLegacyGasParam(provider);
+
                 updateLog("Approving EURC...");
+                const tx = await eurcContract.approve(getSafeAddress(RAW_CONTRACTS.SWAP_POOL_ROUTER), ethers.MaxUint256, gasParams);
                 await tx.wait();
-                updateLog("EURC Approved!");
-            } catch (err) { updateLog(err.message); }
+                updateLog("EURC Approved successfully!");
+            } catch (err) {
+                updateLog("Approval Error: " + (err.reason || err.message));
+            }
         }
 
         async function executeAddLiquidity() {
-            if (!userAddress) return alert("Connect wallet!");
-            const usdcAmt = document.getElementById('liquidityUsdcAmount').value;
-            const eurcAmt = document.getElementById('liquidityEurcAmount').value;
+            if (!userAddress || !window.ethereum) return alert("Please connect wallet!");
+            const amtUsdc = document.getElementById('liquidityUsdcAmount').value;
+            const amtEurc = document.getElementById('liquidityEurcAmount').value;
+            if (!amtUsdc || !amtEurc) return alert("Please input both token amounts!");
+
             try {
                 const provider = new ethers.BrowserProvider(window.ethereum);
                 const signer = await provider.getSigner();
-                const contract = new ethers.Contract(getSafeAddress(RAW_CONTRACTS.SWAP_POOL_ROUTER), SWAP_POOL_ABI, signer);
-                const gasOpts = await getLegacyGasParam(provider);
-                const tx = await contract.addLiquidity(ethers.parseUnits(usdcAmt || "0", 6), ethers.parseUnits(eurcAmt || "0", 6), gasOpts);
-                updateLog("Adding liquidity...");
+                const swapContract = new ethers.Contract(getSafeAddress(RAW_CONTRACTS.SWAP_POOL_ROUTER), SWAP_POOL_ABI, signer);
+                const gasParams = await getLegacyGasParam(provider);
+
+                updateLog("Adding Liquidity...");
+                const tx = await swapContract.addLiquidity(ethers.parseUnits(amtUsdc, 6), ethers.parseUnits(amtEurc, 6), gasParams);
                 await tx.wait();
-                updateLog("Liquidity Added!");
+                updateLog("Liquidity added successfully! 💦");
                 await updateAllBalances();
-            } catch (err) { updateLog(err.message); }
+            } catch (err) {
+                updateLog("Liquidity Error: " + (err.reason || err.message));
+            }
         }
 
         async function executeRemoveLiquidity() {
-            if (!userAddress) return alert("Connect wallet!");
-            const usdcAmt = document.getElementById('liquidityUsdcAmount').value;
+            if (!userAddress || !window.ethereum) return alert("Please connect wallet!");
+            const amtUsdc = document.getElementById('liquidityUsdcAmount').value;
+            if (!amtUsdc) return alert("Please enter amount to remove!");
+
             try {
                 const provider = new ethers.BrowserProvider(window.ethereum);
                 const signer = await provider.getSigner();
-                const contract = new ethers.Contract(getSafeAddress(RAW_CONTRACTS.SWAP_POOL_ROUTER), SWAP_POOL_ABI, signer);
-                const gasOpts = await getLegacyGasParam(provider);
-                const tx = await contract.removeLiquidity(ethers.parseUnits(usdcAmt || "0", 6), gasOpts);
-                updateLog("Removing liquidity...");
+                const swapContract = new ethers.Contract(getSafeAddress(RAW_CONTRACTS.SWAP_POOL_ROUTER), SWAP_POOL_ABI, signer);
+                const gasParams = await getLegacyGasParam(provider);
+
+                updateLog("Removing Liquidity...");
+                const tx = await swapContract.removeLiquidity(ethers.parseUnits(amtUsdc, 6), gasParams);
                 await tx.wait();
-                updateLog("Liquidity Removed!");
+                updateLog("Liquidity removed successfully!");
                 await updateAllBalances();
-            } catch (err) { updateLog(err.message); }
+            } catch (err) {
+                updateLog("Remove Liquidity Error: " + (err.reason || err.message));
+            }
         }
 
         async function approveLending() {
-            if (!userAddress) return alert("Connect wallet!");
-            const token = document.getElementById('lendingToken').value;
-            const tokenAddr = token === "USDC" ? RAW_CONTRACTS.USDC_TOKEN : RAW_CONTRACTS.EURC_TOKEN;
+            if (!userAddress || !window.ethereum) return alert("Please connect wallet!");
+            const tokenSymbol = document.getElementById('lendingToken').value;
+            const tokenAddr = getSafeAddress(tokenSymbol === "USDC" ? RAW_CONTRACTS.USDC_TOKEN : RAW_CONTRACTS.EURC_TOKEN);
+
             try {
                 const provider = new ethers.BrowserProvider(window.ethereum);
                 const signer = await provider.getSigner();
-                const contract = new ethers.Contract(getSafeAddress(tokenAddr), ERC20_ABI, signer);
-                const gasOpts = await getLegacyGasParam(provider);
-                const tx = await contract.approve(getSafeAddress(RAW_CONTRACTS.LENDING_POOL), ethers.MaxUint256, gasOpts);
-                updateLog("Approving Lending...");
+                const tokenContract = new ethers.Contract(tokenAddr, ERC20_ABI, signer);
+                const gasParams = await getLegacyGasParam(provider);
+
+                updateLog(`Approving ${tokenSymbol} for Lending...`);
+                const tx = await tokenContract.approve(getSafeAddress(RAW_CONTRACTS.LENDING_POOL), ethers.MaxUint256, gasParams);
                 await tx.wait();
-                updateLog("Lending Approved!");
-            } catch (err) { updateLog(err.message); }
+                updateLog(`${tokenSymbol} Approved for Lending!`);
+            } catch (err) {
+                updateLog("Lending Approve Error: " + (err.reason || err.message));
+            }
         }
 
         async function executeLendingDeposit() {
-            if (!userAddress) return alert("Connect wallet!");
-            const token = document.getElementById('lendingToken').value;
-            const amt = document.getElementById('lendingAmount').value;
-            const tokenAddr = token === "USDC" ? RAW_CONTRACTS.USDC_TOKEN : RAW_CONTRACTS.EURC_TOKEN;
+            if (!userAddress || !window.ethereum) return alert("Please connect wallet!");
+            const tokenSymbol = document.getElementById('lendingToken').value;
+            const amount = document.getElementById('lendingAmount').value;
+            if (!amount || parseFloat(amount) <= 0) return alert("Invalid amount!");
+
+            const tokenAddr = getSafeAddress(tokenSymbol === "USDC" ? RAW_CONTRACTS.USDC_TOKEN : RAW_CONTRACTS.EURC_TOKEN);
+
             try {
                 const provider = new ethers.BrowserProvider(window.ethereum);
                 const signer = await provider.getSigner();
-                const contract = new ethers.Contract(getSafeAddress(RAW_CONTRACTS.LENDING_POOL), LENDING_POOL_ABI, signer);
-                const gasOpts = await getLegacyGasParam(provider);
-                const tx = await contract.deposit(getSafeAddress(tokenAddr), ethers.parseUnits(amt, 6), gasOpts);
-                updateLog("Depositing collateral...");
+                const lendingContract = new ethers.Contract(getSafeAddress(RAW_CONTRACTS.LENDING_POOL), LENDING_POOL_ABI, signer);
+                const gasParams = await getLegacyGasParam(provider);
+
+                updateLog(`Depositing ${tokenSymbol}...`);
+                const tx = await lendingContract.deposit(tokenAddr, ethers.parseUnits(amount, 6), gasParams);
                 await tx.wait();
-                updateLog("Collateral Deposited!");
+                updateLog("Deposit successful! 🏦");
                 await updateAllBalances();
-            } catch (err) { updateLog(err.message); }
+            } catch (err) {
+                updateLog("Deposit Error: " + (err.reason || err.message));
+            }
         }
 
         async function executeLendingWithdraw() {
-            if (!userAddress) return alert("Connect wallet!");
-            const token = document.getElementById('lendingToken').value;
-            const amt = document.getElementById('lendingAmount').value;
-            const tokenAddr = token === "USDC" ? RAW_CONTRACTS.USDC_TOKEN : RAW_CONTRACTS.EURC_TOKEN;
+            if (!userAddress || !window.ethereum) return alert("Please connect wallet!");
+            const tokenSymbol = document.getElementById('lendingToken').value;
+            const amount = document.getElementById('lendingAmount').value;
+            if (!amount || parseFloat(amount) <= 0) return alert("Invalid amount!");
+
+            const tokenAddr = getSafeAddress(tokenSymbol === "USDC" ? RAW_CONTRACTS.USDC_TOKEN : RAW_CONTRACTS.EURC_TOKEN);
+
             try {
                 const provider = new ethers.BrowserProvider(window.ethereum);
                 const signer = await provider.getSigner();
-                const contract = new ethers.Contract(getSafeAddress(RAW_CONTRACTS.LENDING_POOL), LENDING_POOL_ABI, signer);
-                const gasOpts = await getLegacyGasParam(provider);
-                const tx = await contract.withdraw(getSafeAddress(tokenAddr), ethers.parseUnits(amt, 6), gasOpts);
-                updateLog("Withdrawing deposit...");
+                const lendingContract = new ethers.Contract(getSafeAddress(RAW_CONTRACTS.LENDING_POOL), LENDING_POOL_ABI, signer);
+                const gasParams = await getLegacyGasParam(provider);
+
+                updateLog(`Withdrawing ${tokenSymbol}...`);
+                const tx = await lendingContract.withdraw(tokenAddr, ethers.parseUnits(amount, 6), gasParams);
                 await tx.wait();
-                updateLog("Withdrawal Complete!");
+                updateLog("Withdrawal successful!");
                 await updateAllBalances();
-            } catch (err) { updateLog(err.message); }
+            } catch (err) {
+                updateLog("Withdraw Error: " + (err.reason || err.message));
+            }
         }
 
         async function uiBorrow() {
-            if (!userAddress) return alert("Connect wallet!");
-            const token = document.getElementById('borrowToken').value;
-            const amt = document.getElementById('borrowAmount').value;
-            const tokenAddr = token === "USDC" ? RAW_CONTRACTS.USDC_TOKEN : RAW_CONTRACTS.EURC_TOKEN;
+            if (!userAddress || !window.ethereum) return alert("Please connect wallet!");
+            const tokenSymbol = document.getElementById('borrowToken').value;
+            const amount = document.getElementById('borrowAmount').value;
+            if (!amount || parseFloat(amount) <= 0) return alert("Invalid amount!");
+
+            const tokenAddr = getSafeAddress(tokenSymbol === "USDC" ? RAW_CONTRACTS.USDC_TOKEN : RAW_CONTRACTS.EURC_TOKEN);
+
             try {
                 const provider = new ethers.BrowserProvider(window.ethereum);
                 const signer = await provider.getSigner();
-                const contract = new ethers.Contract(getSafeAddress(RAW_CONTRACTS.LENDING_POOL), LENDING_POOL_ABI, signer);
-                const gasOpts = await getLegacyGasParam(provider);
-                const tx = await contract.borrow(getSafeAddress(tokenAddr), ethers.parseUnits(amt, 6), gasOpts);
-                updateLog("Borrowing asset...");
+                const lendingContract = new ethers.Contract(getSafeAddress(RAW_CONTRACTS.LENDING_POOL), LENDING_POOL_ABI, signer);
+                const gasParams = await getLegacyGasParam(provider);
+
+                updateLog(`Borrowing ${tokenSymbol}...`);
+                const tx = await lendingContract.borrow(tokenAddr, ethers.parseUnits(amount, 6), gasParams);
                 await tx.wait();
-                updateLog("Borrow Successful!");
+                updateLog("Borrow successful!");
                 await updateAllBalances();
-            } catch (err) { updateLog(err.message); }
+            } catch (err) {
+                updateLog("Borrow Error: " + (err.reason || err.message));
+            }
         }
 
         async function uiRepayBorrow() {
-            if (!userAddress) return alert("Connect wallet!");
-            const token = document.getElementById('borrowToken').value;
-            const amt = document.getElementById('borrowAmount').value;
-            const tokenAddr = token === "USDC" ? RAW_CONTRACTS.USDC_TOKEN : RAW_CONTRACTS.EURC_TOKEN;
+            if (!userAddress || !window.ethereum) return alert("Please connect wallet!");
+            const tokenSymbol = document.getElementById('borrowToken').value;
+            const amount = document.getElementById('borrowAmount').value;
+            if (!amount || parseFloat(amount) <= 0) return alert("Invalid amount!");
+
+            const tokenAddr = getSafeAddress(tokenSymbol === "USDC" ? RAW_CONTRACTS.USDC_TOKEN : RAW_CONTRACTS.EURC_TOKEN);
+
             try {
                 const provider = new ethers.BrowserProvider(window.ethereum);
                 const signer = await provider.getSigner();
-                const contract = new ethers.Contract(getSafeAddress(RAW_CONTRACTS.LENDING_POOL), LENDING_POOL_ABI, signer);
-                const gasOpts = await getLegacyGasParam(provider);
-                const tx = await contract.repay(getSafeAddress(tokenAddr), ethers.parseUnits(amt, 6), gasOpts);
-                updateLog("Repaying loan...");
+                const lendingContract = new ethers.Contract(getSafeAddress(RAW_CONTRACTS.LENDING_POOL), LENDING_POOL_ABI, signer);
+                const gasParams = await getLegacyGasParam(provider);
+
+                updateLog(`Repaying ${tokenSymbol}...`);
+                const tx = await lendingContract.repay(tokenAddr, ethers.parseUnits(amount, 6), gasParams);
                 await tx.wait();
-                updateLog("Loan Repaid!");
+                updateLog("Repayment successful!");
                 await updateAllBalances();
-            } catch (err) { updateLog(err.message); }
+            } catch (err) {
+                updateLog("Repay Error: " + (err.reason || err.message));
+            }
         }
 
+        /* ARC APPKIT BRIDGE FUNCTIONS */
         async function approveBridge() {
-            if (!userAddress) return alert("Connect wallet!");
-            const token = document.getElementById('bridgeToken').value;
-            const tokenAddr = token === "USDC" ? RAW_CONTRACTS.USDC_TOKEN : RAW_CONTRACTS.EURC_TOKEN;
+            if (!userAddress || !window.ethereum) return alert("Please connect wallet!");
+            const tokenSymbol = document.getElementById('bridgeToken').value;
+            const tokenAddr = getSafeAddress(tokenSymbol === "USDC" ? RAW_CONTRACTS.USDC_TOKEN : RAW_CONTRACTS.EURC_TOKEN);
+
             try {
                 const provider = new ethers.BrowserProvider(window.ethereum);
                 const signer = await provider.getSigner();
-                const contract = new ethers.Contract(getSafeAddress(tokenAddr), ERC20_ABI, signer);
-                const gasOpts = await getLegacyGasParam(provider);
-                const tx = await contract.approve(getSafeAddress(RAW_CONTRACTS.BRIDGE_CONTRACT), ethers.MaxUint256, gasOpts);
-                updateLog("Approving Bridge...");
+                const tokenContract = new ethers.Contract(tokenAddr, ERC20_ABI, signer);
+                const gasParams = await getLegacyGasParam(provider);
+
+                updateLog(`Approving ${tokenSymbol} for Arc AppKit Bridge...`);
+                const tx = await tokenContract.approve(getSafeAddress(RAW_CONTRACTS.BRIDGE_CONTRACT), ethers.MaxUint256, gasParams);
                 await tx.wait();
-                updateLog("Bridge Approved!");
-            } catch (err) { updateLog(err.message); }
+                updateLog(`${tokenSymbol} Approved for Bridge!`);
+            } catch (err) {
+                updateLog("Bridge Approve Error: " + (err.reason || err.message));
+            }
         }
 
         async function executeBridge() {
-            if (!userAddress) return alert("Connect wallet!");
-            const chainId = document.getElementById('bridgeTargetChain').value;
-            const token = document.getElementById('bridgeToken').value;
-            const amt = document.getElementById('bridgeAmount').value;
-            const recipient = document.getElementById('bridgeRecipient').value || userAddress;
-            const tokenAddr = token === "USDC" ? RAW_CONTRACTS.USDC_TOKEN : RAW_CONTRACTS.EURC_TOKEN;
+            if (!userAddress || !window.ethereum) return alert("Please connect wallet!");
+            const targetChainId = document.getElementById('bridgeTargetChain').value;
+            const tokenSymbol = document.getElementById('bridgeToken').value;
+            const amount = document.getElementById('bridgeAmount').value;
+            let recipient = document.getElementById('bridgeRecipient').value.trim();
+
+            if (!amount || parseFloat(amount) <= 0) return alert("Invalid amount!");
+            if (!recipient) recipient = userAddress;
+
+            const tokenAddr = getSafeAddress(tokenSymbol === "USDC" ? RAW_CONTRACTS.USDC_TOKEN : RAW_CONTRACTS.EURC_TOKEN);
+            const bridgeAddr = getSafeAddress(RAW_CONTRACTS.BRIDGE_CONTRACT);
+
             try {
                 const provider = new ethers.BrowserProvider(window.ethereum);
                 const signer = await provider.getSigner();
-                const contract = new ethers.Contract(getSafeAddress(RAW_CONTRACTS.BRIDGE_CONTRACT), BRIDGE_ABI, signer);
-                const gasOpts = await getLegacyGasParam(provider);
-                const tx = await contract.bridgeAsset(chainId, getSafeAddress(tokenAddr), ethers.parseUnits(amt, 6), getSafeAddress(recipient), gasOpts);
-                updateLog("Bridging asset cross-chain...");
+                const tokenContract = new ethers.Contract(tokenAddr, ERC20_ABI, signer);
+                const bridgeContract = new ethers.Contract(bridgeAddr, BRIDGE_ABI, signer);
+                const parsedAmount = ethers.parseUnits(amount, 6);
+                const gasParams = await getLegacyGasParam(provider);
+
+                // Check allowance & auto-approve if needed
+                updateLog("Checking Bridge allowance...");
+                const allowance = await tokenContract.allowance(userAddress, bridgeAddr);
+                if (allowance < parsedAmount) {
+                    updateLog(`Auto-approving ${tokenSymbol} for Bridge...`);
+                    const txApprove = await tokenContract.approve(bridgeAddr, ethers.MaxUint256, gasParams);
+                    await txApprove.wait();
+                    updateLog("Approval complete!");
+                }
+
+                updateLog(`Initiating Arc Bridge Transfer to Chain ID ${targetChainId}...`);
+                const tx = await bridgeContract.bridgeAsset(
+                    targetChainId,
+                    tokenAddr,
+                    parsedAmount,
+                    getSafeAddress(recipient),
+                    gasParams
+                );
+                updateLog("Bridge transaction sent: " + tx.hash);
                 await tx.wait();
-                updateLog("Bridge Initiated Successfully!");
+                updateLog("Bridge Transfer Dispatched via Arc AppKit! 🌉");
                 await updateAllBalances();
-            } catch (err) { updateLog(err.message); }
+            } catch (err) {
+                updateLog("Bridge Error: " + (err.reason || err.message));
+            }
         }
 
         async function executePayment() {
-            if (!userAddress) return alert("Connect wallet!");
-            const token = document.getElementById('payToken').value;
+            if (!userAddress || !window.ethereum) return alert("Please connect wallet!");
+            const tokenSymbol = document.getElementById('payToken').value;
             const recipient = document.getElementById('payRecipient').value;
-            const amt = document.getElementById('payAmount').value;
-            const tokenAddr = token === "USDC" ? RAW_CONTRACTS.USDC_TOKEN : RAW_CONTRACTS.EURC_TOKEN;
+            const amount = document.getElementById('payAmount').value;
+
+            if (!recipient || !amount || parseFloat(amount) <= 0) return alert("Invalid recipient or amount!");
+
+            const tokenAddr = getSafeAddress(tokenSymbol === "USDC" ? RAW_CONTRACTS.USDC_TOKEN : RAW_CONTRACTS.EURC_TOKEN);
+
             try {
                 const provider = new ethers.BrowserProvider(window.ethereum);
                 const signer = await provider.getSigner();
-                const contract = new ethers.Contract(getSafeAddress(tokenAddr), ERC20_ABI, signer);
-                const gasOpts = await getLegacyGasParam(provider);
-                const tx = await contract.transfer(getSafeAddress(recipient), ethers.parseUnits(amt, 6), gasOpts);
-                updateLog("Sending payment...");
+                const tokenContract = new ethers.Contract(tokenAddr, ERC20_ABI, signer);
+                const gasParams = await getLegacyGasParam(provider);
+
+                updateLog(`Sending ${amount} ${tokenSymbol}...`);
+                const tx = await tokenContract.transfer(getSafeAddress(recipient), ethers.parseUnits(amount, 6), gasParams);
                 await tx.wait();
-                updateLog("Payment Sent Successfully!");
+                updateLog("Payment Sent Successfully! 💸");
                 await updateAllBalances();
-            } catch (err) { updateLog(err.message); }
+            } catch (err) {
+                updateLog("Payment Error: " + (err.reason || err.message));
+            }
         }
 
+        // AI Chatbot Functions
         function toggleChatWindow() {
-            document.getElementById('aiChatWindow').classList.toggle('hidden');
+            const chatWindow = document.getElementById('aiChatWindow');
+            chatWindow.classList.toggle('hidden');
         }
 
         function sendAgentMessage() {
             const input = document.getElementById('chatInput');
-            const val = input.value.trim();
-            if (!val) return;
-            
-            const body = document.getElementById('chatBody');
-            
+            const text = input.value.trim();
+            if (!text) return;
+
+            const chatBody = document.getElementById('chatBody');
+
             const userMsg = document.createElement('div');
             userMsg.className = 'msg msg-user';
-            userMsg.innerText = val;
-            body.appendChild(userMsg);
-            
+            userMsg.innerText = text;
+            chatBody.appendChild(userMsg);
+
             input.value = '';
-            body.scrollTop = body.scrollHeight;
+            chatBody.scrollTop = chatBody.scrollHeight;
 
             setTimeout(() => {
                 const agentMsg = document.createElement('div');
                 agentMsg.className = 'msg msg-agent';
-                agentMsg.innerText = "I have processed your request for: \"" + val + "\". Let me know if you need any transaction support!";
-                body.appendChild(agentMsg);
-                body.scrollTop = body.scrollHeight;
-            }, 600);
+                agentMsg.innerText = "I'm ready to assist you with operations on Arc Testnet. Ensure your wallet is connected!";
+                chatBody.appendChild(agentMsg);
+                chatBody.scrollTop = chatBody.scrollHeight;
+            }, 800);
+        }
+
+        // Auto-detect MetaMask accounts change
+        if (window.ethereum) {
+            window.ethereum.on('accountsChanged', (accounts) => {
+                if (accounts.length > 0) {
+                    userAddress = accounts[0];
+                    document.getElementById('connectBtn').innerText = userAddress.substring(0, 6) + "..." + userAddress.substring(38);
+                    updateAllBalances();
+                } else {
+                    disconnectWallet();
+                }
+            });
         }
     </script>
 </body>
