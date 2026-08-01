@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MULTI-DEFI-HUB | Arc Rails</title>
-    <!-- Fonts & Ethers.js -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -39,7 +38,6 @@
             align-items: center;
         }
 
-        /* HEADER & NAVBAR */
         .header {
             width: 100%;
             max-width: 1100px;
@@ -111,7 +109,6 @@
             display: none;
         }
 
-        /* TABS */
         .nav-tabs {
             display: flex;
             flex-wrap: wrap;
@@ -141,7 +138,6 @@
             box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
         }
 
-        /* MAIN CONTAINER */
         .container {
             width: 100%;
             max-width: 520px;
@@ -158,7 +154,6 @@
 
         h3 { margin: 0 0 18px 0; font-size: 18px; font-weight: 700; }
 
-        /* INPUT GROUPS */
         .input-group {
             background: var(--input-bg);
             border: 1px solid var(--card-border);
@@ -176,14 +171,12 @@
         }
         .balance-val { color: #60a5fa; font-weight: 700; }
 
-        .input-row { display: flex; align-items: center; gap: 12px; }
-
-        .input-group input {
+        .input-group input, .input-group select {
             width: 100%;
             background: transparent;
             border: none;
             color: white;
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 700;
             outline: none;
             font-family: inherit;
@@ -191,16 +184,12 @@
 
         .input-group select {
             background: #1e293b;
-            color: white;
             border: 1px solid var(--card-border);
             padding: 8px 12px;
             border-radius: 10px;
-            outline: none;
-            font-weight: 600;
             font-size: 13px;
         }
 
-        /* QUICK PCT BUTTONS */
         .pct-group { display: flex; justify-content: flex-end; gap: 6px; margin-top: 10px; }
         .btn-pct {
             background: rgba(255, 255, 255, 0.05);
@@ -214,7 +203,6 @@
         }
         .btn-pct:hover { background: rgba(255, 255, 255, 0.15); color: white; }
 
-        /* BUTTONS */
         .btn-action {
             width: 100%;
             background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
@@ -232,7 +220,6 @@
         .btn-secondary { background: #334155 !important; box-shadow: none !important; margin-bottom: 8px; }
         .btn-danger { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important; box-shadow: 0 4px 14px rgba(239, 68, 68, 0.3) !important; }
 
-        /* ANALYTICS GRID */
         .stats-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -248,7 +235,6 @@
         .stat-title { font-size: 11px; color: var(--text-muted); font-weight: 600; }
         .stat-value { font-size: 18px; font-weight: 800; color: #60a5fa; margin-top: 4px; }
 
-        /* STATUS CONSOLE */
         .status-box {
             margin-top: 18px;
             padding: 12px 14px;
@@ -261,7 +247,6 @@
             color: #93c5fd;
         }
 
-        /* AI AGENT WIDGET */
         .ai-chat-toggle {
             position: fixed; bottom: 24px; right: 24px;
             background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
@@ -289,7 +274,6 @@
 </head>
 <body>
 
-    <!-- Header -->
     <div class="header">
         <div class="logo-container">
             <div class="logo">MULTI-DEFI-HUB</div>
@@ -302,7 +286,6 @@
         </div>
     </div>
 
-    <!-- Navigation Tabs -->
     <div class="nav-tabs">
         <button class="tab-btn active" onclick="switchTab(event, 'dashboard-tab')">Dashboard</button>
         <button class="tab-btn" onclick="switchTab(event, 'swap-tab')">Swap</button>
@@ -314,7 +297,6 @@
         <button class="tab-btn" onclick="switchTab(event, 'analytics-tab')">Analytics</button>
     </div>
 
-    <!-- Container -->
     <div class="container">
 
         <!-- DASHBOARD TAB -->
@@ -453,7 +435,7 @@
             <button class="btn-action btn-secondary" style="margin-top:8px;" onclick="uiRepayBorrow()">Repay Borrowed Asset</button>
         </div>
 
-        <!-- BRIDGE TAB (ARC APPKIT BRIDGE) -->
+        <!-- BRIDGE TAB -->
         <div id="bridge-tab" class="tab-content">
             <h3>Arc AppKit Cross-Chain Bridge</h3>
             <div class="input-group">
@@ -589,7 +571,8 @@
         ];
 
         const BRIDGE_ABI = [
-            "function bridgeAsset(uint256 _targetChainId, address _token, uint256 _amount, address _recipient) external"
+            "function bridgeAsset(uint256 _targetChainId, address _token, uint256 _amount, address _recipient) external",
+            "event BridgeInitiated(uint256 indexed targetChainId, address indexed token, uint256 amount, address indexed recipient)"
         ];
 
         const LENDING_POOL_ABI = [
@@ -602,7 +585,7 @@
         let userAddress = null;
 
         function updateLog(msg) {
-            document.getElementById('statusConsole').innerText = "Log: " + msg;
+            document.getElementById('statusConsole').innerHTML = "Log: " + msg;
             console.log(msg);
         }
 
@@ -988,7 +971,6 @@
                 const parsedAmount = ethers.parseUnits(amount, 6);
                 const gasParams = await getLegacyGasParam(provider);
 
-                // Check allowance & auto-approve if needed
                 updateLog("Checking Bridge allowance...");
                 const allowance = await tokenContract.allowance(userAddress, bridgeAddr);
                 if (allowance < parsedAmount) {
@@ -998,7 +980,7 @@
                     updateLog("Approval complete!");
                 }
 
-                updateLog(`Initiating Arc Bridge Transfer to Chain ID ${targetChainId}...`);
+                updateLog(`Initiating Bridge to Chain ID ${targetChainId}...`);
                 const tx = await bridgeContract.bridgeAsset(
                     targetChainId,
                     tokenAddr,
@@ -1006,9 +988,12 @@
                     getSafeAddress(recipient),
                     gasParams
                 );
-                updateLog("Bridge transaction sent: " + tx.hash);
+                
+                const txLink = `<a href="https://testnet.arcscan.app/tx/${tx.hash}" target="_blank" style="color:#60a5fa;text-decoration:underline;">${tx.hash.substring(0, 10)}...</a>`;
+                updateLog("Bridge Tx Sent: " + txLink + ". Waiting for confirmation...");
+                
                 await tx.wait();
-                updateLog("Bridge Transfer Dispatched via Arc AppKit! 🌉");
+                updateLog(`Bridge Event Dispatched to Chain ${targetChainId}! 🌉 (Pending Relayer Execution on destination chain)`);
                 await updateAllBalances();
             } catch (err) {
                 updateLog("Bridge Error: " + (err.reason || err.message));
@@ -1041,7 +1026,6 @@
             }
         }
 
-        // AI Chatbot Functions
         function toggleChatWindow() {
             const chatWindow = document.getElementById('aiChatWindow');
             chatWindow.classList.toggle('hidden');
@@ -1071,7 +1055,6 @@
             }, 800);
         }
 
-        // Auto-detect MetaMask accounts change
         if (window.ethereum) {
             window.ethereum.on('accountsChanged', (accounts) => {
                 if (accounts.length > 0) {
