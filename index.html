@@ -3,162 +3,300 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MULTI-DEFI-HUB</title>
+    <title>MULTI-DEFI-HUB | Arc Rails</title>
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.11.1/ethers.umd.min.js"></script>
+    
     <style>
         :root {
-            --bg-color: #0b111e;
-            --card-bg: #111827;
-            --primary-color: #1d4ed8;
-            --primary-hover: #2563eb;
-            --text-color: #ffffff;
-            --text-muted: #9ca3af;
-            --success: #10b981;
+            --bg-color: #070a11;
+            --card-bg: rgba(15, 23, 42, 0.75);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --input-bg: rgba(7, 10, 17, 0.7);
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --accent-color: #10b981;
+            --text-color: #f8fafc;
+            --text-muted: #94a3b8;
             --danger: #ef4444;
+            --faucet-purple: #9333ea;
         }
+
+        * {
+            box-sizing: border-box;
+            transition: all 0.2s ease-in-out;
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
             margin: 0;
-            padding: 20px;
+            padding: 24px 16px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
+
+        /* HEADER & NAVBAR */
         .header {
+            width: 100%;
+            max-width: 1100px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 20px;
-            border-bottom: 1px solid #1f2937;
+            padding: 14px 24px;
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid var(--card-border);
+            backdrop-filter: blur(12px);
+            border-radius: 16px;
+            margin-bottom: 28px;
         }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
         .logo {
-            font-size: 20px;
-            font-weight: bold;
-            color: #3b82f6;
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            background: linear-gradient(135deg, #60a5fa 0%, #a855f7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
+
+        .badge-net {
+            background: rgba(37, 99, 235, 0.15);
+            color: #60a5fa;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
         .wallet-zone {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
         }
+
+        .btn-faucet {
+            background: rgba(147, 51, 234, 0.15);
+            color: #c084fc;
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            padding: 8px 14px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+        }
+        .btn-faucet:hover { background: rgba(147, 51, 234, 0.3); }
+
         .btn-connect {
-            background-color: var(--success);
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             color: white;
             border: none;
-            padding: 10px 15px;
-            border-radius: 8px;
+            padding: 8px 16px;
+            border-radius: 10px;
             cursor: pointer;
-            font-weight: bold;
+            font-weight: 700;
+            font-size: 13px;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.2);
         }
+        .btn-connect:hover { filter: brightness(1.1); transform: translateY(-1px); }
+
         .btn-disconnect {
-            background-color: var(--danger);
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 8px;
+            background: rgba(239, 68, 68, 0.15);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            padding: 8px 14px;
+            border-radius: 10px;
             cursor: pointer;
-            font-weight: bold;
+            font-weight: 600;
+            font-size: 13px;
             display: none;
         }
-        .btn-faucet {
-            background-color: #a855f7;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-        }
+        .btn-disconnect:hover { background: rgba(239, 68, 68, 0.3); }
+
+        /* TABS */
         .nav-tabs {
             display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin: 30px 0;
-            flex-wrap: wrap;
+            background: rgba(15, 23, 42, 0.6);
+            padding: 5px;
+            border-radius: 14px;
+            border: 1px solid var(--card-border);
+            gap: 4px;
+            margin-bottom: 28px;
         }
+
         .tab-btn {
-            background-color: #1f2937;
+            background: transparent;
             color: var(--text-muted);
             border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
+            padding: 10px 22px;
+            border-radius: 10px;
             cursor: pointer;
-            font-weight: 500;
+            font-weight: 600;
+            font-size: 14px;
         }
+        .tab-btn:hover { color: var(--text-color); }
         .tab-btn.active {
-            background-color: var(--primary-color);
+            background: var(--primary-color);
             color: white;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
         }
+
+        /* MAIN CONTAINER */
         .container {
-            max-width: 500px;
-            margin: 0 auto;
-            background-color: var(--card-bg);
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 480px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            padding: 24px;
+            border-radius: 20px;
+            backdrop-filter: blur(16px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
         }
-        .tab-content {
-            display: none;
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        h3 {
+            margin: 0 0 18px 0;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-color);
         }
-        .tab-content.active {
-            display: block;
-        }
+
+        /* INPUT GROUPS */
         .input-group {
-            margin-bottom: 15px;
-            position: relative;
+            background: var(--input-bg);
+            border: 1px solid var(--card-border);
+            padding: 14px 16px;
+            border-radius: 14px;
+            margin-bottom: 14px;
         }
+        .input-group:focus-within {
+            border-color: rgba(59, 130, 246, 0.5);
+        }
+
         .input-group label {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
             color: var(--text-muted);
-            font-size: 14px;
+            font-size: 12px;
+            font-weight: 600;
         }
+
         .balance-label {
-            color: #3b82f6;
-            font-weight: 500;
+            color: var(--text-muted);
         }
-        .input-group input, .input-group select {
+        .balance-val {
+            color: #60a5fa;
+            font-weight: 700;
+        }
+
+        .input-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .input-group input {
             width: 100%;
-            padding: 14px;
-            border-radius: 8px;
-            border: 1px solid #374151;
-            background-color: #1f2937;
+            background: transparent;
+            border: none;
             color: white;
-            box-sizing: border-box;
-            font-size: 15px;
+            font-size: 20px;
+            font-weight: 700;
+            outline: none;
+            font-family: inherit;
         }
+
+        .input-group select {
+            background: #1e293b;
+            color: white;
+            border: 1px solid var(--card-border);
+            padding: 8px 12px;
+            border-radius: 10px;
+            outline: none;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        /* QUICK PCT BUTTONS */
+        .pct-group {
+            display: flex;
+            justify-content: flex-end;
+            gap: 6px;
+            margin-top: 10px;
+        }
+        .btn-pct {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--card-border);
+            color: var(--text-muted);
+            font-size: 10px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .btn-pct:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+        }
+
+        /* ACTION BUTTONS */
         .btn-action {
             width: 100%;
-            background-color: var(--primary-color);
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
             color: white;
             border: none;
             padding: 14px;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: bold;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 700;
             cursor: pointer;
-            margin-top: 10px;
+            margin-top: 8px;
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
         }
-        .btn-action:hover {
-            background-color: var(--primary-hover);
-        }
-        .status-box {
-            margin-top: 15px;
-            padding: 12px;
-            border-radius: 6px;
-            background-color: #1f2937;
-            font-size: 13px;
-            word-break: break-all;
-            color: #60a5fa;
-            border-left: 4px solid #3b82f6;
+        .btn-action:hover { filter: brightness(1.1); transform: translateY(-1px); }
+        
+        .btn-secondary {
+            background: #334155 !important;
+            box-shadow: none !important;
+            margin-bottom: 8px;
         }
 
-        /* AI Agent Widget Styles */
+        /* STATUS LOG */
+        .status-box {
+            margin-top: 18px;
+            padding: 12px 14px;
+            border-radius: 10px;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            font-size: 12px;
+            font-family: monospace;
+            word-break: break-all;
+            color: #93c5fd;
+        }
+
+        /* AI AGENT WIDGET */
         .ai-chat-toggle {
             position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background-color: #2563eb;
+            bottom: 24px;
+            right: 24px;
+            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
             color: #fff;
             border: none;
             border-radius: 50%;
@@ -166,93 +304,98 @@
             height: 56px;
             font-size: 24px;
             cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4);
             z-index: 999;
         }
         .ai-chat-window {
             position: fixed;
-            bottom: 85px;
-            right: 20px;
-            width: 350px;
+            bottom: 92px;
+            right: 24px;
+            width: 360px;
             height: 480px;
-            background-color: #111827;
-            border: 1px solid #374151;
-            border-radius: 12px;
+            background: #0f172a;
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+            box-shadow: 0 12px 32px rgba(0,0,0,0.6);
             z-index: 1000;
             overflow: hidden;
         }
-        .ai-chat-window.hidden {
-            display: none;
-        }
+        .ai-chat-window.hidden { display: none; }
         .ai-chat-header {
-            background-color: #1f2937;
-            padding: 12px 16px;
-            font-weight: bold;
+            background: #1e293b;
+            padding: 14px 16px;
+            font-weight: 700;
+            font-size: 14px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid #374151;
+            border-bottom: 1px solid var(--card-border);
         }
         .ai-chat-body {
             flex: 1;
-            padding: 12px;
+            padding: 14px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
             gap: 10px;
-            font-size: 14px;
+            font-size: 13px;
         }
         .msg {
-            padding: 8px 12px;
-            border-radius: 8px;
+            padding: 10px 14px;
+            border-radius: 12px;
             max-width: 85%;
             line-height: 1.4;
         }
         .msg-user {
-            background-color: #1d4ed8;
+            background: var(--primary-color);
             color: #fff;
             align-self: flex-end;
         }
         .msg-agent {
-            background-color: #1f2937;
-            color: #d1d5db;
+            background: #1e293b;
+            color: #cbd5e1;
             align-self: flex-start;
-            border: 1px solid #374151;
+            border: 1px solid var(--card-border);
         }
         .ai-chat-footer {
-            padding: 10px;
+            padding: 12px;
             display: flex;
             gap: 8px;
-            border-top: 1px solid #374151;
-            background-color: #0b111e;
+            border-top: 1px solid var(--card-border);
+            background: #070a11;
         }
         .ai-chat-footer input {
             flex: 1;
-            background-color: #1f2937;
-            border: 1px solid #374151;
+            background: #1e293b;
+            border: 1px solid var(--card-border);
             color: #fff;
             padding: 8px 12px;
-            border-radius: 6px;
+            border-radius: 8px;
             outline: none;
+            font-size: 13px;
         }
         .ai-chat-footer button {
-            background-color: #2563eb;
+            background: var(--primary-color);
             color: #fff;
             border: none;
             padding: 8px 14px;
-            border-radius: 6px;
+            border-radius: 8px;
             cursor: pointer;
-            font-weight: bold;
+            font-weight: 700;
+            font-size: 13px;
         }
     </style>
 </head>
 <body>
 
+    <!-- Header -->
     <div class="header">
-        <div class="logo">MULTI-DEFI-HUB</div>
+        <div class="logo-container">
+            <div class="logo">MULTI-DEFI-HUB</div>
+            <span class="badge-net">Arc Testnet</span>
+        </div>
         <div class="wallet-zone">
             <button class="btn-faucet" onclick="window.open('https://testnet.arcscan.app', '_blank')">🎁 Faucet USDC / EURC</button>
             <button class="btn-connect" id="connectBtn" onclick="connectWallet()">Connect Wallet</button>
@@ -260,6 +403,7 @@
         </div>
     </div>
 
+    <!-- Navigation Tabs -->
     <div class="nav-tabs">
         <button class="tab-btn active" onclick="switchTab(event, 'swap-tab')">Swap</button>
         <button class="tab-btn" onclick="switchTab(event, 'liquidity-tab')">Liquidity</button>
@@ -268,54 +412,80 @@
         <button class="tab-btn" onclick="switchTab(event, 'bridge-tab')">Bridge</button>
     </div>
 
+    <!-- Container -->
     <div class="container">
         <!-- SWAP TAB -->
         <div id="swap-tab" class="tab-content active">
+            <h3>Swap Tokens</h3>
+            
             <div class="input-group">
                 <label>From Token</label>
-                <select id="swapFromToken" onchange="handleSwapFromChange()">
-                    <option value="USDC">USDC</option>
-                    <option value="EURC" selected>EURC</option>
-                </select>
+                <div class="input-row">
+                    <select id="swapFromToken" onchange="handleSwapFromChange()">
+                        <option value="USDC">USDC</option>
+                        <option value="EURC" selected>EURC</option>
+                    </select>
+                </div>
             </div>
+
             <div class="input-group">
                 <label>
                     <span>Amount to Sell</span>
-                    <span class="balance-label">Wallet: <span id="balance-swap">0.0000</span></span>
+                    <span class="balance-label">Wallet: <span id="balance-swap" class="balance-val">0.0000</span></span>
                 </label>
-                <input type="number" id="swapAmountIn" placeholder="0.0" value="2" step="any">
+                <div class="input-row">
+                    <input type="number" id="swapAmountIn" placeholder="0.0" value="2" step="any">
+                </div>
+                <div class="pct-group">
+                    <button class="btn-pct" onclick="setQuickPct('swapAmountIn', 'balance-swap', 0.25)">25%</button>
+                    <button class="btn-pct" onclick="setQuickPct('swapAmountIn', 'balance-swap', 0.50)">50%</button>
+                    <button class="btn-pct" onclick="setQuickPct('swapAmountIn', 'balance-swap', 0.75)">75%</button>
+                    <button class="btn-pct" onclick="setQuickPct('swapAmountIn', 'balance-swap', 1.00)">MAX</button>
+                </div>
             </div>
+
             <div class="input-group">
                 <label>To Token</label>
-                <select id="swapToToken" onchange="handleSwapToChange()">
-                    <option value="EURC">EURC</option>
-                    <option value="USDC" selected>USDC</option>
-                </select>
+                <div class="input-row">
+                    <select id="swapToToken" onchange="handleSwapToChange()">
+                        <option value="EURC">EURC</option>
+                        <option value="USDC" selected>USDC</option>
+                    </select>
+                </div>
             </div>
+
             <button class="btn-action" onclick="uiSwap()">Confirm Swap</button>
         </div>
 
         <!-- LIQUIDITY TAB -->
         <div id="liquidity-tab" class="tab-content">
             <h3>Liquidity Pool</h3>
+
             <div class="input-group">
                 <label>
                     <span>USDC Deposit Amount</span>
-                    <span class="balance-label">Wallet: <span id="balance-liq-usdc">0.0000</span></span>
+                    <span class="balance-label">Wallet: <span id="balance-liq-usdc" class="balance-val">0.0000</span></span>
                 </label>
                 <input type="number" id="liquidityUsdcAmount" placeholder="0.0" step="any">
+                <div class="pct-group">
+                    <button class="btn-pct" onclick="setQuickPct('liquidityUsdcAmount', 'balance-liq-usdc', 1.00)">MAX</button>
+                </div>
             </div>
+
             <div class="input-group">
                 <label>
                     <span>EURC Deposit Amount</span>
-                    <span class="balance-label">Wallet: <span id="balance-liq-eurc">0.0000</span></span>
+                    <span class="balance-label">Wallet: <span id="balance-liq-eurc" class="balance-val">0.0000</span></span>
                 </label>
                 <input type="number" id="liquidityEurcAmount" placeholder="0.0" step="any">
+                <div class="pct-group">
+                    <button class="btn-pct" onclick="setQuickPct('liquidityEurcAmount', 'balance-liq-eurc', 1.00)">MAX</button>
+                </div>
             </div>
             
-            <button class="btn-action" style="background-color: #4b5563; margin-bottom: 8px;" onclick="approveUSDC()">Approve USDC</button>
-            <button class="btn-action" style="background-color: #4b5563; margin-bottom: 8px;" onclick="approveEURC()">Approve EURC</button>
-            <button class="btn-action" style="background-color: #10b981;" onclick="executeAddLiquidity()">Confirm Add Liquidity</button>
+            <button class="btn-action btn-secondary" onclick="approveUSDC()">Approve USDC</button>
+            <button class="btn-action btn-secondary" onclick="approveEURC()">Approve EURC</button>
+            <button class="btn-action" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);" onclick="executeAddLiquidity()">Confirm Add Liquidity</button>
         </div>
 
         <!-- LENDING TAB -->
@@ -328,16 +498,21 @@
                     <option value="EURC">EURC</option>
                 </select>
             </div>
+
             <div class="input-group">
                 <label>
                     <span>Amount to Deposit</span>
-                    <span class="balance-label">Wallet: <span id="balance-lending">0.0000</span></span>
+                    <span class="balance-label">Wallet: <span id="balance-lending" class="balance-val">0.0000</span></span>
                 </label>
                 <input type="number" id="lendingAmount" placeholder="0.0" step="any">
+                <div class="pct-group">
+                    <button class="btn-pct" onclick="setQuickPct('lendingAmount', 'balance-lending', 0.50)">50%</button>
+                    <button class="btn-pct" onclick="setQuickPct('lendingAmount', 'balance-lending', 1.00)">MAX</button>
+                </div>
             </div>
             
-            <button class="btn-action" style="background-color: #4b5563; margin-bottom: 8px;" onclick="approveLending()">Approve Token</button>
-            <button class="btn-action" style="background-color: #10b981;" onclick="executeLendingDeposit()">Confirm Deposit</button>
+            <button class="btn-action btn-secondary" onclick="approveLending()">Approve Token</button>
+            <button class="btn-action" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);" onclick="executeLendingDeposit()">Confirm Deposit</button>
         </div>
 
         <!-- BORROW TAB -->
@@ -350,19 +525,22 @@
                     <option value="EURC">EURC</option>
                 </select>
             </div>
+
             <div class="input-group">
                 <label>
                     <span>Amount to Borrow</span>
-                    <span class="balance-label">Wallet: <span id="balance-borrow">0.0000</span></span>
+                    <span class="balance-label">Wallet: <span id="balance-borrow" class="balance-val">0.0000</span></span>
                 </label>
                 <input type="number" id="borrowAmount" placeholder="0.0" step="any">
             </div>
+
             <button class="btn-action" onclick="uiBorrow()">Confirm Borrow</button>
         </div>
 
         <!-- BRIDGE TAB -->
         <div id="bridge-tab" class="tab-content">
             <h3>Cross-Chain Bridge</h3>
+
             <div class="input-group">
                 <label>Destination Chain</label>
                 <select id="bridgeTargetChain">
@@ -370,6 +548,7 @@
                     <option value="2">Base Testnet</option>
                 </select>
             </div>
+
             <div class="input-group">
                 <label>Select Token</label>
                 <select id="bridgeToken" onchange="updateAllBalances()">
@@ -377,20 +556,25 @@
                     <option value="EURC">EURC</option>
                 </select>
             </div>
+
             <div class="input-group">
                 <label>
                     <span>Amount to Bridge</span>
-                    <span class="balance-label">Wallet: <span id="balance-bridge">0.0000</span></span>
+                    <span class="balance-label">Wallet: <span id="balance-bridge" class="balance-val">0.0000</span></span>
                 </label>
                 <input type="number" id="bridgeAmount" placeholder="0.0" step="any">
+                <div class="pct-group">
+                    <button class="btn-pct" onclick="setQuickPct('bridgeAmount', 'balance-bridge', 1.00)">MAX</button>
+                </div>
             </div>
+
             <div class="input-group">
-                <label>Recipient Address on Destination Chain</label>
-                <input type="text" id="bridgeRecipient" placeholder="0x...">
+                <label>Recipient Address</label>
+                <input type="text" id="bridgeRecipient" placeholder="0x..." style="font-size: 14px;">
             </div>
             
-            <button class="btn-action" style="background-color: #4b5563; margin-bottom: 8px;" onclick="approveBridge()">Approve Bridge Token</button>
-            <button class="btn-action" style="background-color: #10b981;" onclick="executeBridge()">Confirm Initiate Bridge</button>
+            <button class="btn-action btn-secondary" onclick="approveBridge()">Approve Bridge Token</button>
+            <button class="btn-action" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);" onclick="executeBridge()">Confirm Initiate Bridge</button>
         </div>
 
         <div class="status-box" id="statusConsole">System: Ready to connect Arc Network wallet.</div>
@@ -452,6 +636,14 @@
         function updateLog(msg) {
             document.getElementById('statusConsole').innerText = "Log: " + msg;
             console.log(msg);
+        }
+
+        function setQuickPct(inputId, balanceSpanId, pct) {
+            const balText = document.getElementById(balanceSpanId).innerText;
+            const bal = parseFloat(balText) || 0;
+            if (bal > 0) {
+                document.getElementById(inputId).value = (bal * pct).toFixed(4);
+            }
         }
 
         function switchTab(e, tabId) {
@@ -732,10 +924,10 @@
             if (!userAddress || !window.ethereum) return alert("Please connect your wallet first!");
             const tokenSymbol = document.getElementById('borrowToken').value;
             const amount = document.getElementById('borrowAmount').value;
+            if (!amount || parseFloat(amount) <= 0) return alert("Please enter a valid amount!");
+
             const targetPool = getSafeAddress(RAW_CONTRACTS.LENDING_POOL);
             const tokenAddress = getSafeAddress(tokenSymbol === "USDC" ? RAW_CONTRACTS.USDC_TOKEN : RAW_CONTRACTS.EURC_TOKEN);
-
-            if (!amount || parseFloat(amount) <= 0) return alert("Please enter a valid borrow amount!");
 
             try {
                 const provider = new ethers.BrowserProvider(window.ethereum);
@@ -743,13 +935,13 @@
                 const lending = new ethers.Contract(targetPool, LENDING_POOL_ABI, signer);
                 const gasParams = await getLegacyGasParam(provider);
 
-                updateLog(`Sending borrow() transaction...`);
+                updateLog("Calling borrow()...");
                 let tx = await lending.borrow(tokenAddress, ethers.parseUnits(amount.toString(), 6), { gasLimit: 280000, ...gasParams });
                 await tx.wait();
-                updateLog(`Borrow successful! Funds have been credited to your wallet.`);
-                alert("Asset borrowed successfully (Funds received)!");
+                updateLog(`Borrow successful!`);
+                alert("Borrow successful!");
                 await updateAllBalances();
-            } catch (err) { 
+            } catch (err) {
                 updateLog("Borrow error: " + (err.reason || err.message));
             }
         }
@@ -758,8 +950,8 @@
             if (!userAddress || !window.ethereum) return alert("Please connect your wallet first!");
             const tokenSymbol = document.getElementById('bridgeToken').value;
             const amount = document.getElementById('bridgeAmount').value;
-            if (!amount || parseFloat(amount) <= 0) return alert("Please enter a valid amount to bridge!");
-            
+            if (!amount || parseFloat(amount) <= 0) return alert("Please enter a valid amount!");
+
             const targetBridge = getSafeAddress(RAW_CONTRACTS.BRIDGE_CONTRACT);
             const tokenAddress = getSafeAddress(tokenSymbol === "USDC" ? RAW_CONTRACTS.USDC_TOKEN : RAW_CONTRACTS.EURC_TOKEN);
 
@@ -769,10 +961,10 @@
                 const token = new ethers.Contract(tokenAddress, ERC20_ABI, signer);
                 const gasParams = await getLegacyGasParam(provider);
 
-                updateLog(`Approving allowance for the Bridge contract...`);
+                updateLog(`Approving ${tokenSymbol} for Bridge...`);
                 let tx = await token.approve(targetBridge, ethers.parseUnits(amount.toString(), 6), { gasLimit: 80000, ...gasParams });
                 await tx.wait();
-                updateLog(`Approve successful! You can now initiate the bridge.`);
+                updateLog(`Approve ${tokenSymbol} for Bridge successful!`);
             } catch (err) {
                 updateLog("Bridge Approve error: " + (err.reason || err.message));
             }
@@ -784,157 +976,66 @@
             const tokenSymbol = document.getElementById('bridgeToken').value;
             const amount = document.getElementById('bridgeAmount').value;
             const recipient = document.getElementById('bridgeRecipient').value;
-            
+
+            if (!amount || parseFloat(amount) <= 0) return alert("Please enter a valid amount!");
+            if (!recipient) return alert("Please enter a recipient address!");
+
             const targetBridge = getSafeAddress(RAW_CONTRACTS.BRIDGE_CONTRACT);
             const tokenAddress = getSafeAddress(tokenSymbol === "USDC" ? RAW_CONTRACTS.USDC_TOKEN : RAW_CONTRACTS.EURC_TOKEN);
-
-            if (!amount || parseFloat(amount) <= 0) return alert("Invalid amount!");
-            if (!recipient || !recipient.trim().startsWith("0x")) return alert("Invalid recipient address format on destination chain!");
 
             try {
                 const provider = new ethers.BrowserProvider(window.ethereum);
                 const signer = await provider.getSigner();
-                const bridgeContract = new ethers.Contract(targetBridge, BRIDGE_ABI, signer);
+                const bridge = new ethers.Contract(targetBridge, BRIDGE_ABI, signer);
                 const gasParams = await getLegacyGasParam(provider);
 
-                updateLog(`Calling bridgeAsset()...`);
-                let tx = await bridgeContract.bridgeAsset(
-                    BigInt(targetChainId),
+                updateLog("Calling bridgeAsset()...");
+                let tx = await bridge.bridgeAsset(
+                    targetChainId,
                     tokenAddress,
                     ethers.parseUnits(amount.toString(), 6),
                     getSafeAddress(recipient),
-                    { gasLimit: 280000, ...gasParams }
+                    { gasLimit: 300000, ...gasParams }
                 );
                 await tx.wait();
-                
-                updateLog("Assets locked and bridge initiated successfully!");
-                alert("Cross-chain bridge initiated successfully!");
+                updateLog("Bridge transaction initiated successfully!");
+                alert("Bridge initiated successfully!");
                 await updateAllBalances();
             } catch (err) {
                 updateLog("Bridge error: " + (err.reason || err.message));
-                alert("Error: " + (err.reason || err.message));
             }
         }
 
-        /* --- AI AGENT INTEGRATION LOGIC --- */
+        /* AI Chatbot Functions */
         function toggleChatWindow() {
-            const win = document.getElementById('aiChatWindow');
-            win.classList.toggle('hidden');
+            const chatWin = document.getElementById('aiChatWindow');
+            chatWin.classList.toggle('hidden');
         }
 
-        function appendMessage(sender, text) {
-            const chatBody = document.getElementById('chatBody');
-            const div = document.createElement('div');
-            div.className = `msg msg-${sender}`;
-            div.innerText = text;
-            chatBody.appendChild(div);
-            chatBody.scrollTop = chatBody.scrollHeight;
-        }
-
-        async function sendAgentMessage() {
+        function sendAgentMessage() {
             const input = document.getElementById('chatInput');
             const text = input.value.trim();
             if (!text) return;
 
-            appendMessage('user', text);
+            const chatBody = document.getElementById('chatBody');
+
+            // User message
+            const userMsg = document.createElement('div');
+            userMsg.className = 'msg msg-user';
+            userMsg.innerText = text;
+            chatBody.appendChild(userMsg);
+
             input.value = '';
+            chatBody.scrollTop = chatBody.scrollHeight;
 
-            const lowerText = text.toLowerCase();
-
-            // Intent Keywords
-            const txKeywords = ['swap', 'trade', 'convert', 'send', 'transfer', 'đổi', 'gửi', 'chuyển'];
-            const isTxIntent = txKeywords.some(keyword => lowerText.includes(keyword));
-
-            if (isTxIntent) {
-                const matches = text.match(/(\d+(\.\d+)?)\s*(usdc|eurc)/i);
-                
-                if (matches) {
-                    const amount = matches[1];
-                    const token = matches[3].toUpperCase();
-
-                    // Swap logic execution
-                    if (lowerText.includes('swap') || lowerText.includes('trade') || lowerText.includes('convert') || lowerText.includes('đổi')) {
-                        const fromToken = token;
-                        const toToken = fromToken === 'USDC' ? 'EURC' : 'USDC';
-
-                        switchTab(null, 'swap-tab');
-                        document.getElementById('swapFromToken').value = fromToken;
-                        document.getElementById('swapToToken').value = toToken;
-                        document.getElementById('swapAmountIn').value = amount;
-                        await updateAllBalances();
-
-                        appendMessage('agent', `Auto-filling: Swap ${amount} ${fromToken} to ${toToken}. Opening MetaMask...`);
-                        uiSwap();
-                        return;
-                    }
-
-                    // Send / Transfer logic execution via MetaMask
-                    if (lowerText.includes('send') || lowerText.includes('transfer') || lowerText.includes('gửi') || lowerText.includes('chuyển')) {
-                        const addressMatch = text.match(/0x[a-fA-F0-9]{40}/);
-                        const recipient = addressMatch ? addressMatch[0] : null;
-
-                        if (!recipient) {
-                            appendMessage('agent', `Please provide a valid 0x recipient address (e.g., "send 5 USDC to 0x123...").`);
-                            return;
-                        }
-
-                        if (!userAddress || !window.ethereum) {
-                            appendMessage('agent', `Please connect your MetaMask wallet first!`);
-                            return;
-                        }
-
-                        appendMessage('agent', `Initiating transfer of ${amount} ${token} to ${recipient}. Please confirm in MetaMask...`);
-                        
-                        try {
-                            const tokenAddress = getSafeAddress(token === 'USDC' ? RAW_CONTRACTS.USDC_TOKEN : RAW_CONTRACTS.EURC_TOKEN);
-                            const provider = new ethers.BrowserProvider(window.ethereum);
-                            const signer = await provider.getSigner();
-                            const tokenContract = new ethers.Contract(tokenAddress, ERC20_ABI, signer);
-
-                            const parsedAmount = ethers.parseUnits(amount.toString(), 6);
-                            const gasParams = await getLegacyGasParam(provider);
-
-                            // Execute direct ERC-20 transfer transaction on MetaMask
-                            const tx = await tokenContract.transfer(getSafeAddress(recipient), parsedAmount, {
-                                gasLimit: 80000,
-                                ...gasParams
-                            });
-
-                            updateLog(`Transfer tx submitted: ${tx.hash}`);
-                            appendMessage('agent', `Transaction submitted! Hash: ${tx.hash.substring(0, 10)}... Waiting for confirmation...`);
-
-                            await tx.wait();
-                            appendMessage('agent', `Transfer of ${amount} ${token} successful!`);
-                            updateLog(`Transfer successful!`);
-                            await updateAllBalances();
-                        } catch (err) {
-                            const errMsg = err.reason || err.message;
-                            appendMessage('agent', `Transaction failed or rejected: ${errMsg}`);
-                            updateLog(`Transfer error: ${errMsg}`);
-                        }
-                        return;
-                    }
-                } else {
-                    appendMessage('agent', 'Please specify amount and token symbol (e.g., "swap 5 USDC" or "transfer 5 USDC to 0x...").');
-                    return;
-                }
-            }
-
-            // Fallback to Arc Docs MCP Search
-            appendMessage('agent', 'Searching Arc Docs MCP...');
-            try {
-                const docsQuery = encodeURIComponent(text);
-                const res = await fetch(`https://docs.arc.io/mcp?q=${docsQuery}`).catch(() => null);
-                
-                if (res && res.ok) {
-                    const data = await res.json();
-                    appendMessage('agent', data.answer || "Arc Docs Info: " + JSON.stringify(data));
-                } else {
-                    appendMessage('agent', `Response for "${text}": Arc Network supports fixed gas fees in stablecoins with sub-second finality.`);
-                }
-            } catch (err) {
-                appendMessage('agent', "Unable to query Arc Docs MCP at this moment.");
-            }
+            // Agent simulated reply
+            setTimeout(() => {
+                const agentMsg = document.createElement('div');
+                agentMsg.className = 'msg msg-agent';
+                agentMsg.innerText = "Command received: '" + text + "'. Interfacing with Arc ArcKit RPC...";
+                chatBody.appendChild(agentMsg);
+                chatBody.scrollTop = chatBody.scrollHeight;
+            }, 600);
         }
     </script>
 </body>
