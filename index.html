@@ -1057,34 +1057,161 @@
 
 
     <!-- AI Agent Chatbot UI Widget -->
+<button class="ai-chat-toggle fixed bottom-6 right-6 bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-lg z-50 text-xl" onclick="toggleChatWindow()">🤖</button>
 
-    <button class="ai-chat-toggle" onclick="toggleChatWindow()">🤖</button>
-
-    <div class="ai-chat-window hidden" id="aiChatWindow">
-
-        <div class="ai-chat-header">
-
-            <span>Arc Agent</span>
-
-            <button onclick="toggleChatWindow()" style="background:none; border:none; color:#fff; cursor:pointer;">✕</button>
-
-        </div>
-
-        <div class="ai-chat-body" id="chatBody">
-
-            <div class="msg msg-agent">Hello! I am your Arc Agent. How can I assist with your DeFi operations today?</div>
-
-        </div>
-
-        <div class="ai-chat-footer">
-
-            <input type="text" id="chatInput" placeholder="Enter prompt..." onkeydown="if(event.key === 'Enter') sendAgentMessage()">
-
-            <button onclick="sendAgentMessage()">Send</button>
-
-        </div>
-
+<div class="ai-chat-window hidden fixed bottom-20 right-6 w-80 h-96 bg-slate-800 border border-slate-700 rounded-xl flex flex-col shadow-2xl z-50 overflow-hidden" id="aiChatWindow">
+    <div class="ai-chat-header bg-slate-900 p-3 flex justify-between items-center border-b border-slate-700 font-bold text-sm text-blue-400">
+        <span>Arc MCP Agent</span>
+        <button onclick="toggleChatWindow()" style="background:none; border:none; color:#fff; cursor:pointer;">✕</button>
     </div>
+    <div class="ai-chat-body p-3 flex-1 overflow-y-auto space-y-2 text-sm" id="chatBody">
+        <div class="msg msg-agent bg-slate-700 p-2 rounded-lg text-slate-200">Hello! I am your Arc MCP Agent. Ask me to check balances, swap, or bridge tokens directly!</div>
+    </div>
+    <div class="ai-chat-footer p-2 bg-slate-900 border-t border-slate-700 flex gap-2">
+        <input type="text" id="chatInput" class="input-field text-xs bg-slate-950 border border-slate-700 rounded p-2 flex-1 text-white" placeholder="e.g. Swap 10 USDC to EURC..." onkeydown="if(event.key === 'Enter') sendAgentMessage()">
+        <button onclick="sendAgentMessage()" class="btn-primary text-xs px-3 py-1 bg-blue-600 rounded text-white hover:bg-blue-700">Send</button>
+    </div>
+</div>
+
+<script>
+    // --- ARC MCP AGENT ENGINE ---
+    
+    function toggleChatWindow() {
+        const chatWindow = document.getElementById('aiChatWindow');
+        chatWindow.classList.toggle('hidden');
+    }
+
+    async function sendAgentMessage() {
+        const input = document.getElementById('chatInput');
+        const prompt = input.value.trim();
+        if (!prompt) return;
+
+        appendChatMessage(prompt, 'user');
+        input.value = '';
+
+        // Hiển thị trạng thái Agent đang xử lý MCP Context
+        const loadingId = appendChatMessage("Thinking & inspecting context...", 'agent-loading');
+
+        try {
+            // 1. Thu thập MCP Context từ trạng thái DApp hiện tại
+            const mcpContext = await getArcMCPContext();
+
+            // 2. Xử lý Prompt thông qua MCP Router
+            const agentResponse = await processMCPRequest(prompt, mcpContext);
+
+            // Xóa dòng loading
+            document.getElementById(loadingId)?.remove();
+
+            // 3. Phản hồi văn bản và thực thi Tool/Action nếu được kích hoạt
+            appendChatMessage(agentResponse.message, 'agent');
+
+            if (agentResponse.action) {
+                await executeMCPAction(agentResponse.action);
+            }
+        } catch (error) {
+            document.getElementById(loadingId)?.remove();
+            appendChatMessage("MCP Error: " + error.message, 'agent');
+        }
+    }
+
+    function appendChatMessage(text, sender) {
+        const chatBody = document.getElementById('chatBody');
+        const msg = document.createElement('div');
+        const msgId = 'msg-' + Date.now();
+        msg.id = msgId;
+
+        if (sender === 'user') {
+            msg.className = 'msg msg-user bg-blue-600 text-white p-2 rounded-lg ml-auto max-w-[85%] break-words text-xs';
+        } else if (sender === 'agent-loading') {
+            msg.className = 'msg msg-agent italic text-slate-400 text-xs';
+        } else {
+            msg.className = 'msg msg-agent bg-slate-700 text-slate-200 p-2 rounded-lg mr-auto max-w-[85%] break-words text-xs';
+        }
+
+        msg.innerText = text;
+        chatBody.appendChild(msg);
+        chatBody.scrollTop = chatBody.scrollHeight;
+        return msgId;
+    }
+
+    // Lấy ngữ cảnh hệ thống theo định dạng MCP
+    async function getArcMCPContext() {
+        return {
+            network: "Arc Testnet",
+            chainId: 50,
+            userAddress: typeof userAddress !== 'undefined' ? userAddress : null,
+            balances: {
+                usdc: document.getElementById('usdcBalance')?.innerText || "0",
+                eurc: document.getElementById('eurcBalance')?.innerText || "0"
+            }
+        };
+    }
+
+    // Parser ý định người dùng (MCP Tool Intent Routing)
+    async function processMCPRequest(prompt, context) {
+        const lower = prompt.toLowerCase();
+
+        if (!context.userAddress) {
+            return { message: "Please connect your wallet first so I can inspect your account." };
+        }
+
+        // Tool: Check Balance
+        if (lower.includes("balance") || lower.includes("số dư")) {
+            return { 
+                message: `Your current balances on Arc Testnet:\n• USDC: ${context.balances.usdc}\n• EURC: ${context.balances.eurc}` 
+            };
+        }
+
+        // Tool: Execute Swap Action
+        if (lower.includes("swap")) {
+            const match = prompt.match(/\d+(\.\d+)?/);
+            const amount = match ? match[0] : null;
+
+            if (amount) {
+                return {
+                    message: `Executing MCP Tool: Initiating swap for ${amount} USDC...`,
+                    action: { type: 'SWAP', amount: amount, token: 'USDC' }
+                };
+            }
+            return { message: "Please specify the amount to swap. Example: 'Swap 5 USDC'" };
+        }
+
+        // Tool: Bridge Tokens
+        if (lower.includes("bridge") || lower.includes("cctp")) {
+            const match = prompt.match(/\d+(\.\d+)?/);
+            const amount = match ? match[0] : null;
+
+            if (amount) {
+                return {
+                    message: `Executing MCP Tool: Initiating CCTP Bridge Burn for ${amount} USDC...`,
+                    action: { type: 'BRIDGE', amount: amount }
+                };
+            }
+            return { message: "Please specify the amount to bridge. Example: 'Bridge 10 USDC'" };
+        }
+
+        // Mặc định phản hồi chung
+        return { 
+            message: `[Arc MCP Agent]: I received your prompt "${prompt}". I can help you Swap, Bridge, or check Balances. Try asking 'Swap 5 USDC'` 
+        };
+    }
+
+    // Kích hoạt các hàm Web3 tương ứng từ giao diện khi Agent nhận lệnh
+    async function executeMCPAction(action) {
+        if (action.type === 'SWAP') {
+            document.getElementById('swapFromToken').value = action.token;
+            document.getElementById('swapAmountIn').value = action.amount;
+            if (typeof uiSwap === 'function') {
+                await uiSwap();
+            }
+        } else if (action.type === 'BRIDGE') {
+            document.getElementById('bridgeAmount').value = action.amount;
+            if (typeof executeArcBridge === 'function') {
+                await executeArcBridge();
+            }
+        }
+    }
+</script>
 
 
 
