@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MULTI-DEFI-HUB | Arc AppKit Bridge</title>
+    <title>MULTI-DEFI-HUB | Arc Rails</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -247,52 +247,6 @@
             color: #93c5fd;
         }
 
-        /* Dashboard Styles */
-        .dash-container {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            width: 100%;
-        }
-        .dash-header-card {
-            background: #1e293b;
-            border: 1px solid #334155;
-            border-radius: 12px;
-            padding: 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .dash-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 12px;
-            width: 100%;
-        }
-        .dash-card {
-            background: #1e293b;
-            border: 1px solid #334155;
-            border-radius: 12px;
-            padding: 14px;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-        .dash-label { font-size: 11px; color: #94a3b8; font-weight: 500; }
-        .dash-value { font-size: 15px; font-weight: 700; font-family: monospace; }
-        .dash-subtext { font-size: 10px; color: #64748b; }
-        .dash-btn {
-            background: #2563eb;
-            color: #fff;
-            border: none;
-            border-radius: 8px;
-            padding: 8px 14px;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        /* AI Chatbot Widget Styles */
         .ai-chat-toggle {
             position: fixed; bottom: 24px; right: 24px;
             background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
@@ -308,10 +262,9 @@
         .ai-chat-header {
             background: #1e293b; padding: 14px 16px; font-weight: 700; font-size: 14px;
             display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--card-border);
-            color: #60a5fa;
         }
         .ai-chat-body { flex: 1; padding: 14px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; font-size: 13px; }
-        .msg { padding: 10px 14px; border-radius: 12px; max-width: 85%; line-height: 1.4; word-break: break-word; }
+        .msg { padding: 10px 14px; border-radius: 12px; max-width: 85%; line-height: 1.4; }
         .msg-user { background: var(--primary-color); color: #fff; align-self: flex-end; }
         .msg-agent { background: #1e293b; color: #cbd5e1; align-self: flex-start; border: 1px solid var(--card-border); }
         .ai-chat-footer { padding: 12px; display: flex; gap: 8px; border-top: 1px solid var(--card-border); background: #070a11; }
@@ -327,7 +280,7 @@
             <span class="badge-net">Arc Testnet</span>
         </div>
         <div class="wallet-zone">
-            <button class="btn-faucet" onclick="window.open('https://testnet.arcscan.app', '_blank')">🚰 Faucet USDC / EURC</button>
+            <button class="btn-faucet" onclick="window.open('https://testnet.arcscan.app', '_blank')">🎁 Faucet USDC / EURC</button>
             <button class="btn-connect" id="connectBtn" onclick="connectWallet()">Connect Wallet</button>
             <button class="btn-disconnect" id="disconnectBtn" onclick="disconnectWallet()">Disconnect</button>
         </div>
@@ -348,55 +301,26 @@
 
         <!-- DASHBOARD TAB -->
         <div id="dashboard-tab" class="tab-content active">
-            <div class="dash-container">
-                <div class="dash-header-card">
-                    <div>
-                        <div class="dash-label">CONNECTED ACCOUNT</div>
-                        <div id="dash-wallet-address" class="dash-value" style="color: #60a5fa;">Not Connected</div>
-                    </div>
-                    <button class="dash-btn" onclick="updateAllBalances()">🔄 Sync Data</button>
+            <h3>Overview Dashboard</h3>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-title">USDC Balance</div>
+                    <div class="stat-value" id="dash-usdc">0.00</div>
                 </div>
-
-                <div class="dash-grid">
-                    <div class="dash-card">
-                        <div class="dash-label">USDC / EURC BALANCE</div>
-                        <div class="dash-value" style="color: #38bdf8;">
-                            <span id="dash-usdc">0.00</span> / <span id="dash-eurc">0.00</span>
-                        </div>
-                        <div class="dash-subtext">Wallet Balance</div>
-                    </div>
-
-                    <div class="dash-card">
-                        <div class="dash-label">PROVIDED LIQUIDITY</div>
-                        <div class="dash-value" id="dash-lp-balance" style="color: #c084fc;">0.00 LP</div>
-                        <div class="dash-subtext">Swap Pool</div>
-                    </div>
-
-                    <div class="dash-card">
-                        <div class="dash-label">TOTAL SUPPLIED</div>
-                        <div class="dash-value" id="dash-supplied" style="color: #4ade80;">$0.00</div>
-                        <div class="dash-subtext">Lending Pool</div>
-                    </div>
-
-                    <div class="dash-card">
-                        <div class="dash-label">TOTAL BORROWED</div>
-                        <div class="dash-value" id="dash-borrowed" style="color: #f87171;">$0.00</div>
-                        <div class="dash-subtext">Lending Pool</div>
-                    </div>
-
-                    <div class="dash-card">
-                        <div class="dash-label">BRIDGE STATUS</div>
-                        <div class="dash-value" id="dash-bridge-status" style="color: #facc15;">Ready</div>
-                        <div class="dash-subtext">CCTP Messenger</div>
-                    </div>
-
-                    <div class="dash-card">
-                        <div class="dash-label">RECENT PAYMENT</div>
-                        <div class="dash-value" id="dash-last-pay" style="color: #22d3ee;">None</div>
-                        <div class="dash-subtext">Direct Transfer</div>
-                    </div>
+                <div class="stat-card">
+                    <div class="stat-title">EURC Balance</div>
+                    <div class="stat-value" id="dash-eurc">0.00</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Total Supplied</div>
+                    <div class="stat-value" id="dash-supplied">$0.00</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Total Borrowed</div>
+                    <div class="stat-value" id="dash-borrowed">$0.00</div>
                 </div>
             </div>
+            <button class="btn-action" onclick="updateAllBalances()">🔄 Refresh Data</button>
         </div>
 
         <!-- SWAP TAB -->
@@ -515,11 +439,11 @@
         <div id="bridge-tab" class="tab-content">
             <h3>Arc AppKit Cross-Chain Bridge</h3>
             <div class="input-group">
-                <label>Destination Chain Domain</label>
-                <select id="bridgeTargetDomain">
-                    <option value="0">Ethereum Sepolia (Domain 0)</option>
-                    <option value="6">Base Sepolia (Domain 6)</option>
-                    <option value="3">Arbitrum Sepolia (Domain 3)</option>
+                <label>Destination Chain</label>
+                <select id="bridgeTargetChain">
+                    <option value="11155111">Ethereum Sepolia (11155111)</option>
+                    <option value="84532">Base Sepolia (84532)</option>
+                    <option value="421614">Arbitrum Sepolia (421614)</option>
                 </select>
             </div>
 
@@ -536,7 +460,7 @@
                     <span>Amount to Bridge</span>
                     <span>Wallet: <span id="balance-bridge" class="balance-val">0.0000</span></span>
                 </label>
-                <input type="number" id="bridgeAmount" placeholder="0.0" value="2" step="any">
+                <input type="number" id="bridgeAmount" placeholder="0.0" step="any">
                 <div class="pct-group">
                     <button class="btn-pct" onclick="setQuickPct('bridgeAmount', 'balance-bridge', 0.50)">50%</button>
                     <button class="btn-pct" onclick="setQuickPct('bridgeAmount', 'balance-bridge', 1.00)">MAX</button>
@@ -544,12 +468,12 @@
             </div>
 
             <div class="input-group">
-                <label>Recipient Address (Destination Chain)</label>
+                <label>Recipient Address (Optional - Defaults to current wallet)</label>
                 <input type="text" id="bridgeRecipient" placeholder="0x..." style="font-size: 13px;">
             </div>
             
-            <button class="btn-action btn-secondary" onclick="approveBridgeToken()">1. Approve TokenMessenger Contract</button>
-            <button class="btn-action" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);" onclick="executeArcBridge()">2. Initiate AppKit Cross-Chain Bridge</button>
+            <button class="btn-action btn-secondary" onclick="approveBridge()">Approve Bridge Token</button>
+            <button class="btn-action" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);" onclick="executeBridge()">Initiate Arc Bridge Transfer</button>
         </div>
 
         <!-- PAYMENTS TAB -->
@@ -605,56 +529,34 @@
 
     <!-- AI Agent Chatbot UI Widget -->
     <button class="ai-chat-toggle" onclick="toggleChatWindow()">🤖</button>
-
     <div class="ai-chat-window hidden" id="aiChatWindow">
         <div class="ai-chat-header">
-            <span>Arc MCP Agent</span>
+            <span>Arc Agent</span>
             <button onclick="toggleChatWindow()" style="background:none; border:none; color:#fff; cursor:pointer;">✕</button>
         </div>
         <div class="ai-chat-body" id="chatBody">
-            <div class="msg msg-agent">Hello! I am your Arc MCP Agent. Ask me to check balances, swap, or bridge tokens directly!</div>
+            <div class="msg msg-agent">Hello! I am your Arc Agent. How can I assist with your DeFi operations today?</div>
         </div>
         <div class="ai-chat-footer">
-            <input type="text" id="chatInput" placeholder="e.g. Swap 10 USDC to EURC..." onkeydown="if(event.key === 'Enter') sendAgentMessage()">
+            <input type="text" id="chatInput" placeholder="Enter prompt..." onkeydown="if(event.key === 'Enter') sendAgentMessage()">
             <button onclick="sendAgentMessage()">Send</button>
         </div>
     </div>
 
     <script>
-        // CONFIG ARC TESTNET
-        const ARC_TESTNET_CONFIG = {
-            chainId: "0x32", // 50 in hex (Arc Testnet)
-            chainName: "Arc Testnet",
-            nativeCurrency: { name: "Arc Token", symbol: "ARC", decimals: 18 },
-            rpcUrls: ["https://rpc.testnet.arcscan.app"],
-            blockExplorerUrls: ["https://testnet.arcscan.app"]
-        };
-
-        // SMART CONTRACT ADDRESSES
         const RAW_CONTRACTS = {
             USDC_TOKEN: "0x3600000000000000000000000000000000000000", 
             EURC_TOKEN: "0x89B50855Aa3bE2F677cD6303Cec089B5F319D72a", 
             SWAP_POOL_ROUTER: "0x8D02E191dDa6da9a2F8De7bd46caF795D3e3Bc9c", 
-            LENDING_POOL: "0x398E4b2A5d5F534e1bfe64DC515DCf829620cFf5",
-            TOKEN_MESSENGER: "0x9f32f32f3a2d212a76f296277259f9393a652a92"
+            BRIDGE_CONTRACT: "0xfdB761CDB47093cEe833b8f20C6aDe50e5FbbC02",
+            LENDING_POOL: "0x398E4b2A5d5F534e1bfe64DC515DCf829620cFf5"
         };
 
-        let userAddress = null;
-
         function getSafeAddress(addr) {
-            if (!addr || addr === "0x0000000000000000000000000000000000000000") return ethers.ZeroAddress;
-            try {
-                return ethers.getAddress(addr.trim().toLowerCase());
-            } catch (e) {
-                return ethers.ZeroAddress;
-            }
+            if (!addr) return ethers.ZeroAddress;
+            return ethers.getAddress(addr.trim().toLowerCase());
         }
 
-        function addressToBytes32(address) {
-            return ethers.zeroPadValue(getSafeAddress(address), 32);
-        }
-
-        // ABIs
         const ERC20_ABI = [
             "function approve(address spender, uint256 amount) public returns (bool)",
             "function allowance(address owner, address spender) public view returns (uint256)",
@@ -665,22 +567,22 @@
         const SWAP_POOL_ABI = [
             "function trade(address _tokenAddress, uint256 _amountIn) external", 
             "function addLiquidity(uint256 _amountUSDC, uint256 _amountEURC) external",
-            "function removeLiquidity(uint256 _amount) external",
-            "function balanceOf(address) view returns (uint256)"
+            "function removeLiquidity(uint256 _amount) external"
         ];
 
         const BRIDGE_ABI = [
-            "function depositForBurn(uint256 amount, uint32 destinationDomain, bytes32 mintRecipient, address burnToken) external returns (uint64 _nonce)"
+            "function bridgeAsset(uint256 _targetChainId, address _token, uint256 _amount, address _recipient) external",
+            "event BridgeInitiated(uint256 indexed targetChainId, address indexed token, uint256 amount, address indexed recipient)"
         ];
 
         const LENDING_POOL_ABI = [
             "function deposit(address token, uint256 amount) external",
             "function withdraw(address token, uint256 amount) external",
             "function borrow(address token, uint256 amount) external",
-            "function repay(address token, uint256 amount) external",
-            "function getUserSupplied(address) view returns (uint256)",
-            "function getUserBorrowed(address) view returns (uint256)"
+            "function repay(address token, uint256 amount) external"
         ];
+
+        let userAddress = null;
 
         function updateLog(msg) {
             document.getElementById('statusConsole').innerHTML = "Log: " + msg;
@@ -705,34 +607,6 @@
             updateAllBalances();
         }
 
-        async function ensureArcNetwork() {
-            if (!window.ethereum) return false;
-            try {
-                const chainId = await window.ethereum.request({ method: 'eth_chainId' });
-                if (chainId !== ARC_TESTNET_CONFIG.chainId) {
-                    try {
-                        await window.ethereum.request({
-                            method: 'wallet_switchEthereumChain',
-                            params: [{ chainId: ARC_TESTNET_CONFIG.chainId }],
-                        });
-                    } catch (switchError) {
-                        if (switchError.code === 4902) {
-                            await window.ethereum.request({
-                                method: 'wallet_addEthereumChain',
-                                params: [ARC_TESTNET_CONFIG],
-                            });
-                        } else {
-                            throw switchError;
-                        }
-                    }
-                }
-                return true;
-            } catch (err) {
-                updateLog("Network Switch Error: " + err.message);
-                return false;
-            }
-        }
-
         async function handleSwapFromChange() {
             const fromToken = document.getElementById('swapFromToken').value;
             document.getElementById('swapToToken').value = fromToken === "USDC" ? "EURC" : "USDC";
@@ -748,11 +622,8 @@
         async function getTokenBalance(tokenAddress, account) {
             try {
                 if(!window.ethereum || !account) return "0.0000";
-                const safeAddr = getSafeAddress(tokenAddress);
-                if (safeAddr === ethers.ZeroAddress) return "0.0000";
-
                 const provider = new ethers.BrowserProvider(window.ethereum);
-                const contract = new ethers.Contract(safeAddr, ERC20_ABI, provider);
+                const contract = new ethers.Contract(getSafeAddress(tokenAddress), ERC20_ABI, provider);
                 const balance = await contract.balanceOf(getSafeAddress(account));
                 return ethers.formatUnits(balance, 6);
             } catch (err) {
@@ -761,26 +632,7 @@
         }
 
         async function updateAllBalances() {
-            if (!window.ethereum) return;
-
-            let activeAddr = userAddress;
-            if (!activeAddr) {
-                try {
-                    const provider = new ethers.BrowserProvider(window.ethereum);
-                    const accounts = await provider.send("eth_accounts", []);
-                    if (accounts.length > 0) activeAddr = accounts[0];
-                } catch(e) {}
-            }
-
-            if (!activeAddr) {
-                resetDashboardUI();
-                return;
-            }
-
-            userAddress = activeAddr;
-            const shortAddr = activeAddr.substring(0, 6) + "..." + activeAddr.substring(38);
-            document.getElementById('dash-wallet-address').innerText = shortAddr;
-
+            if (!userAddress || !window.ethereum) return;
             try {
                 const balUsdc = await getTokenBalance(RAW_CONTRACTS.USDC_TOKEN, userAddress);
                 const balEurc = await getTokenBalance(RAW_CONTRACTS.EURC_TOKEN, userAddress);
@@ -810,54 +662,19 @@
                 const bridgeTokenAddress = bridgeToken === "USDC" ? RAW_CONTRACTS.USDC_TOKEN : RAW_CONTRACTS.EURC_TOKEN;
                 const balBridge = await getTokenBalance(bridgeTokenAddress, userAddress);
                 document.getElementById('balance-bridge').innerText = parseFloat(balBridge).toFixed(4);
-
-                const provider = new ethers.BrowserProvider(window.ethereum);
-                
-                if (getSafeAddress(RAW_CONTRACTS.SWAP_POOL_ROUTER) !== ethers.ZeroAddress) {
-                    try {
-                        const poolContract = new ethers.Contract(getSafeAddress(RAW_CONTRACTS.SWAP_POOL_ROUTER), SWAP_POOL_ABI, provider);
-                        const lpBal = await poolContract.balanceOf(userAddress);
-                        document.getElementById('dash-lp-balance').innerText = parseFloat(ethers.formatUnits(lpBal, 6)).toFixed(2) + " LP";
-                    } catch(e) { document.getElementById('dash-lp-balance').innerText = "0.00 LP"; }
-                }
-
-                if (getSafeAddress(RAW_CONTRACTS.LENDING_POOL) !== ethers.ZeroAddress) {
-                    try {
-                        const lendingContract = new ethers.Contract(getSafeAddress(RAW_CONTRACTS.LENDING_POOL), LENDING_POOL_ABI, provider);
-                        const supplied = await lendingContract.getUserSupplied(userAddress);
-                        const borrowed = await lendingContract.getUserBorrowed(userAddress);
-                        document.getElementById('dash-supplied').innerText = "$" + parseFloat(ethers.formatUnits(supplied, 6)).toFixed(2);
-                        document.getElementById('dash-borrowed').innerText = "$" + parseFloat(ethers.formatUnits(borrowed, 6)).toFixed(2);
-                    } catch(e) {
-                        document.getElementById('dash-supplied').innerText = "$0.00";
-                        document.getElementById('dash-borrowed').innerText = "$0.00";
-                    }
-                }
-
             } catch (error) {
-                console.error("Sync Error:", error);
+                console.error(error);
             }
-        }
-
-        function resetDashboardUI() {
-            document.getElementById('dash-wallet-address').innerText = "Not Connected";
-            document.getElementById('dash-usdc').innerText = "0.00";
-            document.getElementById('dash-eurc').innerText = "0.00";
-            document.getElementById('dash-lp-balance').innerText = "0.00 LP";
-            document.getElementById('dash-supplied').innerText = "$0.00";
-            document.getElementById('dash-borrowed').innerText = "$0.00";
         }
 
         async function connectWallet() {
             if (!window.ethereum) return alert("Please install MetaMask!");
             try {
-                await ensureArcNetwork();
                 const provider = new ethers.BrowserProvider(window.ethereum);
                 const accounts = await provider.send("eth_requestAccounts", []);
                 userAddress = accounts[0];
                 document.getElementById('connectBtn').innerText = userAddress.substring(0, 6) + "..." + userAddress.substring(38);
                 document.getElementById('disconnectBtn').style.display = "inline-block";
-                document.getElementById('bridgeRecipient').value = userAddress;
                 updateLog("Connected: " + userAddress);
                 await updateAllBalances();
             } catch (err) {
@@ -869,34 +686,27 @@
             userAddress = null;
             document.getElementById('connectBtn').innerText = "Connect Wallet";
             document.getElementById('disconnectBtn').style.display = "none";
-            resetDashboardUI();
             updateLog("Wallet disconnected.");
         }
 
-        async function getTransactionOptions(provider) {
+        async function getLegacyGasParam(provider) {
             try {
                 const feeData = await provider.getFeeData();
-                let gasPrice = feeData.gasPrice ? (feeData.gasPrice * 120n) / 100n : ethers.parseUnits("10", "gwei");
-                return { gasPrice: gasPrice, gasLimit: 300000n };
+                let targetGasPrice = feeData.gasPrice ? (feeData.gasPrice * 200n) / 100n : ethers.parseUnits("25", "gwei");
+                return { gasPrice: targetGasPrice };
             } catch (e) {
-                return { gasPrice: ethers.parseUnits("10", "gwei"), gasLimit: 300000n };
+                return { gasPrice: ethers.parseUnits("25", "gwei") };
             }
         }
 
         async function uiSwap() {
             if (!userAddress || !window.ethereum) return alert("Please connect wallet!");
-            await ensureArcNetwork();
-
             const fromSymbol = document.getElementById('swapFromToken').value;
             const amountIn = document.getElementById('swapAmountIn').value;
             if (!amountIn || parseFloat(amountIn) <= 0) return alert("Invalid amount!");
 
-            const fromAddress = getSafeAddress(fromSymbol === "USDC" ? RAW_CONTRACTS.USDC_TOKEN : RAW_CONTRACTS.EURC_TOKEN); 
+            const fromAddress = getSafeAddress(fromSymbol === "USDC" ? RAW_CONTRACTS.USDC_TOKEN : RAW_CONTRACTS.EURC_TOKEN);
             const targetRouter = getSafeAddress(RAW_CONTRACTS.SWAP_POOL_ROUTER);
-
-            if (fromAddress === ethers.ZeroAddress || targetRouter === ethers.ZeroAddress) {
-                return alert("Lỗi Smart Contract Address: Vui lòng kiểm tra lại cấu hình địa chỉ Contract!");
-            }
 
             try {
                 const provider = new ethers.BrowserProvider(window.ethereum);
@@ -904,19 +714,19 @@
                 const tokenInContract = new ethers.Contract(fromAddress, ERC20_ABI, signer);
                 const swapContract = new ethers.Contract(targetRouter, SWAP_POOL_ABI, signer);
                 const parsedAmount = ethers.parseUnits(amountIn, 6);
-                const txOpts = await getTransactionOptions(provider);
+                const gasParams = await getLegacyGasParam(provider);
 
                 updateLog("Checking allowance...");
                 const allowance = await tokenInContract.allowance(userAddress, targetRouter);
                 if (allowance < parsedAmount) {
                     updateLog("Approving token for Swap...");
-                    const txApprove = await tokenInContract.approve(targetRouter, ethers.MaxUint256, txOpts);
+                    const txApprove = await tokenInContract.approve(targetRouter, ethers.MaxUint256, gasParams);
                     await txApprove.wait();
                     updateLog("Approval successful!");
                 }
 
                 updateLog("Executing Swap...");
-                const txSwap = await swapContract.trade(fromAddress, parsedAmount, txOpts);
+                const txSwap = await swapContract.trade(fromAddress, parsedAmount, gasParams);
                 updateLog("Swap tx sent: " + txSwap.hash);
                 await txSwap.wait();
                 updateLog("Swap completed successfully! 🎉");
@@ -928,15 +738,14 @@
 
         async function approveUSDC() {
             if (!userAddress || !window.ethereum) return alert("Please connect wallet!");
-            await ensureArcNetwork();
             try {
                 const provider = new ethers.BrowserProvider(window.ethereum);
                 const signer = await provider.getSigner();
                 const usdcContract = new ethers.Contract(getSafeAddress(RAW_CONTRACTS.USDC_TOKEN), ERC20_ABI, signer);
-                const txOpts = await getTransactionOptions(provider);
+                const gasParams = await getLegacyGasParam(provider);
 
                 updateLog("Approving USDC...");
-                const tx = await usdcContract.approve(getSafeAddress(RAW_CONTRACTS.SWAP_POOL_ROUTER), ethers.MaxUint256, txOpts);
+                const tx = await usdcContract.approve(getSafeAddress(RAW_CONTRACTS.SWAP_POOL_ROUTER), ethers.MaxUint256, gasParams);
                 await tx.wait();
                 updateLog("USDC Approved successfully!");
             } catch (err) {
@@ -946,15 +755,14 @@
 
         async function approveEURC() {
             if (!userAddress || !window.ethereum) return alert("Please connect wallet!");
-            await ensureArcNetwork();
             try {
                 const provider = new ethers.BrowserProvider(window.ethereum);
                 const signer = await provider.getSigner();
                 const eurcContract = new ethers.Contract(getSafeAddress(RAW_CONTRACTS.EURC_TOKEN), ERC20_ABI, signer);
-                const txOpts = await getTransactionOptions(provider);
+                const gasParams = await getLegacyGasParam(provider);
 
                 updateLog("Approving EURC...");
-                const tx = await eurcContract.approve(getSafeAddress(RAW_CONTRACTS.SWAP_POOL_ROUTER), ethers.MaxUint256, txOpts);
+                const tx = await eurcContract.approve(getSafeAddress(RAW_CONTRACTS.SWAP_POOL_ROUTER), ethers.MaxUint256, gasParams);
                 await tx.wait();
                 updateLog("EURC Approved successfully!");
             } catch (err) {
@@ -964,7 +772,6 @@
 
         async function executeAddLiquidity() {
             if (!userAddress || !window.ethereum) return alert("Please connect wallet!");
-            await ensureArcNetwork();
             const amtUsdc = document.getElementById('liquidityUsdcAmount').value;
             const amtEurc = document.getElementById('liquidityEurcAmount').value;
             if (!amtUsdc || !amtEurc) return alert("Please input both token amounts!");
@@ -973,12 +780,12 @@
                 const provider = new ethers.BrowserProvider(window.ethereum);
                 const signer = await provider.getSigner();
                 const swapContract = new ethers.Contract(getSafeAddress(RAW_CONTRACTS.SWAP_POOL_ROUTER), SWAP_POOL_ABI, signer);
-                const txOpts = await getTransactionOptions(provider);
+                const gasParams = await getLegacyGasParam(provider);
 
                 updateLog("Adding Liquidity...");
-                const tx = await swapContract.addLiquidity(ethers.parseUnits(amtUsdc, 6), ethers.parseUnits(amtEurc, 6), txOpts);
+                const tx = await swapContract.addLiquidity(ethers.parseUnits(amtUsdc, 6), ethers.parseUnits(amtEurc, 6), gasParams);
                 await tx.wait();
-                updateLog("Liquidity added successfully! 🚀");
+                updateLog("Liquidity added successfully! 💦");
                 await updateAllBalances();
             } catch (err) {
                 updateLog("Liquidity Error: " + (err.reason || err.message));
@@ -987,7 +794,6 @@
 
         async function executeRemoveLiquidity() {
             if (!userAddress || !window.ethereum) return alert("Please connect wallet!");
-            await ensureArcNetwork();
             const amtUsdc = document.getElementById('liquidityUsdcAmount').value;
             if (!amtUsdc) return alert("Please enter amount to remove!");
 
@@ -995,10 +801,10 @@
                 const provider = new ethers.BrowserProvider(window.ethereum);
                 const signer = await provider.getSigner();
                 const swapContract = new ethers.Contract(getSafeAddress(RAW_CONTRACTS.SWAP_POOL_ROUTER), SWAP_POOL_ABI, signer);
-                const txOpts = await getTransactionOptions(provider);
+                const gasParams = await getLegacyGasParam(provider);
 
                 updateLog("Removing Liquidity...");
-                const tx = await swapContract.removeLiquidity(ethers.parseUnits(amtUsdc, 6), txOpts);
+                const tx = await swapContract.removeLiquidity(ethers.parseUnits(amtUsdc, 6), gasParams);
                 await tx.wait();
                 updateLog("Liquidity removed successfully!");
                 await updateAllBalances();
@@ -1009,7 +815,6 @@
 
         async function approveLending() {
             if (!userAddress || !window.ethereum) return alert("Please connect wallet!");
-            await ensureArcNetwork();
             const tokenSymbol = document.getElementById('lendingToken').value;
             const tokenAddr = getSafeAddress(tokenSymbol === "USDC" ? RAW_CONTRACTS.USDC_TOKEN : RAW_CONTRACTS.EURC_TOKEN);
 
@@ -1017,10 +822,10 @@
                 const provider = new ethers.BrowserProvider(window.ethereum);
                 const signer = await provider.getSigner();
                 const tokenContract = new ethers.Contract(tokenAddr, ERC20_ABI, signer);
-                const txOpts = await getTransactionOptions(provider);
+                const gasParams = await getLegacyGasParam(provider);
 
                 updateLog(`Approving ${tokenSymbol} for Lending...`);
-                const tx = await tokenContract.approve(getSafeAddress(RAW_CONTRACTS.LENDING_POOL), ethers.MaxUint256, txOpts);
+                const tx = await tokenContract.approve(getSafeAddress(RAW_CONTRACTS.LENDING_POOL), ethers.MaxUint256, gasParams);
                 await tx.wait();
                 updateLog(`${tokenSymbol} Approved for Lending!`);
             } catch (err) {
@@ -1030,7 +835,6 @@
 
         async function executeLendingDeposit() {
             if (!userAddress || !window.ethereum) return alert("Please connect wallet!");
-            await ensureArcNetwork();
             const tokenSymbol = document.getElementById('lendingToken').value;
             const amount = document.getElementById('lendingAmount').value;
             if (!amount || parseFloat(amount) <= 0) return alert("Invalid amount!");
@@ -1041,12 +845,12 @@
                 const provider = new ethers.BrowserProvider(window.ethereum);
                 const signer = await provider.getSigner();
                 const lendingContract = new ethers.Contract(getSafeAddress(RAW_CONTRACTS.LENDING_POOL), LENDING_POOL_ABI, signer);
-                const txOpts = await getTransactionOptions(provider);
+                const gasParams = await getLegacyGasParam(provider);
 
                 updateLog(`Depositing ${tokenSymbol}...`);
-                const tx = await lendingContract.deposit(tokenAddr, ethers.parseUnits(amount, 6), txOpts);
+                const tx = await lendingContract.deposit(tokenAddr, ethers.parseUnits(amount, 6), gasParams);
                 await tx.wait();
-                updateLog("Deposit successful! 🎉");
+                updateLog("Deposit successful! 🏦");
                 await updateAllBalances();
             } catch (err) {
                 updateLog("Deposit Error: " + (err.reason || err.message));
@@ -1055,7 +859,6 @@
 
         async function executeLendingWithdraw() {
             if (!userAddress || !window.ethereum) return alert("Please connect wallet!");
-            await ensureArcNetwork();
             const tokenSymbol = document.getElementById('lendingToken').value;
             const amount = document.getElementById('lendingAmount').value;
             if (!amount || parseFloat(amount) <= 0) return alert("Invalid amount!");
@@ -1066,10 +869,10 @@
                 const provider = new ethers.BrowserProvider(window.ethereum);
                 const signer = await provider.getSigner();
                 const lendingContract = new ethers.Contract(getSafeAddress(RAW_CONTRACTS.LENDING_POOL), LENDING_POOL_ABI, signer);
-                const txOpts = await getTransactionOptions(provider);
+                const gasParams = await getLegacyGasParam(provider);
 
                 updateLog(`Withdrawing ${tokenSymbol}...`);
-                const tx = await lendingContract.withdraw(tokenAddr, ethers.parseUnits(amount, 6), txOpts);
+                const tx = await lendingContract.withdraw(tokenAddr, ethers.parseUnits(amount, 6), gasParams);
                 await tx.wait();
                 updateLog("Withdrawal successful!");
                 await updateAllBalances();
@@ -1080,7 +883,6 @@
 
         async function uiBorrow() {
             if (!userAddress || !window.ethereum) return alert("Please connect wallet!");
-            await ensureArcNetwork();
             const tokenSymbol = document.getElementById('borrowToken').value;
             const amount = document.getElementById('borrowAmount').value;
             if (!amount || parseFloat(amount) <= 0) return alert("Invalid amount!");
@@ -1091,10 +893,10 @@
                 const provider = new ethers.BrowserProvider(window.ethereum);
                 const signer = await provider.getSigner();
                 const lendingContract = new ethers.Contract(getSafeAddress(RAW_CONTRACTS.LENDING_POOL), LENDING_POOL_ABI, signer);
-                const txOpts = await getTransactionOptions(provider);
+                const gasParams = await getLegacyGasParam(provider);
 
                 updateLog(`Borrowing ${tokenSymbol}...`);
-                const tx = await lendingContract.borrow(tokenAddr, ethers.parseUnits(amount, 6), txOpts);
+                const tx = await lendingContract.borrow(tokenAddr, ethers.parseUnits(amount, 6), gasParams);
                 await tx.wait();
                 updateLog("Borrow successful!");
                 await updateAllBalances();
@@ -1105,7 +907,6 @@
 
         async function uiRepayBorrow() {
             if (!userAddress || !window.ethereum) return alert("Please connect wallet!");
-            await ensureArcNetwork();
             const tokenSymbol = document.getElementById('borrowToken').value;
             const amount = document.getElementById('borrowAmount').value;
             if (!amount || parseFloat(amount) <= 0) return alert("Invalid amount!");
@@ -1116,10 +917,10 @@
                 const provider = new ethers.BrowserProvider(window.ethereum);
                 const signer = await provider.getSigner();
                 const lendingContract = new ethers.Contract(getSafeAddress(RAW_CONTRACTS.LENDING_POOL), LENDING_POOL_ABI, signer);
-                const txOpts = await getTransactionOptions(provider);
+                const gasParams = await getLegacyGasParam(provider);
 
                 updateLog(`Repaying ${tokenSymbol}...`);
-                const tx = await lendingContract.repay(tokenAddr, ethers.parseUnits(amount, 6), txOpts);
+                const tx = await lendingContract.repay(tokenAddr, ethers.parseUnits(amount, 6), gasParams);
                 await tx.wait();
                 updateLog("Repayment successful!");
                 await updateAllBalances();
@@ -1128,9 +929,9 @@
             }
         }
 
-        async function approveBridgeToken() {
+        /* ARC APPKIT BRIDGE FUNCTIONS */
+        async function approveBridge() {
             if (!userAddress || !window.ethereum) return alert("Please connect wallet!");
-            await ensureArcNetwork();
             const tokenSymbol = document.getElementById('bridgeToken').value;
             const tokenAddr = getSafeAddress(tokenSymbol === "USDC" ? RAW_CONTRACTS.USDC_TOKEN : RAW_CONTRACTS.EURC_TOKEN);
 
@@ -1138,68 +939,61 @@
                 const provider = new ethers.BrowserProvider(window.ethereum);
                 const signer = await provider.getSigner();
                 const tokenContract = new ethers.Contract(tokenAddr, ERC20_ABI, signer);
-                const txOpts = await getTransactionOptions(provider);
+                const gasParams = await getLegacyGasParam(provider);
 
-                updateLog(`Approving ${tokenSymbol} for TokenMessenger (${RAW_CONTRACTS.TOKEN_MESSENGER})...`);
-                const tx = await tokenContract.approve(getSafeAddress(RAW_CONTRACTS.TOKEN_MESSENGER), ethers.MaxUint256, txOpts);
+                updateLog(`Approving ${tokenSymbol} for Arc AppKit Bridge...`);
+                const tx = await tokenContract.approve(getSafeAddress(RAW_CONTRACTS.BRIDGE_CONTRACT), ethers.MaxUint256, gasParams);
                 await tx.wait();
-                updateLog(`${tokenSymbol} Approved for TokenMessenger! Ready to bridge.`);
+                updateLog(`${tokenSymbol} Approved for Bridge!`);
             } catch (err) {
                 updateLog("Bridge Approve Error: " + (err.reason || err.message));
             }
         }
 
-        async function executeArcBridge() {
+        async function executeBridge() {
             if (!userAddress || !window.ethereum) return alert("Please connect wallet!");
-            await ensureArcNetwork();
-            const targetDomain = parseInt(document.getElementById('bridgeTargetDomain').value);
+            const targetChainId = document.getElementById('bridgeTargetChain').value;
             const tokenSymbol = document.getElementById('bridgeToken').value;
-            const amountStr = document.getElementById('bridgeAmount').value;
+            const amount = document.getElementById('bridgeAmount').value;
             let recipient = document.getElementById('bridgeRecipient').value.trim();
 
-            if (!amountStr || parseFloat(amountStr) <= 0) return alert("Invalid amount!");
+            if (!amount || parseFloat(amount) <= 0) return alert("Invalid amount!");
             if (!recipient) recipient = userAddress;
 
             const tokenAddr = getSafeAddress(tokenSymbol === "USDC" ? RAW_CONTRACTS.USDC_TOKEN : RAW_CONTRACTS.EURC_TOKEN);
-            const messengerAddr = getSafeAddress(RAW_CONTRACTS.TOKEN_MESSENGER);
+            const bridgeAddr = getSafeAddress(RAW_CONTRACTS.BRIDGE_CONTRACT);
 
             try {
                 const provider = new ethers.BrowserProvider(window.ethereum);
                 const signer = await provider.getSigner();
                 const tokenContract = new ethers.Contract(tokenAddr, ERC20_ABI, signer);
-                const bridgeContract = new ethers.Contract(messengerAddr, BRIDGE_ABI, signer);
-                const parsedAmount = ethers.parseUnits(amountStr, 6);
-                const txOpts = await getTransactionOptions(provider);
+                const bridgeContract = new ethers.Contract(bridgeAddr, BRIDGE_ABI, signer);
+                const parsedAmount = ethers.parseUnits(amount, 6);
+                const gasParams = await getLegacyGasParam(provider);
 
-                updateLog("Checking TokenMessenger allowance...");
-                const allowance = await tokenContract.allowance(userAddress, messengerAddr);
+                updateLog("Checking Bridge allowance...");
+                const allowance = await tokenContract.allowance(userAddress, bridgeAddr);
                 if (allowance < parsedAmount) {
-                    updateLog(`Auto-approving ${tokenSymbol} for TokenMessenger...`);
-                    const txApprove = await tokenContract.approve(messengerAddr, ethers.MaxUint256, txOpts);
+                    updateLog(`Auto-approving ${tokenSymbol} for Bridge...`);
+                    const txApprove = await tokenContract.approve(bridgeAddr, ethers.MaxUint256, gasParams);
                     await txApprove.wait();
                     updateLog("Approval complete!");
                 }
 
-                const recipientBytes32 = addressToBytes32(recipient);
-
-                updateLog(`Initiating AppKit Bridge Burn to Domain ${targetDomain}...`);
-                const tx = await bridgeContract.depositForBurn(
-                    parsedAmount,
-                    targetDomain,
-                    recipientBytes32,
+                updateLog(`Initiating Bridge to Chain ID ${targetChainId}...`);
+                const tx = await bridgeContract.bridgeAsset(
+                    targetChainId,
                     tokenAddr,
-                    txOpts
+                    parsedAmount,
+                    getSafeAddress(recipient),
+                    gasParams
                 );
-
+                
                 const txLink = `<a href="https://testnet.arcscan.app/tx/${tx.hash}" target="_blank" style="color:#60a5fa;text-decoration:underline;">${tx.hash.substring(0, 10)}...</a>`;
-                updateLog("Bridge Burn Tx Sent: " + txLink + ". Waiting for confirmation...");
-
+                updateLog("Bridge Tx Sent: " + txLink + ". Waiting for confirmation...");
+                
                 await tx.wait();
-                updateLog(`Bridge Burn Complete! Token burn event sent. Waiting for Relayer to mint on Domain ${targetDomain}. 🎉`);
-                
-                document.getElementById('dash-bridge-status').innerText = "Processing";
-                document.getElementById('dash-bridge-status').style.color = "#60a5fa";
-                
+                updateLog(`Bridge Event Dispatched to Chain ${targetChainId}! 🌉 (Pending Relayer Execution on destination chain)`);
                 await updateAllBalances();
             } catch (err) {
                 updateLog("Bridge Error: " + (err.reason || err.message));
@@ -1208,7 +1002,6 @@
 
         async function executePayment() {
             if (!userAddress || !window.ethereum) return alert("Please connect wallet!");
-            await ensureArcNetwork();
             const tokenSymbol = document.getElementById('payToken').value;
             const recipient = document.getElementById('payRecipient').value;
             const amount = document.getElementById('payAmount').value;
@@ -1221,146 +1014,47 @@
                 const provider = new ethers.BrowserProvider(window.ethereum);
                 const signer = await provider.getSigner();
                 const tokenContract = new ethers.Contract(tokenAddr, ERC20_ABI, signer);
-                const txOpts = await getTransactionOptions(provider);
+                const gasParams = await getLegacyGasParam(provider);
 
                 updateLog(`Sending ${amount} ${tokenSymbol}...`);
-                const tx = await tokenContract.transfer(getSafeAddress(recipient), ethers.parseUnits(amount, 6), txOpts);
+                const tx = await tokenContract.transfer(getSafeAddress(recipient), ethers.parseUnits(amount, 6), gasParams);
                 await tx.wait();
-                updateLog("Payment Sent Successfully! 🚀");
-                
-                document.getElementById('dash-last-pay').innerText = `${amount} ${tokenSymbol}`;
+                updateLog("Payment Sent Successfully! 💸");
                 await updateAllBalances();
             } catch (err) {
                 updateLog("Payment Error: " + (err.reason || err.message));
             }
         }
 
-        // AI AGENT ENGINE (MCP ROUTER)
         function toggleChatWindow() {
             const chatWindow = document.getElementById('aiChatWindow');
             chatWindow.classList.toggle('hidden');
         }
 
-        async function sendAgentMessage() {
+        function sendAgentMessage() {
             const input = document.getElementById('chatInput');
-            const prompt = input.value.trim();
-            if (!prompt) return;
+            const text = input.value.trim();
+            if (!text) return;
 
-            appendChatMessage(prompt, 'user');
-            input.value = '';
-
-            const loadingId = appendChatMessage("Thinking & inspecting context...", 'agent-loading');
-
-            try {
-                const mcpContext = await getArcMCPContext();
-                const agentResponse = await processMCPRequest(prompt, mcpContext);
-
-                document.getElementById(loadingId)?.remove();
-                appendChatMessage(agentResponse.message, 'agent');
-
-                if (agentResponse.action) {
-                    await executeMCPAction(agentResponse.action);
-                }
-            } catch (error) {
-                document.getElementById(loadingId)?.remove();
-                appendChatMessage("MCP Error: " + error.message, 'agent');
-            }
-        }
-
-        function appendChatMessage(text, sender) {
             const chatBody = document.getElementById('chatBody');
-            const msg = document.createElement('div');
-            const msgId = 'msg-' + Date.now();
-            msg.id = msgId;
 
-            if (sender === 'user') {
-                msg.className = 'msg msg-user';
-            } else if (sender === 'agent-loading') {
-                msg.className = 'msg msg-agent';
-                msg.style.fontStyle = 'italic';
-                msg.style.color = '#94a3b8';
-            } else {
-                msg.className = 'msg msg-agent';
-            }
+            const userMsg = document.createElement('div');
+            userMsg.className = 'msg msg-user';
+            userMsg.innerText = text;
+            chatBody.appendChild(userMsg);
 
-            msg.innerText = text;
-            chatBody.appendChild(msg);
+            input.value = '';
             chatBody.scrollTop = chatBody.scrollHeight;
-            return msgId;
+
+            setTimeout(() => {
+                const agentMsg = document.createElement('div');
+                agentMsg.className = 'msg msg-agent';
+                agentMsg.innerText = "I'm ready to assist you with operations on Arc Testnet. Ensure your wallet is connected!";
+                chatBody.appendChild(agentMsg);
+                chatBody.scrollTop = chatBody.scrollHeight;
+            }, 800);
         }
 
-        async function getArcMCPContext() {
-            return {
-                network: "Arc Testnet",
-                chainId: 50,
-                userAddress: userAddress,
-                balances: {
-                    usdc: document.getElementById('dash-usdc')?.innerText || "0",
-                    eurc: document.getElementById('dash-eurc')?.innerText || "0"
-                }
-            };
-        }
-
-        async function processMCPRequest(prompt, context) {
-            const lower = prompt.toLowerCase();
-
-            if (!context.userAddress) {
-                return { message: "Please connect your wallet first so I can inspect your account." };
-            }
-
-            if (lower.includes("balance") || lower.includes("số dư")) {
-                return { 
-                    message: `Your current balances on Arc Testnet:\n• USDC: ${context.balances.usdc}\n• EURC: ${context.balances.eurc}` 
-                };
-            }
-
-            if (lower.includes("swap")) {
-                const match = prompt.match(/\d+(\.\d+)?/);
-                const amount = match ? match[0] : null;
-
-                if (amount) {
-                    return {
-                        message: `Executing MCP Tool: Initiating swap for ${amount} USDC...`,
-                        action: { type: 'SWAP', amount: amount, token: 'USDC' }
-                    };
-                }
-                return { message: "Please specify the amount to swap. Example: 'Swap 5 USDC'" };
-            }
-
-            if (lower.includes("bridge") || lower.includes("cctp")) {
-                const match = prompt.match(/\d+(\.\d+)?/);
-                const amount = match ? match[0] : null;
-
-                if (amount) {
-                    return {
-                        message: `Executing MCP Tool: Initiating CCTP Bridge Burn for ${amount} USDC...`,
-                        action: { type: 'BRIDGE', amount: amount }
-                    };
-                }
-                return { message: "Please specify the amount to bridge. Example: 'Bridge 10 USDC'" };
-            }
-
-            return { 
-                message: `[Arc MCP Agent]: I received your prompt "${prompt}". I can help you Swap, Bridge, or check Balances. Try asking 'Swap 5 USDC'` 
-            };
-        }
-
-        async function executeMCPAction(action) {
-            if (action.type === 'SWAP') {
-                document.getElementById('swapFromToken').value = action.token;
-                document.getElementById('swapAmountIn').value = action.amount;
-                if (typeof uiSwap === 'function') {
-                    await uiSwap();
-                }
-            } else if (action.type === 'BRIDGE') {
-                document.getElementById('bridgeAmount').value = action.amount;
-                if (typeof executeArcBridge === 'function') {
-                    await executeArcBridge();
-                }
-            }
-        }
-
-        // Network & Account Listeners
         if (window.ethereum) {
             window.ethereum.on('accountsChanged', (accounts) => {
                 if (accounts.length > 0) {
@@ -1371,14 +1065,7 @@
                     disconnectWallet();
                 }
             });
-
-            window.ethereum.on('chainChanged', () => {
-                window.location.reload();
-            });
         }
-
-        // Auto Refresh Balances
-        setInterval(updateAllBalances, 3000);
     </script>
 </body>
 </html>
