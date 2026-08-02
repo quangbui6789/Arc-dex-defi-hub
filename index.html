@@ -717,203 +717,104 @@
 
 <script>
     async function updateAllBalances() {
-        if (!window.ethereum) {
-            alert("MetaMask required!");
-            return;
-        }
+        let activeAddr = null;
 
-        try {
-            const provider = new ethers.BrowserProvider(window.ethereum);
-            
-            // 1. Lấy trực tiếp địa chỉ ví từ Provider (Tránh lỗi 'Not Connected' do sai biến)
-            const accounts = await provider.send("eth_accounts", []);
-            if (!accounts || accounts.length === 0) {
-                resetDashboardUI();
-                return;
-            }
-
-            const currentAccount = accounts[0];
-            window.userAddress = currentAccount; // Cập nhật biến global
-
-            // Hiển thị địa chỉ rút gọn
-            const shortAddr = currentAccount.substring(0, 6) + "..." + currentAccount.substring(38);
-            document.getElementById('dash-wallet-address').innerText = shortAddr;
-
-            // 2. Lấy số dư Token an toàn (Dùng try-catch riêng để không bị đứt luồng khi Contract lỗi)
+        // 1. Thử đọc địa chỉ từ MetaMask Provider
+        if (window.ethereum) {
             try {
-                const usdcContract = new ethers.Contract(RAW_CONTRACTS.USDC_TOKEN, ERC20_ABI, provider);
-                const eurcContract = new ethers.Contract(RAW_CONTRACTS.EURC_TOKEN, ERC20_ABI, provider);
-
-                const usdcBal = await usdcContract.balanceOf(currentAccount);
-                const eurcBal = await eurcContract.balanceOf(currentAccount);
-
-                document.getElementById('dash-usdc').innerText = parseFloat(ethers.formatUnits(usdcBal, 6)).toFixed(2);
-                document.getElementById('dash-eurc').innerText = parseFloat(ethers.formatUnits(eurcBal, 6)).toFixed(2);
-            } catch (e) {
-                console.warn("Lỗi lấy balance Token (có thể do sai địa chỉ contract):", e);
-            }
-
-            // 3. Lấy vị thế Liquidity Pool an toàn
-            try {
-                const poolContract = new ethers.Contract(RAW_CONTRACTS.SWAP_POOL_ROUTER, ["function balanceOf(address) view returns (uint256)"], provider);
-                const lpBal = await poolContract.balanceOf(currentAccount);
-                document.getElementById('dash-lp-balance').innerText = parseFloat(ethers.formatUnits(lpBal, 6)).toFixed(2) + " LP";
-            } catch (e) {
-                document.getElementById('dash-lp-balance').innerText = "0.00 LP";
-            }
-
-            // 4. Lấy vị thế Lending & Borrow an toàn
-            try {
-                const lendingContract = new ethers.Contract(
-                    RAW_CONTRACTS.LENDING_POOL, 
-                    [
-                        "function getUserSupplied(address) view returns (uint256)",
-                        "function getUserBorrowed(address) view returns (uint256)"
-                    ], 
-                    provider
-                );
-                const supplied = await lendingContract.getUserSupplied(currentAccount);
-                const borrowed = await lendingContract.getUserBorrowed(currentAccount);
-
-                document.getElementById('dash-supplied').innerText = "$" + parseFloat(ethers.formatUnits(supplied, 6)).toFixed(2);
-                document.getElementById('dash-borrowed').innerText = "$" + parseFloat(ethers.formatUnits(borrowed, 6)).toFixed(2);
-            } catch (e) {
-                document.getElementById('dash-supplied').innerText = "$0.00";
-                document.getElementById('dash-borrowed').innerText = "$0.00";
-            }
-
-            if (typeof updateLog === 'function') {
-                updateLog("Synced dashboard data for " + shortAddr);
-            }
-
-        } catch (err) {
-            console.error("General Sync Error:", err);
-        }
-    }
-
-    function resetDashboardUI() {
-        document.getElementById('dash-wallet-address').innerText = "Not Connected";
-        document.getElementById('dash-usdc').innerText = "0.00";
-        document.getElementById('dash-eurc').innerText = "0.00";
-        document.getElementById('dash-lp-balance').innerText = "0.00 LP";
-        document.getElementById('dash-supplied').innerText = "$0.00";
-        document.getElementById('dash-borrowed').innerText = "$0.00";
-    }
-
-    // Tự động đồng bộ dữ liệu khi tải trang nếu ví đã kết nối sẵn
-    document.addEventListener("DOMContentLoaded", () => {
-        setTimeout(updateAllBalances, 1000);
-    });
-<script>
-    async function updateAllBalances() {
-        if (!window.ethereum) {
-            console.warn("MetaMask provider không tồn tại");
-            return;
-        }
-
-        try {
-            const provider = new ethers.BrowserProvider(window.ethereum);
-            let currentAccount = null;
-
-            // 1. Thử lấy địa chỉ trực tiếp từ MetaMask
-            try {
+                const provider = new ethers.BrowserProvider(window.ethereum);
                 const accounts = await provider.send("eth_accounts", []);
-                if (accounts && accounts.length > 0) {
-                    currentAccount = accounts[0];
-                }
+                if (accounts && accounts.length > 0) activeAddr = accounts[0];
             } catch (e) {
-                console.warn("Lỗi đọc eth_accounts:", e);
+                console.warn("eth_accounts fail:", e);
             }
+        }
 
-            // 2. Nếu không thấy, lấy từ biến window.userAddress
-            if (!currentAccount && typeof window.userAddress !== 'undefined' && window.userAddress) {
-                currentAccount = window.userAddress;
+        // 2. Thử lấy từ các biến Global phổ biến
+        if (!activeAddr) {
+            activeAddr = window.userAddress || window.selectedAccount || window.currentAccount;
+        }
+
+        // 3. FORCE SCAN: Quét thẳng nút chứa chữ '0x' trên Header (chấp nhận cả dấu … hay ...)
+        if (!activeAddr) {
+            const allBtns = Array.from(document.querySelectorAll('button, div, span, a'));
+            const headerBtn = allBtns.find(el => {
+                const txt = el.innerText ? el.innerText.trim() : "";
+                return txt.startsWith("0x") && (txt.includes("...") || txt.includes("…"));
+            });
+
+            if (headerBtn) {
+                const txt = headerBtn.innerText.trim();
+                document.getElementById('dash-wallet-address').innerText = txt;
+                // Nếu tìm thấy nút Header có dạng 0x..., coi như đã kết nối
+                activeAddr = txt; 
             }
+        }
 
-            // 3. Nếu vẫn không thấy, quét trích xuất từ chữ hiển thị ở nút Header (Ví dụ: 0xfe57...5ff8)
-            if (!currentAccount) {
-                const allElements = Array.from(document.querySelectorAll('button, div, span'));
-                const matchedEl = allElements.find(el => /^0x[a-fA-F0-9]{3,4}\.\.\.[a-fA-F0-9]{3,4}$/.test(el.innerText.trim()));
-                if (matchedEl) {
-                    document.getElementById('dash-wallet-address').innerText = matchedEl.innerText.trim();
-                }
-            }
+        // Nếu vẫn không tìm thấy bất kỳ dấu vết kết nối nào
+        if (!activeAddr) {
+            resetDashboardUI();
+            return;
+        }
 
-            // Cập nhật UI hiển thị địa chỉ ví trên Dashboard
-            if (currentAccount) {
-                window.userAddress = currentAccount;
-                const shortAddr = currentAccount.substring(0, 6) + "..." + currentAccount.substring(currentAccount.length - 4);
-                document.getElementById('dash-wallet-address').innerText = shortAddr;
-            } else {
-                // Kiểm tra xem nút Disconnect có xuất hiện trên Header không
-                const isHeaderConnected = Array.from(document.querySelectorAll('button')).some(b => b.innerText.includes('Disconnect'));
-                if (!isHeaderConnected) {
-                    resetDashboardUI();
-                    return;
-                }
-            }
+        // Hiển thị lên UI nếu là địa chỉ đầy đủ (0x...42 ký tự)
+        if (activeAddr.length === 42) {
+            window.userAddress = activeAddr;
+            const shortAddr = activeAddr.substring(0, 6) + "..." + activeAddr.substring(38);
+            document.getElementById('dash-wallet-address').innerText = shortAddr;
+        }
 
-            const targetAddress = currentAccount || window.userAddress;
+        // FETCH DATA TỪ SMART CONTRACTS
+        if (window.ethereum) {
+            try {
+                const provider = new ethers.BrowserProvider(window.ethereum);
+                const queryAddr = (activeAddr.length === 42) ? activeAddr : window.userAddress;
 
-            // Fetch dữ liệu từ Smart Contracts khi đã nhận diện được ví
-            if (targetAddress && targetAddress.startsWith("0x") && targetAddress.length === 42) {
-                
-                // Lấy Token Balances (USDC / EURC)
-                try {
-                    if (typeof RAW_CONTRACTS !== 'undefined' && RAW_CONTRACTS.USDC_TOKEN && typeof ERC20_ABI !== 'undefined') {
-                        const usdcContract = new ethers.Contract(RAW_CONTRACTS.USDC_TOKEN, ERC20_ABI, provider);
-                        const usdcBal = await usdcContract.balanceOf(targetAddress);
-                        document.getElementById('dash-usdc').innerText = parseFloat(ethers.formatUnits(usdcBal, 6)).toFixed(2);
+                if (queryAddr && queryAddr.length === 42) {
+                    // Fetch USDC / EURC
+                    try {
+                        if (typeof RAW_CONTRACTS !== 'undefined' && RAW_CONTRACTS.USDC_TOKEN && typeof ERC20_ABI !== 'undefined') {
+                            const usdcContract = new ethers.Contract(RAW_CONTRACTS.USDC_TOKEN, ERC20_ABI, provider);
+                            const usdcBal = await usdcContract.balanceOf(queryAddr);
+                            document.getElementById('dash-usdc').innerText = parseFloat(ethers.formatUnits(usdcBal, 6)).toFixed(2);
+                        }
+                        if (typeof RAW_CONTRACTS !== 'undefined' && RAW_CONTRACTS.EURC_TOKEN && typeof ERC20_ABI !== 'undefined') {
+                            const eurcContract = new ethers.Contract(RAW_CONTRACTS.EURC_TOKEN, ERC20_ABI, provider);
+                            const eurcBal = await eurcContract.balanceOf(queryAddr);
+                            document.getElementById('dash-eurc').innerText = parseFloat(ethers.formatUnits(eurcBal, 6)).toFixed(2);
+                        }
+                    } catch (e) { console.warn("Err Token:", e); }
+
+                    // Fetch LP
+                    try {
+                        if (typeof RAW_CONTRACTS !== 'undefined' && RAW_CONTRACTS.SWAP_POOL_ROUTER) {
+                            const poolContract = new ethers.Contract(RAW_CONTRACTS.SWAP_POOL_ROUTER, ["function balanceOf(address) view returns (uint256)"], provider);
+                            const lpBal = await poolContract.balanceOf(queryAddr);
+                            document.getElementById('dash-lp-balance').innerText = parseFloat(ethers.formatUnits(lpBal, 6)).toFixed(2) + " LP";
+                        }
+                    } catch (e) { document.getElementById('dash-lp-balance').innerText = "0.00 LP"; }
+
+                    // Fetch Lending / Borrow
+                    try {
+                        if (typeof RAW_CONTRACTS !== 'undefined' && RAW_CONTRACTS.LENDING_POOL) {
+                            const lendingContract = new ethers.Contract(
+                                RAW_CONTRACTS.LENDING_POOL, 
+                                ["function getUserSupplied(address) view returns (uint256)", "function getUserBorrowed(address) view returns (uint256)"], 
+                                provider
+                            );
+                            const supplied = await lendingContract.getUserSupplied(queryAddr);
+                            const borrowed = await lendingContract.getUserBorrowed(queryAddr);
+                            document.getElementById('dash-supplied').innerText = "$" + parseFloat(ethers.formatUnits(supplied, 6)).toFixed(2);
+                            document.getElementById('dash-borrowed').innerText = "$" + parseFloat(ethers.formatUnits(borrowed, 6)).toFixed(2);
+                        }
+                    } catch (e) {
+                        document.getElementById('dash-supplied').innerText = "$0.00";
+                        document.getElementById('dash-borrowed').innerText = "$0.00";
                     }
-                    if (typeof RAW_CONTRACTS !== 'undefined' && RAW_CONTRACTS.EURC_TOKEN && typeof ERC20_ABI !== 'undefined') {
-                        const eurcContract = new ethers.Contract(RAW_CONTRACTS.EURC_TOKEN, ERC20_ABI, provider);
-                        const eurcBal = await eurcContract.balanceOf(targetAddress);
-                        document.getElementById('dash-eurc').innerText = parseFloat(ethers.formatUnits(eurcBal, 6)).toFixed(2);
-                    }
-                } catch (e) {
-                    console.warn("Lỗi fetch USDC/EURC:", e);
                 }
-
-                // Lấy Liquidity LP
-                try {
-                    if (typeof RAW_CONTRACTS !== 'undefined' && RAW_CONTRACTS.SWAP_POOL_ROUTER) {
-                        const poolContract = new ethers.Contract(RAW_CONTRACTS.SWAP_POOL_ROUTER, ["function balanceOf(address) view returns (uint256)"], provider);
-                        const lpBal = await poolContract.balanceOf(targetAddress);
-                        document.getElementById('dash-lp-balance').innerText = parseFloat(ethers.formatUnits(lpBal, 6)).toFixed(2) + " LP";
-                    }
-                } catch (e) {
-                    document.getElementById('dash-lp-balance').innerText = "0.00 LP";
-                }
-
-                // Lấy Lending / Borrow
-                try {
-                    if (typeof RAW_CONTRACTS !== 'undefined' && RAW_CONTRACTS.LENDING_POOL) {
-                        const lendingContract = new ethers.Contract(
-                            RAW_CONTRACTS.LENDING_POOL, 
-                            [
-                                "function getUserSupplied(address) view returns (uint256)",
-                                "function getUserBorrowed(address) view returns (uint256)"
-                            ], 
-                            provider
-                        );
-                        const supplied = await lendingContract.getUserSupplied(targetAddress);
-                        const borrowed = await lendingContract.getUserBorrowed(targetAddress);
-
-                        document.getElementById('dash-supplied').innerText = "$" + parseFloat(ethers.formatUnits(supplied, 6)).toFixed(2);
-                        document.getElementById('dash-borrowed').innerText = "$" + parseFloat(ethers.formatUnits(borrowed, 6)).toFixed(2);
-                    }
-                } catch (e) {
-                    document.getElementById('dash-supplied').innerText = "$0.00";
-                    document.getElementById('dash-borrowed').innerText = "$0.00";
-                }
+            } catch (err) {
+                console.error("Sync Error:", err);
             }
-
-            if (typeof updateLog === 'function') {
-                updateLog("Synced dashboard data successfully.");
-            }
-
-        } catch (err) {
-            console.error("Lỗi Sync Dashboard:", err);
         }
     }
 
@@ -926,22 +827,8 @@
         document.getElementById('dash-borrowed').innerText = "$0.00";
     }
 
-    // Tự động đồng bộ khi chuyển tài khoản MetaMask
-    if (window.ethereum) {
-        window.ethereum.on('accountsChanged', (accounts) => {
-            if (accounts.length > 0) {
-                window.userAddress = accounts[0];
-                updateAllBalances();
-            } else {
-                resetDashboardUI();
-            }
-        });
-    }
-
-    // Tự động chạy khi load lại trang
-    document.addEventListener("DOMContentLoaded", () => {
-        setTimeout(updateAllBalances, 500);
-    });
+    // Tự động chạy mỗi 1.5s để bắt sự kiện khi bấm nút Connect trên Header
+    setInterval(updateAllBalances, 1500);
 </script>
 
 
