@@ -600,7 +600,18 @@
 
 
 
-        <!-- DASHBOARD TAB CONTENT -->
+<!-- NAVIGATION BAR (Dựa theo ảnh) -->
+<nav class="flex bg-slate-900 p-1.5 rounded-xl border border-slate-800 space-x-1 mb-6 text-sm">
+    <button class="nav-btn bg-blue-600 text-white font-semibold px-4 py-2 rounded-lg" onclick="switchTab('dashboard')">Dashboard</button>
+    <button class="nav-btn text-slate-400 hover:text-white px-4 py-2 rounded-lg" onclick="switchTab('swap')">Swap</button>
+    <button class="nav-btn text-slate-400 hover:text-white px-4 py-2 rounded-lg" onclick="switchTab('liquidity')">Liquidity</button>
+    <button class="nav-btn text-slate-400 hover:text-white px-4 py-2 rounded-lg" onclick="switchTab('lending')">Lending</button>
+    <button class="nav-btn text-slate-400 hover:text-white px-4 py-2 rounded-lg" onclick="switchTab('borrow')">Borrow</button>
+    <button class="nav-btn text-slate-400 hover:text-white px-4 py-2 rounded-lg" onclick="switchTab('bridge')">Bridge</button>
+    <button class="nav-btn text-slate-400 hover:text-white px-4 py-2 rounded-lg" onclick="switchTab('payments')">Payments</button>
+</nav>
+
+<!-- DASHBOARD TAB CONTENT -->
 <div id="dashboard-tab" class="tab-content space-y-6">
     
     <!-- Wallet Info Header -->
