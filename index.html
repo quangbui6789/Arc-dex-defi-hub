@@ -600,131 +600,194 @@
 
 
 
+<!-- CSS Dành riêng cho Dashboard (Dán vào thẻ <style> hoặc trên đầu tab) -->
+<style>
+    .dash-container {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        width: 100%;
+        max-width: 1100px;
+        margin: 0 auto;
+        box-sizing: border-box;
+    }
+    .dash-header-card {
+        background: #1e293b;
+        border: 1px solid #334155;
+        border-radius: 12px;
+        padding: 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .dash-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 12px;
+        width: 100%;
+    }
+    .dash-card {
+        background: #1e293b;
+        border: 1px solid #334155;
+        border-radius: 12px;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+    .dash-label { font-size: 11px; color: #94a3b8; font-weight: 500; }
+    .dash-value { font-size: 16px; font-weight: 700; font-family: monospace; }
+    .dash-subtext { font-size: 10px; color: #64748b; }
+    .dash-btn {
+        background: #2563eb;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 8px 16px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+    .dash-btn:hover { background: #1d4ed8; }
+</style>
+
 <!-- DASHBOARD TAB CONTENT -->
-<div id="dashboard-tab" class="tab-content space-y-6">
-    
-    <!-- Wallet Info Bar -->
-    <div class="card flex justify-between items-center p-4 bg-slate-800 rounded-xl border border-slate-700">
-        <div>
-            <div class="text-xs text-slate-400">Account Overview</div>
-            <div id="dash-wallet-address" class="font-mono text-sm font-bold text-blue-400">Not Connected</div>
-        </div>
-        <button class="btn-primary text-xs px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg" onclick="updateAllBalances()">🔄 Sync All Positions</button>
-    </div>
-
-    <!-- Overview Stats Grid -->
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+<div id="dashboard-tab" class="tab-content active">
+    <div class="dash-container">
         
-        <!-- 1. Balances (Swap) -->
-        <div class="card p-4 bg-slate-800 border border-slate-700 rounded-xl">
-            <div class="text-xs text-slate-400 font-medium">USDC / EURC Balance</div>
-            <div class="font-bold text-blue-400 text-base mt-2">
-                <span id="dash-usdc">0.00</span> / <span id="dash-eurc">0.00</span>
+        <!-- Header Info Bar -->
+        <div class="dash-header-card">
+            <div>
+                <div class="dash-label">CONNECTED ACCOUNT</div>
+                <div id="dash-wallet-address" class="dash-value" style="color: #60a5fa;">Not Connected</div>
             </div>
-            <div class="text-[10px] text-slate-500 mt-1">Wallet Tokens</div>
+            <button class="dash-btn" onclick="updateAllBalances()">🔄 Sync All Data</button>
         </div>
 
-        <!-- 2. Liquidity -->
-        <div class="card p-4 bg-slate-800 border border-slate-700 rounded-xl">
-            <div class="text-xs text-slate-400 font-medium">Provided Liquidity</div>
-            <div class="font-bold text-purple-400 text-base mt-2" id="dash-lp-balance">0.00 LP</div>
-            <div class="text-[10px] text-slate-500 mt-1">Swap Pool</div>
+        <!-- 6 Stats Cards Grid -->
+        <div class="dash-grid">
+            <!-- 1. USDC / EURC -->
+            <div class="dash-card">
+                <div class="dash-label">USDC / EURC BALANCE</div>
+                <div class="dash-value" style="color: #38bdf8;">
+                    <span id="dash-usdc">0.00</span> / <span id="dash-eurc">0.00</span>
+                </div>
+                <div class="dash-subtext">Wallet Balance</div>
+            </div>
+
+            <!-- 2. Liquidity -->
+            <div class="dash-card">
+                <div class="dash-label">PROVIDED LIQUIDITY</div>
+                <div class="dash-value" id="dash-lp-balance" style="color: #c084fc;">0.00 LP</div>
+                <div class="dash-subtext">Swap Pool</div>
+            </div>
+
+            <!-- 3. Lending -->
+            <div class="dash-card">
+                <div class="dash-label">TOTAL SUPPLIED</div>
+                <div class="dash-value" id="dash-supplied" style="color: #4ade80;">$0.00</div>
+                <div class="dash-subtext">Lending Pool</div>
+            </div>
+
+            <!-- 4. Borrow -->
+            <div class="dash-card">
+                <div class="dash-label">TOTAL BORROWED</div>
+                <div class="dash-value" id="dash-borrowed" style="color: #f87171;">$0.00</div>
+                <div class="dash-subtext">Lending Pool</div>
+            </div>
+
+            <!-- 5. Bridge -->
+            <div class="dash-card">
+                <div class="dash-label">BRIDGE STATUS</div>
+                <div class="dash-value" id="dash-bridge-status" style="color: #facc15;">Ready</div>
+                <div class="dash-subtext">CCTP Messenger</div>
+            </div>
+
+            <!-- 6. Payments -->
+            <div class="dash-card">
+                <div class="dash-label">RECENT PAYMENT</div>
+                <div class="dash-value" id="dash-last-pay" style="color: #22d3ee;">None</div>
+                <div class="dash-subtext">Direct Transfer</div>
+            </div>
         </div>
 
-        <!-- 3. Lending -->
-        <div class="card p-4 bg-slate-800 border border-slate-700 rounded-xl">
-            <div class="text-xs text-slate-400 font-medium">Total Supplied</div>
-            <div class="font-bold text-green-400 text-base mt-2" id="dash-supplied">$0.00</div>
-            <div class="text-[10px] text-slate-500 mt-1">Lending Pool</div>
-        </div>
-
-        <!-- 4. Borrow -->
-        <div class="card p-4 bg-slate-800 border border-slate-700 rounded-xl">
-            <div class="text-xs text-slate-400 font-medium">Total Borrowed</div>
-            <div class="font-bold text-red-400 text-base mt-2" id="dash-borrowed">$0.00</div>
-            <div class="text-[10px] text-slate-500 mt-1">Lending Pool</div>
-        </div>
-
-        <!-- 5. Bridge -->
-        <div class="card p-4 bg-slate-800 border border-slate-700 rounded-xl">
-            <div class="text-xs text-slate-400 font-medium">Bridge Status</div>
-            <div class="font-bold text-yellow-400 text-base mt-2" id="dash-bridge-status">Ready</div>
-            <div class="text-[10px] text-slate-500 mt-1">CCTP Messenger</div>
-        </div>
-
-        <!-- 6. Payments -->
-        <div class="card p-4 bg-slate-800 border border-slate-700 rounded-xl">
-            <div class="text-xs text-slate-400 font-medium">Recent Payment</div>
-            <div class="font-bold text-cyan-400 text-base mt-2" id="dash-last-pay">None</div>
-            <div class="text-[10px] text-slate-500 mt-1">Direct Transfer</div>
-        </div>
-    </div>
-
-    <!-- Log Console Box -->
-    <div class="card p-4 bg-slate-900 border border-slate-800 rounded-xl">
-        <div class="text-xs text-slate-400 mb-2 font-mono">System Execution Log</div>
-        <div id="logBox" class="h-24 overflow-y-auto font-mono text-xs text-green-400 bg-slate-950 p-3 rounded border border-slate-800">
-            System ready. Connect wallet to fetch data.
-        </div>
     </div>
 </div>
 
 <script>
     async function updateAllBalances() {
-        if (!window.ethereum || !userAddress) {
-            resetDashboardUI();
+        if (!window.ethereum) {
+            alert("MetaMask required!");
             return;
         }
 
         try {
             const provider = new ethers.BrowserProvider(window.ethereum);
             
-            // Hiển thị ví
-            const shortAddr = userAddress.substring(0, 6) + "..." + userAddress.substring(38);
-            document.getElementById('dash-wallet-address').innerText = userAddress;
+            // 1. Lấy trực tiếp địa chỉ ví từ Provider (Tránh lỗi 'Not Connected' do sai biến)
+            const accounts = await provider.send("eth_accounts", []);
+            if (!accounts || accounts.length === 0) {
+                resetDashboardUI();
+                return;
+            }
 
-            // 1. Lấy số dư USDC / EURC
-            const usdcContract = new ethers.Contract(getSafeAddress(RAW_CONTRACTS.USDC_TOKEN), ERC20_ABI, provider);
-            const eurcContract = new ethers.Contract(getSafeAddress(RAW_CONTRACTS.EURC_TOKEN), ERC20_ABI, provider);
+            const currentAccount = accounts[0];
+            window.userAddress = currentAccount; // Cập nhật biến global
 
-            const usdcBal = await usdcContract.balanceOf(userAddress).catch(() => 0n);
-            const eurcBal = await eurcContract.balanceOf(userAddress).catch(() => 0n);
+            // Hiển thị địa chỉ rút gọn
+            const shortAddr = currentAccount.substring(0, 6) + "..." + currentAccount.substring(38);
+            document.getElementById('dash-wallet-address').innerText = shortAddr;
 
-            document.getElementById('dash-usdc').innerText = parseFloat(ethers.formatUnits(usdcBal, 6)).toFixed(2);
-            document.getElementById('dash-eurc').innerText = parseFloat(ethers.formatUnits(eurcBal, 6)).toFixed(2);
+            // 2. Lấy số dư Token an toàn (Dùng try-catch riêng để không bị đứt luồng khi Contract lỗi)
+            try {
+                const usdcContract = new ethers.Contract(RAW_CONTRACTS.USDC_TOKEN, ERC20_ABI, provider);
+                const eurcContract = new ethers.Contract(RAW_CONTRACTS.EURC_TOKEN, ERC20_ABI, provider);
 
-            // 2. Lấy số dư Liquidity Pool
-            const poolContract = new ethers.Contract(
-                getSafeAddress(RAW_CONTRACTS.SWAP_POOL_ROUTER), 
-                ["function balanceOf(address owner) view returns (uint256)"], 
-                provider
-            );
-            const lpBal = await poolContract.balanceOf(userAddress).catch(() => 0n);
-            document.getElementById('dash-lp-balance').innerText = parseFloat(ethers.formatUnits(lpBal, 6)).toFixed(2) + " LP";
+                const usdcBal = await usdcContract.balanceOf(currentAccount);
+                const eurcBal = await eurcContract.balanceOf(currentAccount);
 
-            // 3 & 4. Lấy vị thế Lending & Borrow
-            const lendingContract = new ethers.Contract(
-                getSafeAddress(RAW_CONTRACTS.LENDING_POOL), 
-                [
-                    "function getUserSupplied(address user) view returns (uint256)",
-                    "function getUserBorrowed(address user) view returns (uint256)"
-                ], 
-                provider
-            );
-            const supplied = await lendingContract.getUserSupplied(userAddress).catch(() => 0n);
-            const borrowed = await lendingContract.getUserBorrowed(userAddress).catch(() => 0n);
+                document.getElementById('dash-usdc').innerText = parseFloat(ethers.formatUnits(usdcBal, 6)).toFixed(2);
+                document.getElementById('dash-eurc').innerText = parseFloat(ethers.formatUnits(eurcBal, 6)).toFixed(2);
+            } catch (e) {
+                console.warn("Lỗi lấy balance Token (có thể do sai địa chỉ contract):", e);
+            }
 
-            document.getElementById('dash-supplied').innerText = "$" + parseFloat(ethers.formatUnits(supplied, 6)).toFixed(2);
-            document.getElementById('dash-borrowed').innerText = "$" + parseFloat(ethers.formatUnits(borrowed, 6)).toFixed(2);
+            // 3. Lấy vị thế Liquidity Pool an toàn
+            try {
+                const poolContract = new ethers.Contract(RAW_CONTRACTS.SWAP_POOL_ROUTER, ["function balanceOf(address) view returns (uint256)"], provider);
+                const lpBal = await poolContract.balanceOf(currentAccount);
+                document.getElementById('dash-lp-balance').innerText = parseFloat(ethers.formatUnits(lpBal, 6)).toFixed(2) + " LP";
+            } catch (e) {
+                document.getElementById('dash-lp-balance').innerText = "0.00 LP";
+            }
+
+            // 4. Lấy vị thế Lending & Borrow an toàn
+            try {
+                const lendingContract = new ethers.Contract(
+                    RAW_CONTRACTS.LENDING_POOL, 
+                    [
+                        "function getUserSupplied(address) view returns (uint256)",
+                        "function getUserBorrowed(address) view returns (uint256)"
+                    ], 
+                    provider
+                );
+                const supplied = await lendingContract.getUserSupplied(currentAccount);
+                const borrowed = await lendingContract.getUserBorrowed(currentAccount);
+
+                document.getElementById('dash-supplied').innerText = "$" + parseFloat(ethers.formatUnits(supplied, 6)).toFixed(2);
+                document.getElementById('dash-borrowed').innerText = "$" + parseFloat(ethers.formatUnits(borrowed, 6)).toFixed(2);
+            } catch (e) {
+                document.getElementById('dash-supplied').innerText = "$0.00";
+                document.getElementById('dash-borrowed').innerText = "$0.00";
+            }
 
             if (typeof updateLog === 'function') {
-                updateLog("Synced all balances for address: " + shortAddr);
+                updateLog("Synced dashboard data for " + shortAddr);
             }
+
         } catch (err) {
-            console.error("Sync Error:", err);
-            if (typeof updateLog === 'function') {
-                updateLog("Sync Error: " + (err.reason || err.message));
-            }
+            console.error("General Sync Error:", err);
         }
     }
 
@@ -735,9 +798,12 @@
         document.getElementById('dash-lp-balance').innerText = "0.00 LP";
         document.getElementById('dash-supplied').innerText = "$0.00";
         document.getElementById('dash-borrowed').innerText = "$0.00";
-        document.getElementById('dash-bridge-status').innerText = "Ready";
-        document.getElementById('dash-last-pay').innerText = "None";
     }
+
+    // Tự động đồng bộ dữ liệu khi tải trang nếu ví đã kết nối sẵn
+    document.addEventListener("DOMContentLoaded", () => {
+        setTimeout(updateAllBalances, 1000);
+    });
 </script>
 
 
