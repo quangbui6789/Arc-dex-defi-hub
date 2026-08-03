@@ -535,11 +535,11 @@
             <button onclick="toggleChatWindow()" style="background:none; border:none; color:#fff; cursor:pointer;">✕</button>
         </div>
         <div class="ai-chat-body" id="chatBody">
-            <div class="msg msg-agent">Xin chào! Tôi có thể xử lý mọi yêu cầu giao dịch của bạn trên Arc AppKit:
-            <br>• <i>"Bridge 5 USDC sang Base Sepolia"</i>
-            <br>• <i>"Swap 2 EURC lấy USDC"</i>
-            <br>• <i>"Deposit 10 USDC"</i>
-            <br>• <i>"Chuyển 1 USDC cho 0x123..."</i></div>
+            <div class="msg msg-agent">Xin chào! Tôi có thể thực hiện mọi thao tác theo yêu cầu của bạn:
+            <br>• <i>"transfer 2 usdc to 0x0a..."</i>
+            <br>• <i>"bridge 5 usdc on Base Sepolia"</i>
+            <br>• <i>"swap 2 EURC sang USDC"</i>
+            <br>• <i>"deposit 10 USDC"</i></div>
         </div>
         <div class="ai-chat-footer">
             <input type="text" id="chatInput" placeholder="Yêu cầu giao dịch bất kỳ..." onkeydown="if(event.key === 'Enter') sendAgentMessage()">
@@ -574,9 +574,8 @@
             "function removeLiquidity(uint256 _amount) external"
         ];
 
-        // Standard Arc AppKit Bridge ABI (https://docs.arc.io/app-kit/bridge)
         const BRIDGE_ABI = [
-            "function bridgeAsset(uint256 _targetChainId, address _token, uint256 _amount, address _recipient) external",
+            "function bridgeAsset(uint256 _targetChainId, address _token, uint256 _amount, address _recipient) external payable",
             "event BridgeInitiated(uint256 indexed targetChainId, address indexed token, uint256 amount, address indexed recipient)"
         ];
 
@@ -661,9 +660,7 @@
 
                     totalSuppliedUSD = parseFloat(ethers.formatUnits(usdcSupplied, 6)) + parseFloat(ethers.formatUnits(eurcSupplied, 6));
                     totalBorrowedUSD = parseFloat(ethers.formatUnits(usdcBorrowed, 6)) + parseFloat(ethers.formatUnits(eurcBorrowed, 6));
-                } catch(e) {
-                    console.log("Lending pool query notice:", e.message);
-                }
+                } catch(e) {}
 
                 document.getElementById('dash-supplied').innerText = "$" + totalSuppliedUSD.toFixed(2);
                 document.getElementById('dash-borrowed').innerText = "$" + totalBorrowedUSD.toFixed(2);
@@ -720,7 +717,7 @@
         async function getLegacyGasParam(provider) {
             try {
                 const feeData = await provider.getFeeData();
-                let targetGasPrice = feeData.gasPrice ? (feeData.gasPrice * 200n) / 100n : ethers.parseUnits("25", "gwei");
+                let targetGasPrice = feeData.gasPrice ? (feeData.gasPrice * 150n) / 100n : ethers.parseUnits("25", "gwei");
                 return { gasPrice: targetGasPrice };
             } catch (e) {
                 return { gasPrice: ethers.parseUnits("25", "gwei") };
@@ -957,7 +954,7 @@
             }
         }
 
-        /* ARC APPKIT BRIDGE FUNCTIONS */
+        /* ARC APPKIT BRIDGE FIXED FUNCTIONS */
         async function approveBridge() {
             if (!userAddress || !window.ethereum) return alert("Please connect wallet!");
             const tokenSymbol = document.getElementById('bridgeToken').value;
@@ -1009,17 +1006,17 @@
                 }
 
                 updateLog(`Initiating Bridge via Arc AppKit to Chain ID ${targetChainId}...`);
+                
+                // Transmission parameters aligned with Arc AppKit BigInt types
                 const tx = await bridgeContract.bridgeAsset(
-                    targetChainId,
+                    BigInt(targetChainId),
                     tokenAddr,
                     parsedAmount,
                     getSafeAddress(recipient),
-                    gasParams
+                    { ...gasParams }
                 );
                 
-                const txLink = `<a href="https://testnet.arcscan.app/tx/${tx.hash}" target="_blank" style="color:#60a5fa;text-decoration:underline;">${tx.hash.substring(0, 10)}...</a>`;
-                updateLog("Bridge Tx Sent: " + txLink + ". Waiting for confirmation...");
-                
+                updateLog("Bridge Tx Sent: " + tx.hash + ". Waiting for confirmation...");
                 await tx.wait();
                 updateLog(`Bridge Event Dispatched to Chain ${targetChainId}! 🚀`);
                 await updateAllBalances();
@@ -1028,11 +1025,11 @@
             }
         }
 
-        async function executePayment() {
+        async function executePayment(overrideRecipient, overrideAmount, overrideToken) {
             if (!userAddress || !window.ethereum) return alert("Please connect wallet!");
-            const tokenSymbol = document.getElementById('payToken').value;
-            const recipient = document.getElementById('payRecipient').value;
-            const amount = document.getElementById('payAmount').value;
+            const tokenSymbol = overrideToken || document.getElementById('payToken').value;
+            const recipient = overrideRecipient || document.getElementById('payRecipient').value;
+            const amount = overrideAmount || document.getElementById('payAmount').value;
 
             if (!recipient || !amount || parseFloat(amount) <= 0) return alert("Invalid recipient or amount!");
 
@@ -1044,7 +1041,7 @@
                 const tokenContract = new ethers.Contract(tokenAddr, ERC20_ABI, signer);
                 const gasParams = await getLegacyGasParam(provider);
 
-                updateLog(`Sending ${amount} ${tokenSymbol}...`);
+                updateLog(`Sending ${amount} ${tokenSymbol} to ${recipient}...`);
                 const tx = await tokenContract.transfer(getSafeAddress(recipient), ethers.parseUnits(amount, 6), gasParams);
                 await tx.wait();
                 updateLog("Payment Sent Successfully! 🚀");
@@ -1059,7 +1056,7 @@
             chatWindow.classList.toggle('hidden');
         }
 
-        // --- ENHANCED NATURAL LANGUAGE AI AGENT EXECUTION ENGINE ---
+        // --- UNIVERSAL NATURAL LANGUAGE AI AGENT EXECUTION ENGINE ---
         async function parseAndExecuteAgentCommand(text) {
             const lower = text.toLowerCase();
             
@@ -1075,20 +1072,37 @@
                 return "⚠️ Bạn vui lòng kết nối ví trước khi thực hiện giao dịch nhé!";
             }
 
-            // Extract Numbers (Amount)
+            // 1. Extract All Numbers
             const numMatch = lower.match(/\d+(\.\d+)?/);
             const amount = numMatch ? numMatch[0] : null;
 
-            // Extract Token
+            // 2. Extract Token Symbol
             let token = "USDC";
             if (lower.includes("eurc") || lower.includes("eur")) token = "EURC";
 
-            // Extract Address (0x...)
+            // 3. Extract EVM Address (0x...)
             const addrMatch = text.match(/0x[a-fA-F0-9]{40}/);
             const extractedAddress = addrMatch ? addrMatch[0] : null;
 
-            // 1. ARC APPKIT BRIDGE COMMAND
-            if (lower.includes("bridge") || lower.includes("chuyển mạng") || lower.includes("cross chain")) {
+            // --- INTENT DETECTOR ---
+
+            // INTENT 1: TRANSFER / PAY / SEND
+            const isTransferIntent = (lower.includes("transfer") || lower.includes("send") || lower.includes("chuyển") || lower.includes("pay") || lower.includes("gửi")) && !lower.includes("bridge") && !lower.includes("mạng");
+            
+            if (isTransferIntent) {
+                if (amount && extractedAddress) {
+                    document.getElementById('payToken').value = token;
+                    document.getElementById('payAmount').value = amount;
+                    document.getElementById('payRecipient').value = extractedAddress;
+                    setTimeout(() => { executePayment(extractedAddress, amount, token); }, 500);
+                    return `🤖 Đang gửi lệnh chuyển **${amount} ${token}** tới ví **${extractedAddress}**. Vui lòng kiểm tra và bấm xác nhận trên MetaMask!`;
+                } else if (amount && !extractedAddress) {
+                    return "⚠️ Vui lòng cung cấp địa chỉ ví nhận dạng `0x...` (Ví dụ: `transfer 2 usdc to 0x123...`).";
+                }
+            }
+
+            // INTENT 2: ARC APPKIT BRIDGE COMMAND
+            if (lower.includes("bridge") || lower.includes("cross chain") || lower.includes("sang mạng") || lower.includes("qua mạng")) {
                 let targetChainId = "11155111"; // Default Sepolia
                 let chainName = "Ethereum Sepolia";
 
@@ -1107,13 +1121,13 @@
                     if (extractedAddress) document.getElementById('bridgeRecipient').value = extractedAddress;
 
                     setTimeout(() => { executeBridge(); }, 500);
-                    return `🤖 Đang gửi lệnh Arc Bridge AppKit: **${amount} ${token}** tới **${chainName}** (Chain ID: ${targetChainId}). Hãy xác nhận giao dịch trên ví!`;
+                    return `🤖 Đang gửi lệnh Arc Bridge AppKit: **${amount} ${token}** sang **${chainName}** (Chain ID: ${targetChainId})${extractedAddress ? ' tới người nhận ' + extractedAddress : ''}. Hãy xác nhận trên ví!`;
                 } else {
-                    return "Vui lòng nhập số lượng cần Bridge (ví dụ: 'bridge 5 usdc to base sepolia').";
+                    return "Vui lòng nhập số lượng cần Bridge (ví dụ: 'bridge 5 usdc to 0x... on Base Sepolia').";
                 }
             }
 
-            // 2. SWAP COMMAND
+            // INTENT 3: SWAP COMMAND
             if (lower.includes("swap") || lower.includes("đổi") || lower.includes("trade")) {
                 let fromToken = "USDC";
                 let toToken = "EURC";
@@ -1128,14 +1142,12 @@
                     document.getElementById('swapToToken').value = toToken;
                     document.getElementById('swapAmountIn').value = amount;
                     setTimeout(() => { uiSwap(); }, 500);
-                    return `🤖 Đang thực hiện Swap: **${amount} ${fromToken}** sang **${toToken}**. Hãy kiểm tra và bấm xác nhận trên ví!`;
-                } else {
-                    return "Vui lòng nhập số lượng cần swap (ví dụ: 'swap 2 usdc sang eurc').";
+                    return `🤖 Đang kích hoạt Swap: **${amount} ${fromToken}** sang **${toToken}**. Xác nhận giao dịch trên ví nhé!`;
                 }
             }
 
-            // 3. DEPOSIT / LENDING COMMAND
-            if (lower.includes("deposit") || lower.includes("nạp") || lower.includes("lend")) {
+            // INTENT 4: LENDING / DEPOSIT COMMAND
+            if (lower.includes("deposit") || lower.includes("nạp") || lower.includes("lend") || lower.includes("gửi tiết kiệm")) {
                 if (amount) {
                     document.getElementById('lendingToken').value = token;
                     document.getElementById('lendingAmount').value = amount;
@@ -1144,7 +1156,7 @@
                 }
             }
 
-            // 4. BORROW COMMAND
+            // INTENT 5: BORROW COMMAND
             if (lower.includes("borrow") || lower.includes("vay")) {
                 if (amount) {
                     document.getElementById('borrowToken').value = token;
@@ -1154,26 +1166,13 @@
                 }
             }
 
-            // 5. DIRECT PAYMENT / TRANSFER COMMAND
-            if (lower.includes("send") || lower.includes("chuyển") || lower.includes("pay")) {
-                if (amount && extractedAddress) {
-                    document.getElementById('payToken').value = token;
-                    document.getElementById('payAmount').value = amount;
-                    document.getElementById('payRecipient').value = extractedAddress;
-                    setTimeout(() => { executePayment(); }, 500);
-                    return `🤖 Đang chuyển **${amount} ${token}** tới địa chỉ **${extractedAddress}**...`;
-                } else {
-                    return "Để chuyển tiền, vui lòng cung cấp số tiền + địa chỉ nhận (ví dụ: 'chuyển 1 usdc cho 0x123...').";
-                }
-            }
-
-            // 6. BALANCE / QUERY COMMAND
+            // INTENT 6: BALANCE / QUERY COMMAND
             if (lower.includes("balance") || lower.includes("số dư") || lower.includes("kiểm tra")) {
                 await updateAllBalances();
-                return `🤖 Đã cập nhật! Số dư hiện tại của bạn: **${document.getElementById('dash-usdc').innerText} USDC** và **${document.getElementById('dash-eurc').innerText} EURC**.`;
+                return `🤖 Đã cập nhật! Số dư của bạn: **${document.getElementById('dash-usdc').innerText} USDC** & **${document.getElementById('dash-eurc').innerText} EURC**.`;
             }
 
-            return "Tôi chưa hiểu rõ câu lệnh. Bạn có thể gõ các câu lệnh giao dịch trực tiếp như:\n• 'Bridge 5 USDC to Base Sepolia'\n• 'Swap 2 USDC sang EURC'\n• 'Deposit 10 USDC'\n• 'Chuyển 1 USDC cho 0x...'";
+            return "Tôi chưa nhận diện được yêu cầu. Bạn thử gõ theo các cú pháp linh hoạt sau nhé:\n• `transfer 2 usdc to 0x...`\n• `bridge 5 usdc to 0x... on Base Sepolia`\n• `swap 10 usdc sang eurc`\n• `deposit 5 usdc`";
         }
 
         async function sendAgentMessage() {
@@ -1199,7 +1198,7 @@
                 agentMsg.innerHTML = replyText;
                 chatBody.appendChild(agentMsg);
                 chatBody.scrollTop = chatBody.scrollHeight;
-            }, 500);
+            }, 400);
         }
 
         if (window.ethereum) {
