@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MULTI-DEFI-HUB | Arc Rails</title>
+    <title>MULTI-DEFI-HUB | Arc Rails & AppKit</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -254,7 +254,7 @@
             font-size: 24px; cursor: pointer; box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4); z-index: 999;
         }
         .ai-chat-window {
-            position: fixed; bottom: 92px; right: 24px; width: 360px; height: 480px;
+            position: fixed; bottom: 92px; right: 24px; width: 380px; height: 500px;
             background: #0f172a; border: 1px solid var(--card-border); border-radius: 16px;
             display: flex; flex-direction: column; box-shadow: 0 12px 32px rgba(0,0,0,0.6); z-index: 1000; overflow: hidden;
         }
@@ -264,7 +264,7 @@
             display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--card-border);
         }
         .ai-chat-body { flex: 1; padding: 14px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; font-size: 13px; }
-        .msg { padding: 10px 14px; border-radius: 12px; max-width: 85%; line-height: 1.4; }
+        .msg { padding: 10px 14px; border-radius: 12px; max-width: 88%; line-height: 1.4; word-break: break-word; }
         .msg-user { background: var(--primary-color); color: #fff; align-self: flex-end; }
         .msg-agent { background: #1e293b; color: #cbd5e1; align-self: flex-start; border: 1px solid var(--card-border); }
         .ai-chat-footer { padding: 12px; display: flex; gap: 8px; border-top: 1px solid var(--card-border); background: #070a11; }
@@ -531,14 +531,18 @@
     <button class="ai-chat-toggle" onclick="toggleChatWindow()">🤖</button>
     <div class="ai-chat-window hidden" id="aiChatWindow">
         <div class="ai-chat-header">
-            <span>Arc Execution Agent</span>
+            <span>Arc Execution Agent (AppKit Integrated)</span>
             <button onclick="toggleChatWindow()" style="background:none; border:none; color:#fff; cursor:pointer;">✕</button>
         </div>
         <div class="ai-chat-body" id="chatBody">
-            <div class="msg msg-agent">Hello! I am your active Arc Agent. I can directly execute actions on your wallet! Try asking me: <br>• <i>"swap 2 usdc to eurc"</i><br>• <i>"deposit 10 usdc"</i><br>• <i>"borrow 5 eurc"</i></div>
+            <div class="msg msg-agent">Xin chào! Tôi có thể xử lý mọi yêu cầu giao dịch của bạn trên Arc AppKit:
+            <br>• <i>"Bridge 5 USDC sang Base Sepolia"</i>
+            <br>• <i>"Swap 2 EURC lấy USDC"</i>
+            <br>• <i>"Deposit 10 USDC"</i>
+            <br>• <i>"Chuyển 1 USDC cho 0x123..."</i></div>
         </div>
         <div class="ai-chat-footer">
-            <input type="text" id="chatInput" placeholder="Command me (e.g. swap 2 usdc to eurc)..." onkeydown="if(event.key === 'Enter') sendAgentMessage()">
+            <input type="text" id="chatInput" placeholder="Yêu cầu giao dịch bất kỳ..." onkeydown="if(event.key === 'Enter') sendAgentMessage()">
             <button onclick="sendAgentMessage()">Send</button>
         </div>
     </div>
@@ -570,6 +574,7 @@
             "function removeLiquidity(uint256 _amount) external"
         ];
 
+        // Standard Arc AppKit Bridge ABI (https://docs.arc.io/app-kit/bridge)
         const BRIDGE_ABI = [
             "function bridgeAsset(uint256 _targetChainId, address _token, uint256 _amount, address _recipient) external",
             "event BridgeInitiated(uint256 indexed targetChainId, address indexed token, uint256 amount, address indexed recipient)"
@@ -642,7 +647,6 @@
                 document.getElementById('dash-usdc').innerText = parseFloat(balUsdc).toFixed(2);
                 document.getElementById('dash-eurc').innerText = parseFloat(balEurc).toFixed(2);
 
-                // Fetch Lending Supplied/Borrowed Data from Contract
                 const provider = new ethers.BrowserProvider(window.ethereum);
                 const lendingContract = new ethers.Contract(getSafeAddress(RAW_CONTRACTS.LENDING_POOL), LENDING_POOL_ABI, provider);
 
@@ -1004,7 +1008,7 @@
                     updateLog("Approval complete!");
                 }
 
-                updateLog(`Initiating Bridge to Chain ID ${targetChainId}...`);
+                updateLog(`Initiating Bridge via Arc AppKit to Chain ID ${targetChainId}...`);
                 const tx = await bridgeContract.bridgeAsset(
                     targetChainId,
                     tokenAddr,
@@ -1055,31 +1059,66 @@
             chatWindow.classList.toggle('hidden');
         }
 
-        // --- AI AGENT DIRECT WALLET & SMART CONTRACT INTERACTION ---
+        // --- ENHANCED NATURAL LANGUAGE AI AGENT EXECUTION ENGINE ---
         async function parseAndExecuteAgentCommand(text) {
             const lower = text.toLowerCase();
             
             if (lower.includes("connect") || lower.includes("ví") || lower.includes("wallet")) {
                 if (!userAddress) {
                     await connectWallet();
-                    return "Connecting your wallet now...";
+                    return "Đang thực hiện kết nối ví của bạn...";
                 }
-                return `Wallet already connected: ${userAddress}`;
+                return `Ví đã được kết nối: ${userAddress}`;
             }
 
             if (!userAddress) {
-                return "⚠️ Please connect your wallet first so I can execute transactions!";
+                return "⚠️ Bạn vui lòng kết nối ví trước khi thực hiện giao dịch nhé!";
             }
 
-            // Command: Swap
-            if (lower.includes("swap") || lower.includes("đổi")) {
-                const numMatch = lower.match(/\d+(\.\d+)?/);
-                const amount = numMatch ? numMatch[0] : null;
+            // Extract Numbers (Amount)
+            const numMatch = lower.match(/\d+(\.\d+)?/);
+            const amount = numMatch ? numMatch[0] : null;
 
+            // Extract Token
+            let token = "USDC";
+            if (lower.includes("eurc") || lower.includes("eur")) token = "EURC";
+
+            // Extract Address (0x...)
+            const addrMatch = text.match(/0x[a-fA-F0-9]{40}/);
+            const extractedAddress = addrMatch ? addrMatch[0] : null;
+
+            // 1. ARC APPKIT BRIDGE COMMAND
+            if (lower.includes("bridge") || lower.includes("chuyển mạng") || lower.includes("cross chain")) {
+                let targetChainId = "11155111"; // Default Sepolia
+                let chainName = "Ethereum Sepolia";
+
+                if (lower.includes("base")) {
+                    targetChainId = "84532";
+                    chainName = "Base Sepolia";
+                } else if (lower.includes("arbitrum") || lower.includes("arb")) {
+                    targetChainId = "421614";
+                    chainName = "Arbitrum Sepolia";
+                }
+
+                if (amount) {
+                    document.getElementById('bridgeTargetChain').value = targetChainId;
+                    document.getElementById('bridgeToken').value = token;
+                    document.getElementById('bridgeAmount').value = amount;
+                    if (extractedAddress) document.getElementById('bridgeRecipient').value = extractedAddress;
+
+                    setTimeout(() => { executeBridge(); }, 500);
+                    return `🤖 Đang gửi lệnh Arc Bridge AppKit: **${amount} ${token}** tới **${chainName}** (Chain ID: ${targetChainId}). Hãy xác nhận giao dịch trên ví!`;
+                } else {
+                    return "Vui lòng nhập số lượng cần Bridge (ví dụ: 'bridge 5 usdc to base sepolia').";
+                }
+            }
+
+            // 2. SWAP COMMAND
+            if (lower.includes("swap") || lower.includes("đổi") || lower.includes("trade")) {
                 let fromToken = "USDC";
                 let toToken = "EURC";
 
-                if (lower.includes("eurc to usdc") || lower.includes("eurc sang usdc")) {
+                if (lower.includes("eurc sang usdc") || lower.includes("eurc to usdc")) {
                     fromToken = "EURC";
                     toToken = "USDC";
                 }
@@ -1088,49 +1127,53 @@
                     document.getElementById('swapFromToken').value = fromToken;
                     document.getElementById('swapToToken').value = toToken;
                     document.getElementById('swapAmountIn').value = amount;
-                    
                     setTimeout(() => { uiSwap(); }, 500);
-                    return `🤖 Executing Swap: ${amount} ${fromToken} to ${toToken}. Check your wallet to confirm!`;
+                    return `🤖 Đang thực hiện Swap: **${amount} ${fromToken}** sang **${toToken}**. Hãy kiểm tra và bấm xác nhận trên ví!`;
                 } else {
-                    return "Please specify an amount to swap (e.g., 'swap 2 usdc to eurc').";
+                    return "Vui lòng nhập số lượng cần swap (ví dụ: 'swap 2 usdc sang eurc').";
                 }
             }
 
-            // Command: Deposit / Lend
+            // 3. DEPOSIT / LENDING COMMAND
             if (lower.includes("deposit") || lower.includes("nạp") || lower.includes("lend")) {
-                const numMatch = lower.match(/\d+(\.\d+)?/);
-                const amount = numMatch ? numMatch[0] : null;
-                const token = lower.includes("eurc") ? "EURC" : "USDC";
-
                 if (amount) {
                     document.getElementById('lendingToken').value = token;
                     document.getElementById('lendingAmount').value = amount;
                     setTimeout(() => { executeLendingDeposit(); }, 500);
-                    return `🤖 Executing Deposit: ${amount} ${token} into Lending Pool. Check your wallet to confirm!`;
+                    return `🤖 Đang thực hiện Deposit **${amount} ${token}** vào Lending Pool...`;
                 }
             }
 
-            // Command: Borrow
+            // 4. BORROW COMMAND
             if (lower.includes("borrow") || lower.includes("vay")) {
-                const numMatch = lower.match(/\d+(\.\d+)?/);
-                const amount = numMatch ? numMatch[0] : null;
-                const token = lower.includes("eurc") ? "EURC" : "USDC";
-
                 if (amount) {
                     document.getElementById('borrowToken').value = token;
                     document.getElementById('borrowAmount').value = amount;
                     setTimeout(() => { uiBorrow(); }, 500);
-                    return `🤖 Executing Borrow: ${amount} ${token} from Lending Pool. Check your wallet to confirm!`;
+                    return `🤖 Đang gửi yêu cầu Borrow **${amount} ${token}** từ Lending Pool...`;
                 }
             }
 
-            // Command: Balance / Refresh
-            if (lower.includes("balance") || lower.includes("số dư") || lower.includes("refresh")) {
-                await updateAllBalances();
-                return `🤖 Balances updated! Your wallet holds ${document.getElementById('dash-usdc').innerText} USDC and ${document.getElementById('dash-eurc').innerText} EURC.`;
+            // 5. DIRECT PAYMENT / TRANSFER COMMAND
+            if (lower.includes("send") || lower.includes("chuyển") || lower.includes("pay")) {
+                if (amount && extractedAddress) {
+                    document.getElementById('payToken').value = token;
+                    document.getElementById('payAmount').value = amount;
+                    document.getElementById('payRecipient').value = extractedAddress;
+                    setTimeout(() => { executePayment(); }, 500);
+                    return `🤖 Đang chuyển **${amount} ${token}** tới địa chỉ **${extractedAddress}**...`;
+                } else {
+                    return "Để chuyển tiền, vui lòng cung cấp số tiền + địa chỉ nhận (ví dụ: 'chuyển 1 usdc cho 0x123...').";
+                }
             }
 
-            return "I didn't quite catch that. Try commands like:\n• 'swap 2 usdc to eurc'\n• 'deposit 10 usdc'\n• 'borrow 5 eurc'";
+            // 6. BALANCE / QUERY COMMAND
+            if (lower.includes("balance") || lower.includes("số dư") || lower.includes("kiểm tra")) {
+                await updateAllBalances();
+                return `🤖 Đã cập nhật! Số dư hiện tại của bạn: **${document.getElementById('dash-usdc').innerText} USDC** và **${document.getElementById('dash-eurc').innerText} EURC**.`;
+            }
+
+            return "Tôi chưa hiểu rõ câu lệnh. Bạn có thể gõ các câu lệnh giao dịch trực tiếp như:\n• 'Bridge 5 USDC to Base Sepolia'\n• 'Swap 2 USDC sang EURC'\n• 'Deposit 10 USDC'\n• 'Chuyển 1 USDC cho 0x...'";
         }
 
         async function sendAgentMessage() {
@@ -1156,7 +1199,7 @@
                 agentMsg.innerHTML = replyText;
                 chatBody.appendChild(agentMsg);
                 chatBody.scrollTop = chatBody.scrollHeight;
-            }, 600);
+            }, 500);
         }
 
         if (window.ethereum) {
