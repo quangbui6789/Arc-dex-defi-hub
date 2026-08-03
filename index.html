@@ -280,7 +280,7 @@
             <span class="badge-net">Arc Testnet</span>
         </div>
         <div class="wallet-zone">
-            <button class="btn-faucet" onclick="window.open('https://testnet.arcscan.app', '_blank')">🎁 Faucet USDC / EURC</button>
+            <button class="btn-faucet" onclick="window.open('https://testnet.arcscan.app', '_blank')">🚰 Faucet USDC / EURC</button>
             <button class="btn-connect" id="connectBtn" onclick="connectWallet()">Connect Wallet</button>
             <button class="btn-disconnect" id="disconnectBtn" onclick="disconnectWallet()">Disconnect</button>
         </div>
@@ -521,7 +521,7 @@
                     <div class="stat-value" style="color:#10b981;">6.2%</div>
                 </div>
             </div>
-            <div style="font-size:12px; color:var(--text-muted); text-align:center;">Network Status: Arc Testnet Operational 🚀</div>
+            <div style="font-size:12px; color:var(--text-muted); text-align:center;">Network Status: Arc Testnet Operational 🟢</div>
         </div>
 
         <div class="status-box" id="statusConsole">System: Ready to connect Arc Network.</div>
@@ -810,7 +810,7 @@
                 updateLog("Adding Liquidity...");
                 const tx = await swapContract.addLiquidity(ethers.parseUnits(amtUsdc, 6), ethers.parseUnits(amtEurc, 6), gasParams);
                 await tx.wait();
-                updateLog("Liquidity added successfully! 🚀");
+                updateLog("Liquidity added successfully! 🎉");
                 await updateAllBalances();
             } catch (err) {
                 updateLog("Liquidity Error: " + (err.reason || err.message));
@@ -875,7 +875,7 @@
                 updateLog(`Depositing ${tokenSymbol}...`);
                 const tx = await lendingContract.deposit(tokenAddr, ethers.parseUnits(amount, 6), gasParams);
                 await tx.wait();
-                updateLog("Deposit successful! 🚀");
+                updateLog("Deposit successful! 🎉");
                 await updateAllBalances();
             } catch (err) {
                 updateLog("Deposit Error: " + (err.reason || err.message));
@@ -1018,7 +1018,7 @@
                 
                 updateLog("Bridge Tx Sent: " + tx.hash + ". Waiting for confirmation...");
                 await tx.wait();
-                updateLog(`Bridge Event Dispatched to Chain ${targetChainId}! 🚀`);
+                updateLog(`Bridge Event Dispatched to Chain ${targetChainId}! 🎉`);
                 await updateAllBalances();
             } catch (err) {
                 updateLog("Bridge Error: " + (err.reason || err.message));
@@ -1044,7 +1044,7 @@
                 updateLog(`Sending ${amount} ${tokenSymbol} to ${recipient}...`);
                 const tx = await tokenContract.transfer(getSafeAddress(recipient), ethers.parseUnits(amount, 6), gasParams);
                 await tx.wait();
-                updateLog("Payment Sent Successfully! 🚀");
+                updateLog("Payment Sent Successfully! 🎉");
                 await updateAllBalances();
             } catch (err) {
                 updateLog("Payment Error: " + (err.reason || err.message));
@@ -1095,7 +1095,7 @@
                     document.getElementById('payAmount').value = amount;
                     document.getElementById('payRecipient').value = extractedAddress;
                     setTimeout(() => { executePayment(extractedAddress, amount, token); }, 500);
-                    return `🤖 Đang gửi lệnh chuyển **${amount} ${token}** tới ví **${extractedAddress}**. Vui lòng kiểm tra và bấm xác nhận trên MetaMask!`;
+                    return `🚀 Đang gửi lệnh chuyển **${amount} ${token}** tới ví **${extractedAddress}**. Vui lòng kiểm tra và bấm xác nhận trên MetaMask!`;
                 } else if (amount && !extractedAddress) {
                     return "⚠️ Vui lòng cung cấp địa chỉ ví nhận dạng `0x...` (Ví dụ: `transfer 2 usdc to 0x123...`).";
                 }
@@ -1121,7 +1121,7 @@
                     if (extractedAddress) document.getElementById('bridgeRecipient').value = extractedAddress;
 
                     setTimeout(() => { executeBridge(); }, 500);
-                    return `🤖 Đang gửi lệnh Arc Bridge AppKit: **${amount} ${token}** sang **${chainName}** (Chain ID: ${targetChainId})${extractedAddress ? ' tới người nhận ' + extractedAddress : ''}. Hãy xác nhận trên ví!`;
+                    return `🌉 Đang gửi lệnh Arc Bridge AppKit: **${amount} ${token}** sang **${chainName}** (Chain ID: ${targetChainId})${extractedAddress ? ' tới người nhận ' + extractedAddress : ''}. Hãy xác nhận trên ví!`;
                 } else {
                     return "Vui lòng nhập số lượng cần Bridge (ví dụ: 'bridge 5 usdc to 0x... on Base Sepolia').";
                 }
@@ -1142,7 +1142,7 @@
                     document.getElementById('swapToToken').value = toToken;
                     document.getElementById('swapAmountIn').value = amount;
                     setTimeout(() => { uiSwap(); }, 500);
-                    return `🤖 Đang kích hoạt Swap: **${amount} ${fromToken}** sang **${toToken}**. Xác nhận giao dịch trên ví nhé!`;
+                    return `🔄 Đang kích hoạt Swap: **${amount} ${fromToken}** sang **${toToken}**. Xác nhận giao dịch trên ví nhé!`;
                 }
             }
 
@@ -1152,7 +1152,7 @@
                     document.getElementById('lendingToken').value = token;
                     document.getElementById('lendingAmount').value = amount;
                     setTimeout(() => { executeLendingDeposit(); }, 500);
-                    return `🤖 Đang thực hiện Deposit **${amount} ${token}** vào Lending Pool...`;
+                    return `📥 Đang thực hiện Deposit **${amount} ${token}** vào Lending Pool...`;
                 }
             }
 
@@ -1162,14 +1162,14 @@
                     document.getElementById('borrowToken').value = token;
                     document.getElementById('borrowAmount').value = amount;
                     setTimeout(() => { uiBorrow(); }, 500);
-                    return `🤖 Đang gửi yêu cầu Borrow **${amount} ${token}** từ Lending Pool...`;
+                    return `🏦 Đang gửi yêu cầu Borrow **${amount} ${token}** từ Lending Pool...`;
                 }
             }
 
             // INTENT 6: BALANCE / QUERY COMMAND
             if (lower.includes("balance") || lower.includes("số dư") || lower.includes("kiểm tra")) {
                 await updateAllBalances();
-                return `🤖 Đã cập nhật! Số dư của bạn: **${document.getElementById('dash-usdc').innerText} USDC** & **${document.getElementById('dash-eurc').innerText} EURC**.`;
+                return `📊 Đã cập nhật! Số dư của bạn: **${document.getElementById('dash-usdc').innerText} USDC** & **${document.getElementById('dash-eurc').innerText} EURC**.`;
             }
 
             return "Tôi chưa nhận diện được yêu cầu. Bạn thử gõ theo các cú pháp linh hoạt sau nhé:\n• `transfer 2 usdc to 0x...`\n• `bridge 5 usdc to 0x... on Base Sepolia`\n• `swap 10 usdc sang eurc`\n• `deposit 5 usdc`";
