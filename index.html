@@ -235,7 +235,6 @@
         .stat-title { font-size: 11px; color: var(--text-muted); font-weight: 600; }
         .stat-value { font-size: 18px; font-weight: 800; color: #60a5fa; margin-top: 4px; }
 
-        /* Style mới dành riêng cho My Pool Card */
         .my-pool-card {
             background: rgba(16, 185, 129, 0.08);
             border: 1px solid rgba(16, 185, 129, 0.25);
@@ -331,7 +330,6 @@
         <div id="dashboard-tab" class="tab-content active">
             <h3>Overview Dashboard</h3>
             <div class="stats-grid">
-                <!-- 1. Balances -->
                 <div class="stat-card">
                     <div class="stat-title">USDC Balance</div>
                     <div class="stat-value" id="dash-usdc">0.00</div>
@@ -341,19 +339,16 @@
                     <div class="stat-value" id="dash-eurc">0.00</div>
                 </div>
 
-                <!-- 2. Swap Activity -->
                 <div class="stat-card">
                     <div class="stat-title">Swap Volume (24h)</div>
                     <div class="stat-value" id="dash-swap-vol">$0.00</div>
                 </div>
 
-                <!-- 3. Liquidity Pool Position -->
                 <div class="stat-card">
                     <div class="stat-title">Active Liquidity Pool</div>
                     <div class="stat-value" id="dash-liquidity">$0.00</div>
                 </div>
 
-                <!-- 4. Lending & Borrowing Stats -->
                 <div class="stat-card">
                     <div class="stat-title">Total Supplied (Lending)</div>
                     <div class="stat-value" id="dash-supplied" style="color:#10b981;">$0.00</div>
@@ -363,7 +358,6 @@
                     <div class="stat-value" id="dash-borrowed" style="color:#f87171;">$0.00</div>
                 </div>
 
-                <!-- 5. Cross-chain & Payments Trackers -->
                 <div class="stat-card">
                     <div class="stat-title">Bridge Transferred</div>
                     <div class="stat-value" id="dash-bridge-vol">$0.00</div>
@@ -416,7 +410,6 @@
         <div id="liquidity-tab" class="tab-content">
             <h3>Liquidity Pool</h3>
 
-            <!-- PHẦN MY POOL ĐÃ ĐƯỢC THÊM MỚI TẠI ĐÂY -->
             <div class="my-pool-card">
                 <div class="my-pool-header">
                     <div class="my-pool-title">⚡ My Pool Position (USDC-EURC)</div>
@@ -443,6 +436,7 @@
             
             <button class="btn-action btn-secondary" onclick="approveUSDC()">Approve USDC</button>
             <button class="btn-action btn-secondary" onclick="approveEURC()">Approve EURC</button>
+            <button class="btn-action btn-secondary" onclick="approveLPToken()">Approve LP Token</button>
             <button class="btn-action" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);" onclick="executeAddLiquidity()">+ Add Liquidity</button>
             <button class="btn-action btn-danger" onclick="executeRemoveLiquidity()">- Withdraw / Remove Liquidity</button>
         </div>
@@ -769,7 +763,7 @@
                 // D. Update Dashboard Metrics & My Pool Position
                 document.getElementById('dash-swap-vol').innerText = "$" + getLocalValue('swapVol').toFixed(2);
                 document.getElementById('dash-liquidity').innerText = "$" + activeLiquidity.toFixed(2);
-                document.getElementById('my-pool-val').innerText = "$" + activeLiquidity.toFixed(2); // ĐỒNG BỘ MY POOL VÀO TAB LIQUIDITY
+                document.getElementById('my-pool-val').innerText = "$" + activeLiquidity.toFixed(2);
                 
                 document.getElementById('dash-bridge-vol').innerText = "$" + getLocalValue('bridgeVol').toFixed(2);
                 document.getElementById('dash-payments-sent').innerText = "$" + getLocalValue('paymentsSent').toFixed(2);
@@ -907,6 +901,23 @@
             }
         }
 
+        async function approveLPToken() {
+            if (!userAddress || !window.ethereum) return alert("Please connect wallet!");
+            try {
+                const provider = new ethers.BrowserProvider(window.ethereum);
+                const signer = await provider.getSigner();
+                const lpContract = new ethers.Contract(getSafeAddress(RAW_CONTRACTS.SWAP_POOL_ROUTER), ERC20_ABI, signer);
+                const gasParams = await getLegacyGasParam(provider);
+
+                updateLog("Approving LP Token for Withdrawal...");
+                const tx = await lpContract.approve(getSafeAddress(RAW_CONTRACTS.SWAP_POOL_ROUTER), ethers.MaxUint256, gasParams);
+                await tx.wait();
+                updateLog("LP Token Approved successfully!");
+            } catch (err) {
+                updateLog("LP Approval Error: " + (err.reason || err.message));
+            }
+        }
+
         async function executeAddLiquidity() {
             if (!userAddress || !window.ethereum) return alert("Please connect wallet!");
             const amtUsdc = document.getElementById('liquidityUsdcAmount').value;
@@ -935,26 +946,53 @@
 
         async function executeRemoveLiquidity() {
             if (!userAddress || !window.ethereum) return alert("Please connect wallet!");
+            
             const amtUsdc = document.getElementById('liquidityUsdcAmount').value;
-            if (!amtUsdc) return alert("Please enter amount to remove!");
+            const amtEurc = document.getElementById('liquidityEurcAmount').value;
+            const removeAmount = amtUsdc || amtEurc;
+
+            if (!removeAmount || parseFloat(removeAmount) <= 0) {
+                return alert("Please enter amount to remove!");
+            }
 
             try {
                 const provider = new ethers.BrowserProvider(window.ethereum);
                 const signer = await provider.getSigner();
                 const swapContract = new ethers.Contract(getSafeAddress(RAW_CONTRACTS.SWAP_POOL_ROUTER), SWAP_POOL_ABI, signer);
+                const lpTokenContract = new ethers.Contract(getSafeAddress(RAW_CONTRACTS.SWAP_POOL_ROUTER), ERC20_ABI, signer);
+                
+                const parsedAmount = ethers.parseUnits(removeAmount, 6);
                 const gasParams = await getLegacyGasParam(provider);
 
+                updateLog("Checking LP Token allowance...");
+                try {
+                    const allowance = await lpTokenContract.allowance(userAddress, getSafeAddress(RAW_CONTRACTS.SWAP_POOL_ROUTER));
+                    if (allowance < parsedAmount) {
+                        updateLog("Approving LP Token...");
+                        const txApprove = await lpTokenContract.approve(getSafeAddress(RAW_CONTRACTS.SWAP_POOL_ROUTER), ethers.MaxUint256, gasParams);
+                        await txApprove.wait();
+                    }
+                } catch (e) {
+                    console.warn("Skipping LP allowance check...", e);
+                }
+
                 updateLog("Removing Liquidity...");
-                const tx = await swapContract.removeLiquidity(ethers.parseUnits(amtUsdc, 6), gasParams);
+                const txOptions = {
+                    ...gasParams,
+                    gasLimit: 500000n
+                };
+
+                const tx = await swapContract.removeLiquidity(parsedAmount, txOptions);
                 await tx.wait();
 
                 const current = getLocalValue('liquidity');
-                setLocalValue('liquidity', Math.max(0, current - parseFloat(amtUsdc)));
+                setLocalValue('liquidity', Math.max(0, current - parseFloat(removeAmount)));
 
-                updateLog("Liquidity removed successfully!");
+                updateLog("Liquidity removed successfully! 🎉");
                 await updateAllBalances();
             } catch (err) {
-                updateLog("Remove Liquidity Error: " + (err.reason || err.message));
+                console.error("Remove Error:", err);
+                updateLog("Remove Liquidity Error: " + (err.reason || err.shortMessage || err.message));
             }
         }
 
@@ -1285,7 +1323,7 @@
                     document.getElementById('borrowToken').value = token;
                     document.getElementById('borrowAmount').value = amount;
                     setTimeout(() => { uiBorrow(); }, 500);
-                    return `🏦 Đang gửi yêu cầu Borrow **${amount} ${token}** từ Lending Pool...`;
+                    return `💸 Đang gửi yêu cầu Borrow **${amount} ${token}** từ Lending Pool...`;
                 }
             }
 
