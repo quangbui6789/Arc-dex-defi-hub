@@ -412,7 +412,7 @@
 
             <div class="my-pool-card">
                 <div class="my-pool-header">
-                    <div class="my-pool-title">⚡ My Pool Position (USDC-EURC)</div>
+                    <div class="my-pool-title">💧 My Pool Position (USDC-EURC)</div>
                     <span style="font-size: 11px; color: var(--text-muted);">Active Share</span>
                 </div>
                 <div class="my-pool-val" id="my-pool-val">$0.00</div>
@@ -436,7 +436,7 @@
             
             <button class="btn-action btn-secondary" onclick="approveUSDC()">Approve USDC</button>
             <button class="btn-action btn-secondary" onclick="approveEURC()">Approve EURC</button>
-            <button class="btn-action btn-secondary" onclick="approveLPToken()">Approve LP Token</button>
+            <button class="btn-action btn-secondary" onclick="approveLPToken()">Approve LP Token (For Remove)</button>
             <button class="btn-action" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);" onclick="executeAddLiquidity()">+ Add Liquidity</button>
             <button class="btn-action btn-danger" onclick="executeRemoveLiquidity()">- Withdraw / Remove Liquidity</button>
         </div>
@@ -860,7 +860,7 @@
 
                 addLocalValue('swapVol', amountIn);
 
-                updateLog("Swap completed successfully! 🎉");
+                updateLog("Swap completed successfully! 🔥");
                 await updateAllBalances();
             } catch (err) {
                 updateLog("Swap Error: " + (err.reason || err.message));
@@ -909,7 +909,7 @@
                 const lpContract = new ethers.Contract(getSafeAddress(RAW_CONTRACTS.SWAP_POOL_ROUTER), ERC20_ABI, signer);
                 const gasParams = await getLegacyGasParam(provider);
 
-                updateLog("Approving LP Token for Withdrawal...");
+                updateLog("Approving LP Token for Pool Router...");
                 const tx = await lpContract.approve(getSafeAddress(RAW_CONTRACTS.SWAP_POOL_ROUTER), ethers.MaxUint256, gasParams);
                 await tx.wait();
                 updateLog("LP Token Approved successfully!");
@@ -946,53 +946,40 @@
 
         async function executeRemoveLiquidity() {
             if (!userAddress || !window.ethereum) return alert("Please connect wallet!");
-            
             const amtUsdc = document.getElementById('liquidityUsdcAmount').value;
-            const amtEurc = document.getElementById('liquidityEurcAmount').value;
-            const removeAmount = amtUsdc || amtEurc;
-
-            if (!removeAmount || parseFloat(removeAmount) <= 0) {
-                return alert("Please enter amount to remove!");
-            }
+            if (!amtUsdc || parseFloat(amtUsdc) <= 0) return alert("Please enter amount to remove!");
 
             try {
                 const provider = new ethers.BrowserProvider(window.ethereum);
                 const signer = await provider.getSigner();
-                const swapContract = new ethers.Contract(getSafeAddress(RAW_CONTRACTS.SWAP_POOL_ROUTER), SWAP_POOL_ABI, signer);
-                const lpTokenContract = new ethers.Contract(getSafeAddress(RAW_CONTRACTS.SWAP_POOL_ROUTER), ERC20_ABI, signer);
-                
-                const parsedAmount = ethers.parseUnits(removeAmount, 6);
+                const poolRouter = getSafeAddress(RAW_CONTRACTS.SWAP_POOL_ROUTER);
+                const lpTokenContract = new ethers.Contract(poolRouter, ERC20_ABI, signer);
+                const swapContract = new ethers.Contract(poolRouter, SWAP_POOL_ABI, signer);
                 const gasParams = await getLegacyGasParam(provider);
+                const parsedAmount = ethers.parseUnits(amtUsdc, 6);
 
+                // Step 1: Tự động kiểm tra và Approve LP Token nếu thiếu Allowance
                 updateLog("Checking LP Token allowance...");
-                try {
-                    const allowance = await lpTokenContract.allowance(userAddress, getSafeAddress(RAW_CONTRACTS.SWAP_POOL_ROUTER));
-                    if (allowance < parsedAmount) {
-                        updateLog("Approving LP Token...");
-                        const txApprove = await lpTokenContract.approve(getSafeAddress(RAW_CONTRACTS.SWAP_POOL_ROUTER), ethers.MaxUint256, gasParams);
-                        await txApprove.wait();
-                    }
-                } catch (e) {
-                    console.warn("Skipping LP allowance check...", e);
+                const allowance = await lpTokenContract.allowance(userAddress, poolRouter);
+                if (allowance < parsedAmount) {
+                    updateLog("Approving LP Token for Withdrawal...");
+                    const txApprove = await lpTokenContract.approve(poolRouter, ethers.MaxUint256, gasParams);
+                    await txApprove.wait();
+                    updateLog("LP Token Approved successfully!");
                 }
 
+                // Step 2: Thực thi rút thanh khoản
                 updateLog("Removing Liquidity...");
-                const txOptions = {
-                    ...gasParams,
-                    gasLimit: 500000n
-                };
-
-                const tx = await swapContract.removeLiquidity(parsedAmount, txOptions);
+                const tx = await swapContract.removeLiquidity(parsedAmount, gasParams);
                 await tx.wait();
 
                 const current = getLocalValue('liquidity');
-                setLocalValue('liquidity', Math.max(0, current - parseFloat(removeAmount)));
+                setLocalValue('liquidity', Math.max(0, current - parseFloat(amtUsdc)));
 
-                updateLog("Liquidity removed successfully! 🎉");
+                updateLog("Liquidity removed successfully!");
                 await updateAllBalances();
             } catch (err) {
-                console.error("Remove Error:", err);
-                updateLog("Remove Liquidity Error: " + (err.reason || err.shortMessage || err.message));
+                updateLog("Remove Liquidity Error: " + (err.reason || err.message));
             }
         }
 
@@ -1187,7 +1174,7 @@
 
                 addLocalValue('bridgeVol', amount);
 
-                updateLog(`Bridge Event Dispatched to Chain ${targetChainId}! 🎉`);
+                updateLog(`Bridge Event Dispatched to Chain ${targetChainId}! 🚀`);
                 await updateAllBalances();
             } catch (err) {
                 updateLog("Bridge Error: " + (err.reason || err.message));
@@ -1216,7 +1203,7 @@
 
                 addLocalValue('paymentsSent', amount);
 
-                updateLog("Payment Sent Successfully! 🎉");
+                updateLog("Payment Sent Successfully! 🚀");
                 await updateAllBalances();
             } catch (err) {
                 updateLog("Payment Error: " + (err.reason || err.message));
@@ -1285,7 +1272,7 @@
                     if (extractedAddress) document.getElementById('bridgeRecipient').value = extractedAddress;
 
                     setTimeout(() => { executeBridge(); }, 500);
-                    return `🌉 Đang gửi lệnh Arc Bridge AppKit: **${amount} ${token}** sang **${chainName}** (Chain ID: ${targetChainId})${extractedAddress ? ' tới người nhận ' + extractedAddress : ''}. Hãy xác nhận trên ví!`;
+                    return `🚀 Đang gửi lệnh Arc Bridge AppKit: **${amount} ${token}** sang **${chainName}** (Chain ID: ${targetChainId})${extractedAddress ? ' tới người nhận ' + extractedAddress : ''}. Hãy xác nhận trên ví!`;
                 } else {
                     return "Vui lòng nhập số lượng cần Bridge (ví dụ: 'bridge 5 usdc to 0x... on Base Sepolia').";
                 }
@@ -1305,16 +1292,16 @@
                     document.getElementById('swapToToken').value = toToken;
                     document.getElementById('swapAmountIn').value = amount;
                     setTimeout(() => { uiSwap(); }, 500);
-                    return `🔄 Đang kích hoạt Swap: **${amount} ${fromToken}** sang **${toToken}**. Xác nhận giao dịch trên ví nhé!`;
+                    return `🚀 Đang kích hoạt Swap: **${amount} ${fromToken}** sang **${toToken}**. Xác nhận giao dịch trên ví nhé!`;
                 }
             }
 
-            if (lower.includes("deposit") || lower.includes("nộp") || lower.includes("lend") || lower.includes("gửi tiết kiệm")) {
+            if (lower.includes("deposit") || lower.includes("nạp") || lower.includes("lend") || lower.includes("gửi tiết kiệm")) {
                 if (amount) {
                     document.getElementById('lendingToken').value = token;
                     document.getElementById('lendingAmount').value = amount;
                     setTimeout(() => { executeLendingDeposit(); }, 500);
-                    return `📥 Đang thực hiện Deposit **${amount} ${token}** vào Lending Pool...`;
+                    return `🚀 Đang thực hiện Deposit **${amount} ${token}** vào Lending Pool...`;
                 }
             }
 
@@ -1323,7 +1310,7 @@
                     document.getElementById('borrowToken').value = token;
                     document.getElementById('borrowAmount').value = amount;
                     setTimeout(() => { uiBorrow(); }, 500);
-                    return `💸 Đang gửi yêu cầu Borrow **${amount} ${token}** từ Lending Pool...`;
+                    return `🚀 Đang gửi yêu cầu Borrow **${amount} ${token}** từ Lending Pool...`;
                 }
             }
 
