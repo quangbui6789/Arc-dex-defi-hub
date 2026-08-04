@@ -235,6 +235,34 @@
         .stat-title { font-size: 11px; color: var(--text-muted); font-weight: 600; }
         .stat-value { font-size: 18px; font-weight: 800; color: #60a5fa; margin-top: 4px; }
 
+        /* Style mới dành riêng cho My Pool Card */
+        .my-pool-card {
+            background: rgba(16, 185, 129, 0.08);
+            border: 1px solid rgba(16, 185, 129, 0.25);
+            border-radius: 14px;
+            padding: 16px;
+            margin-bottom: 18px;
+        }
+        .my-pool-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .my-pool-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #10b981;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .my-pool-val {
+            font-size: 20px;
+            font-weight: 800;
+            color: #ffffff;
+        }
+
         .status-box {
             margin-top: 18px;
             padding: 12px 14px;
@@ -280,7 +308,7 @@
             <span class="badge-net">Arc Testnet</span>
         </div>
         <div class="wallet-zone">
-            <button class="btn-faucet" onclick="window.open('https://testnet.arcscan.app', '_blank')">🚰 Faucet USDC / EURC</button>
+            <button class="btn-faucet" onclick="window.open('https://testnet.arcscan.app', '_blank')">💧 Faucet USDC / EURC</button>
             <button class="btn-connect" id="connectBtn" onclick="connectWallet()">Connect Wallet</button>
             <button class="btn-disconnect" id="disconnectBtn" onclick="disconnectWallet()">Disconnect</button>
         </div>
@@ -387,6 +415,16 @@
         <!-- LIQUIDITY TAB -->
         <div id="liquidity-tab" class="tab-content">
             <h3>Liquidity Pool</h3>
+
+            <!-- PHẦN MY POOL ĐÃ ĐƯỢC THÊM MỚI TẠI ĐÂY -->
+            <div class="my-pool-card">
+                <div class="my-pool-header">
+                    <div class="my-pool-title">⚡ My Pool Position (USDC-EURC)</div>
+                    <span style="font-size: 11px; color: var(--text-muted);">Active Share</span>
+                </div>
+                <div class="my-pool-val" id="my-pool-val">$0.00</div>
+            </div>
+
             <div class="input-group">
                 <label>
                     <span>USDC Amount</span>
@@ -557,7 +595,7 @@
     <div class="ai-chat-window hidden" id="aiChatWindow">
         <div class="ai-chat-header">
             <span>Arc Execution Agent (AppKit Integrated)</span>
-            <button onclick="toggleChatWindow()" style="background:none; border:none; color:#fff; cursor:pointer;">✕</button>
+            <button onclick="toggleChatWindow()" style="background:none; border:none; color:#fff; cursor:pointer;">✖</button>
         </div>
         <div class="ai-chat-body" id="chatBody">
             <div class="msg msg-agent">Xin chào! Tôi có thể thực hiện mọi thao tác theo yêu cầu của bạn:
@@ -620,7 +658,6 @@
             console.log(msg);
         }
 
-        // --- LOCAL STORAGE HELPER ---
         function getStorageKey(key) {
             return userAddress ? `${userAddress.toLowerCase()}_${key}` : null;
         }
@@ -687,7 +724,6 @@
             }
         }
 
-        // --- DASHBOARD REAL-TIME & LOCAL STORAGE HYBRID AGGREGATOR ---
         async function updateAllBalances() {
             if (!userAddress || !window.ethereum) return;
             try {
@@ -730,9 +766,11 @@
                     if (onChainLiq > 0n) activeLiquidity = parseFloat(ethers.formatUnits(onChainLiq, 6));
                 } catch(e) {}
 
-                // D. Update Dashboard Metrics directly from State
+                // D. Update Dashboard Metrics & My Pool Position
                 document.getElementById('dash-swap-vol').innerText = "$" + getLocalValue('swapVol').toFixed(2);
                 document.getElementById('dash-liquidity').innerText = "$" + activeLiquidity.toFixed(2);
+                document.getElementById('my-pool-val').innerText = "$" + activeLiquidity.toFixed(2); // ĐỒNG BỘ MY POOL VÀO TAB LIQUIDITY
+                
                 document.getElementById('dash-bridge-vol').innerText = "$" + getLocalValue('bridgeVol').toFixed(2);
                 document.getElementById('dash-payments-sent').innerText = "$" + getLocalValue('paymentsSent').toFixed(2);
 
@@ -1152,7 +1190,6 @@
             chatWindow.classList.toggle('hidden');
         }
 
-        // --- UNIVERSAL NATURAL LANGUAGE AI AGENT EXECUTION ENGINE ---
         async function parseAndExecuteAgentCommand(text) {
             const lower = text.toLowerCase();
             
@@ -1234,12 +1271,12 @@
                 }
             }
 
-            if (lower.includes("deposit") || lower.includes("nạp") || lower.includes("lend") || lower.includes("gửi tiết kiệm")) {
+            if (lower.includes("deposit") || lower.includes("nộp") || lower.includes("lend") || lower.includes("gửi tiết kiệm")) {
                 if (amount) {
                     document.getElementById('lendingToken').value = token;
                     document.getElementById('lendingAmount').value = amount;
                     setTimeout(() => { executeLendingDeposit(); }, 500);
-                    return `🏦 Đang thực hiện Deposit **${amount} ${token}** vào Lending Pool...`;
+                    return `📥 Đang thực hiện Deposit **${amount} ${token}** vào Lending Pool...`;
                 }
             }
 
@@ -1248,7 +1285,7 @@
                     document.getElementById('borrowToken').value = token;
                     document.getElementById('borrowAmount').value = amount;
                     setTimeout(() => { uiBorrow(); }, 500);
-                    return `💰 Đang gửi yêu cầu Borrow **${amount} ${token}** từ Lending Pool...`;
+                    return `🏦 Đang gửi yêu cầu Borrow **${amount} ${token}** từ Lending Pool...`;
                 }
             }
 
