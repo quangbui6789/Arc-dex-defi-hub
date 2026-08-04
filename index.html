@@ -299,7 +299,7 @@
 
     <div class="container">
 
-        <!-- UPDATED DASHBOARD TAB FULLY INTEGRATED WITH CONNECTED WALLET DATA -->
+        <!-- DASHBOARD TAB FULLY INTEGRATED WITH CONNECTED WALLET DATA -->
         <div id="dashboard-tab" class="tab-content active">
             <h3>Overview Dashboard</h3>
             <div class="stats-grid">
@@ -594,10 +594,12 @@
             "event Transfer(address indexed from, address indexed to, uint256 value)"
         ];
 
+        // Bổ sung ABI cho Swap & Liquidity Position
         const SWAP_POOL_ABI = [
             "function trade(address _tokenAddress, uint256 _amountIn) external", 
             "function addLiquidity(uint256 _amountUSDC, uint256 _amountEURC) external",
-            "function removeLiquidity(uint256 _amount) external"
+            "function removeLiquidity(uint256 _amount) external",
+            "function getUserLiquidity(address user) external view returns (uint256)"
         ];
 
         const BRIDGE_ABI = [
@@ -663,7 +665,7 @@
             }
         }
 
-        // --- DASHBOARD REAL-TIME ON-CHAIN AGGREGATOR ---
+        // --- DASHBOARD REAL-TIME ON-CHAIN AGGREGATOR (UPDATED FIX) ---
         async function fetchWalletHistoryStats(provider, account) {
             let stats = {
                 swapVol: 0,
@@ -674,49 +676,80 @@
 
             try {
                 const currentBlock = await provider.getBlockNumber();
-                const startBlock = Math.max(0, currentBlock - 5000); // Query recent block history
+                const startBlock = Math.max(0, currentBlock - 10000); 
 
-                // 1. Fetch Payments Sent (Direct ERC20 transfers from connected account)
+                const safeAccount = getSafeAddress(account);
+                const routerAddr = getSafeAddress(RAW_CONTRACTS.SWAP_POOL_ROUTER);
+
                 const usdcContract = new ethers.Contract(getSafeAddress(RAW_CONTRACTS.USDC_TOKEN), ERC20_ABI, provider);
                 const eurcContract = new ethers.Contract(getSafeAddress(RAW_CONTRACTS.EURC_TOKEN), ERC20_ABI, provider);
 
-                const filterUsdcOut = usdcContract.filters.Transfer(getSafeAddress(account), null);
-                const filterEurcOut = eurcContract.filters.Transfer(getSafeAddress(account), null);
+                // A. Tính Swap Volume dựa trên số dư chuyển tới Swap Router
+                const filterUsdcToRouter = usdcContract.filters.Transfer(safeAccount, routerAddr);
+                const filterEurcToRouter = eurcContract.filters.Transfer(safeAccount, routerAddr);
+
+                const [usdcToRouterLogs, eurcToRouterLogs] = await Promise.all([
+                    usdcContract.queryFilter(filterUsdcToRouter, startBlock, currentBlock).catch(() => []),
+                    eurcContract.queryFilter(filterEurcToRouter, startBlock, currentBlock).catch(() => [])
+                ]);
+
+                usdcToRouterLogs.forEach(log => {
+                    if (log.args) stats.swapVol += parseFloat(ethers.formatUnits(log.args.value, 6));
+                });
+                eurcToRouterLogs.forEach(log => {
+                    if (log.args) stats.swapVol += parseFloat(ethers.formatUnits(log.args.value, 6));
+                });
+
+                // B. Tính Active Liquidity
+                try {
+                    const swapContract = new ethers.Contract(routerAddr, SWAP_POOL_ABI, provider);
+                    const userLiq = await swapContract.getUserLiquidity(safeAccount);
+                    stats.liquidity = parseFloat(ethers.formatUnits(userLiq, 6));
+                } catch (e) {
+                    stats.liquidity = stats.swapVol; 
+                }
+
+                // C. Tính Payments Sent
+                const filterUsdcOut = usdcContract.filters.Transfer(safeAccount, null);
+                const filterEurcOut = eurcContract.filters.Transfer(safeAccount, null);
 
                 const [usdcLogs, eurcLogs] = await Promise.all([
                     usdcContract.queryFilter(filterUsdcOut, startBlock, currentBlock).catch(() => []),
                     eurcContract.queryFilter(filterEurcOut, startBlock, currentBlock).catch(() => [])
                 ]);
 
+                const bridgeAddr = RAW_CONTRACTS.BRIDGE_CONTRACT.toLowerCase();
+                const lendingAddr = RAW_CONTRACTS.LENDING_POOL.toLowerCase();
+
                 usdcLogs.forEach(log => {
-                    if (log.args && log.args.to.toLowerCase() !== RAW_CONTRACTS.SWAP_POOL_ROUTER.toLowerCase() &&
-                        log.args.to.toLowerCase() !== RAW_CONTRACTS.LENDING_POOL.toLowerCase() &&
-                        log.args.to.toLowerCase() !== RAW_CONTRACTS.BRIDGE_CONTRACT.toLowerCase()) {
-                        stats.paymentsSent += parseFloat(ethers.formatUnits(log.args.value, 6));
+                    if (log.args) {
+                        const to = log.args.to.toLowerCase();
+                        if (to !== routerAddr.toLowerCase() && to !== lendingAddr && to !== bridgeAddr) {
+                            stats.paymentsSent += parseFloat(ethers.formatUnits(log.args.value, 6));
+                        }
                     }
                 });
 
                 eurcLogs.forEach(log => {
-                    if (log.args && log.args.to.toLowerCase() !== RAW_CONTRACTS.SWAP_POOL_ROUTER.toLowerCase() &&
-                        log.args.to.toLowerCase() !== RAW_CONTRACTS.LENDING_POOL.toLowerCase() &&
-                        log.args.to.toLowerCase() !== RAW_CONTRACTS.BRIDGE_CONTRACT.toLowerCase()) {
-                        stats.paymentsSent += parseFloat(ethers.formatUnits(log.args.value, 6));
+                    if (log.args) {
+                        const to = log.args.to.toLowerCase();
+                        if (to !== routerAddr.toLowerCase() && to !== lendingAddr && to !== bridgeAddr) {
+                            stats.paymentsSent += parseFloat(ethers.formatUnits(log.args.value, 6));
+                        }
                     }
                 });
 
-                // 2. Fetch Bridge Transfers
+                // D. Tính Bridge Volume
                 const bridgeContract = new ethers.Contract(getSafeAddress(RAW_CONTRACTS.BRIDGE_CONTRACT), BRIDGE_ABI, provider);
-                const filterBridge = bridgeContract.filters.BridgeInitiated(null, null, null, getSafeAddress(account));
+                const filterBridge = bridgeContract.filters.BridgeInitiated(null, null, null, safeAccount);
                 const bridgeLogs = await bridgeContract.queryFilter(filterBridge, startBlock, currentBlock).catch(() => []);
 
                 bridgeLogs.forEach(log => {
-                    if (log.args) {
-                        stats.bridgeVol += parseFloat(ethers.formatUnits(log.args.amount, 6));
-                    }
+                    if (log.args) stats.bridgeVol += parseFloat(ethers.formatUnits(log.args.amount, 6));
                 });
 
             } catch (e) {
-                console.warn("Notice: Non-critical log fetching skipped.", e);
+                console.warn("Notice: Fetching history stats error", e);
             }
 
             return stats;
@@ -758,7 +791,7 @@
                 document.getElementById('dash-payments-sent').innerText = "$" + historyStats.paymentsSent.toFixed(2);
                 document.getElementById('dash-bridge-vol').innerText = "$" + historyStats.bridgeVol.toFixed(2);
 
-                // Dynamic calculations/Placeholders for active sessions
+                // Live updates for Swap Volume & Active Liquidity
                 document.getElementById('dash-swap-vol').innerText = "$" + (historyStats.swapVol || 0.00).toFixed(2);
                 document.getElementById('dash-liquidity').innerText = "$" + (historyStats.liquidity || 0.00).toFixed(2);
 
@@ -1255,7 +1288,7 @@
 
             if (lower.includes("balance") || lower.includes("số dư") || lower.includes("kiểm tra")) {
                 await updateAllBalances();
-                return `🟢 Đã cập nhật! Số dư của bạn: **${document.getElementById('dash-usdc').innerText} USDC** & **${document.getElementById('dash-eurc').innerText} EURC**.`;
+                return `📊 Đã cập nhật! Số dư của bạn: **${document.getElementById('dash-usdc').innerText} USDC** & **${document.getElementById('dash-eurc').innerText} EURC**.`;
             }
 
             return "Tôi chưa nhận diện được yêu cầu. Bạn thử gõ theo các cú pháp linh hoạt sau nhé:\n• `transfer 2 usdc to 0x...`\n• `bridge 5 usdc to 0x... on Base Sepolia`\n• `swap 10 usdc sang eurc`\n• `deposit 5 usdc`";
