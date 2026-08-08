@@ -1026,7 +1026,6 @@
             }
         }
 
-        /* FIXED: Withdraw Function in Lending Section */
         async function executeLendingWithdraw() {
             if (!userAddress || !window.ethereum) return alert("Please connect wallet!");
             const tokenSymbol = document.getElementById('lendingToken').value;
@@ -1034,23 +1033,21 @@
             if (!amount || parseFloat(amount) <= 0) return alert("Invalid amount!");
 
             const tokenAddr = getSafeAddress(tokenSymbol === "USDC" ? RAW_CONTRACTS.USDC_TOKEN : RAW_CONTRACTS.EURC_TOKEN);
-            const lendingAddr = getSafeAddress(RAW_CONTRACTS.LENDING_POOL);
 
             try {
                 const provider = new ethers.BrowserProvider(window.ethereum);
                 const signer = await provider.getSigner();
-                const lendingContract = new ethers.Contract(lendingAddr, LENDING_POOL_ABI, signer);
-                const parsedAmount = ethers.parseUnits(amount, 6);
+                const lendingContract = new ethers.Contract(getSafeAddress(RAW_CONTRACTS.LENDING_POOL), LENDING_POOL_ABI, signer);
                 const gasParams = await getLegacyGasParam(provider);
 
-                updateLog(`Withdrawing ${amount} ${tokenSymbol}...`);
-                const tx = await lendingContract.withdraw(tokenAddr, parsedAmount, { ...gasParams });
+                updateLog(`Withdrawing ${tokenSymbol}...`);
+                const tx = await lendingContract.withdraw(tokenAddr, ethers.parseUnits(amount, 6), gasParams);
                 await tx.wait();
 
                 const current = getLocalValue('supplied');
                 setLocalValue('supplied', Math.max(0, current - parseFloat(amount)));
 
-                updateLog("Withdrawal successful! ??");
+                updateLog("Withdrawal successful!");
                 await updateAllBalances();
             } catch (err) {
                 updateLog("Withdraw Error: " + (err.reason || err.message));
@@ -1084,7 +1081,6 @@
             }
         }
 
-        /* FIXED: Repay Function in Borrowing Section */
         async function uiRepayBorrow() {
             if (!userAddress || !window.ethereum) return alert("Please connect wallet!");
             const tokenSymbol = document.getElementById('borrowToken').value;
@@ -1111,7 +1107,7 @@
                 }
 
                 updateLog(`Repaying ${amount} ${tokenSymbol}...`);
-                const tx = await lendingContract.repay(tokenAddr, parsedAmount, { ...gasParams });
+                const tx = await lendingContract.repay(tokenAddr, parsedAmount, gasParams);
                 await tx.wait();
 
                 const current = getLocalValue('borrowed');
