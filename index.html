@@ -307,7 +307,7 @@
             <span class="badge-net">Arc Testnet</span>
         </div>
         <div class="wallet-zone">
-            <button class="btn-faucet" onclick="window.open('https://testnet.arcscan.app', '_blank')">?? Faucet USDC / EURC</button>
+            <button class="btn-faucet" onclick="window.open('https://testnet.arcscan.app', '_blank')">🚰 Faucet USDC / EURC</button>
             <button class="btn-connect" id="connectBtn" onclick="connectWallet()">Connect Wallet</button>
             <button class="btn-disconnect" id="disconnectBtn" onclick="disconnectWallet()">Disconnect</button>
         </div>
@@ -372,7 +372,7 @@
                     <div class="stat-value" id="dash-payments-sent">$0.00</div>
                 </div>
             </div>
-            <button class="btn-action" onclick="updateAllBalances()">?? Sync & Refresh Wallet Data</button>
+            <button class="btn-action" onclick="updateAllBalances()">🔄 Sync & Refresh Wallet Data</button>
         </div>
 
         <!-- SWAP TAB -->
@@ -417,7 +417,7 @@
 
             <div class="my-pool-card">
                 <div class="my-pool-header">
-                    <div class="my-pool-title">?? My Pool Position (USDC-EURC)</div>
+                    <div class="my-pool-title">💧 My Pool Position (USDC-EURC)</div>
                     <span style="font-size: 11px; color: var(--text-muted);">Active Share</span>
                 </div>
                 <div class="my-pool-val" id="my-pool-val">$0.00</div>
@@ -589,18 +589,18 @@
                     <div class="stat-value" style="color:#10b981;">6.2%</div>
                 </div>
             </div>
-            <div style="font-size:12px; color:var(--text-muted); text-align:center;">Network Status: Arc Testnet Operational ??</div>
+            <div style="font-size:12px; color:var(--text-muted); text-align:center;">Network Status: Arc Testnet Operational 🟢</div>
         </div>
 
         <div class="status-box" id="statusConsole">System: Ready to connect Arc Network.</div>
     </div>
 
     <!-- AI Agent Chatbot UI Widget -->
-    <button class="ai-chat-toggle" onclick="toggleChatWindow()">??</button>
+    <button class="ai-chat-toggle" onclick="toggleChatWindow()">🤖</button>
     <div class="ai-chat-window hidden" id="aiChatWindow">
         <div class="ai-chat-header">
             <span>Arc Execution Agent (AppKit Integrated)</span>
-            <button onclick="toggleChatWindow()" style="background:none; border:none; color:#fff; cursor:pointer;">?</button>
+            <button onclick="toggleChatWindow()" style="background:none; border:none; color:#fff; cursor:pointer;">✖</button>
         </div>
         <div class="ai-chat-body" id="chatBody">
             <div class="msg msg-agent">Hello! I can execute actions based on your prompt:
@@ -876,7 +876,7 @@
 
                 addLocalValue('swapVol', amountIn);
 
-                updateLog("Swap completed successfully! ??");
+                updateLog("Swap completed successfully! 🚀");
                 await updateAllBalances();
             } catch (err) {
                 updateLog("Swap Error: " + (err.reason || err.message));
@@ -936,7 +936,7 @@
                 const totalLiq = (parseFloat(amtUsdc) || 0) + (parseFloat(amtEurc) || 0);
                 addLocalValue('liquidity', totalLiq);
 
-                updateLog("Liquidity added successfully! ??");
+                updateLog("Liquidity added successfully! 💧");
                 await updateAllBalances();
             } catch (err) {
                 updateLog("Liquidity Error: " + (err.reason || err.message));
@@ -1019,7 +1019,7 @@
 
                 addLocalValue('supplied', amount);
 
-                updateLog("Deposit successful! ??");
+                updateLog("Deposit successful! 🏦");
                 await updateAllBalances();
             } catch (err) {
                 updateLog("Deposit Error: " + (err.reason || err.message));
@@ -1063,7 +1063,7 @@
                 const current = getLocalValue('supplied');
                 setLocalValue('supplied', Math.max(0, current - parseFloat(amount)));
 
-                updateLog("Withdrawal successful! ??");
+                updateLog("Withdrawal successful! 💸");
                 await updateAllBalances();
             } catch (err) {
                 updateLog("Withdraw Error: " + (err.reason || err.message));
@@ -1150,7 +1150,7 @@
                 const current = getLocalValue('borrowed');
                 setLocalValue('borrowed', Math.max(0, current - parseFloat(amount)));
 
-                updateLog("Repayment successful! ??");
+                updateLog("Repayment successful! 🎉");
                 await updateAllBalances();
             } catch (err) {
                 updateLog("Repay Error: " + (err.reason || err.message));
@@ -1218,7 +1218,7 @@
 
                 addLocalValue('bridgeVol', amount);
 
-                updateLog(`Bridge Event Dispatched to Chain ${targetChainId}! ??`);
+                updateLog(`Bridge Event Dispatched to Chain ${targetChainId}! 🌉`);
                 await updateAllBalances();
             } catch (err) {
                 updateLog("Bridge Error: " + (err.reason || err.message));
@@ -1247,7 +1247,7 @@
 
                 addLocalValue('paymentsSent', amount);
 
-                updateLog("Payment Sent Successfully! ??");
+                updateLog("Payment Sent Successfully! 💸");
                 await updateAllBalances();
             } catch (err) {
                 updateLog("Payment Error: " + (err.reason || err.message));
@@ -1271,7 +1271,7 @@
             }
 
             if (!userAddress) {
-                return "?? Please connect your wallet before executing transactions!";
+                return "⚠️ Please connect your wallet before executing transactions!";
             }
 
             const numMatch = lower.match(/\d+(\.\d+)?/);
@@ -1291,9 +1291,9 @@
                     document.getElementById('payAmount').value = amount;
                     document.getElementById('payRecipient').value = extractedAddress;
                     setTimeout(() => { executePayment(extractedAddress, amount, token); }, 500);
-                    return `?? Executing transfer of **${amount} ${token}** to **${extractedAddress}**. Please confirm on MetaMask!`;
+                    return `🚀 Executing transfer of **${amount} ${token}** to **${extractedAddress}**. Please confirm on MetaMask!`;
                 } else if (amount && !extractedAddress) {
-                    return "?? Please provide a valid recipient address like `0x...` (e.g. `transfer 2 usdc to 0x123...`).";
+                    return "⚠️ Please provide a valid recipient address like `0x...` (e.g. `transfer 2 usdc to 0x123...`).";
                 }
             }
 
@@ -1316,7 +1316,7 @@
                     if (extractedAddress) document.getElementById('bridgeRecipient').value = extractedAddress;
 
                     setTimeout(() => { executeBridge(); }, 500);
-                    return `?? Executing Arc Bridge AppKit transfer: **${amount} ${token}** to **${chainName}** (Chain ID: ${targetChainId})${extractedAddress ? ' for recipient ' + extractedAddress : ''}. Please confirm on your wallet!`;
+                    return `🌉 Executing Arc Bridge AppKit transfer: **${amount} ${token}** to **${chainName}** (Chain ID: ${targetChainId})${extractedAddress ? ' for recipient ' + extractedAddress : ''}. Please confirm on your wallet!`;
                 } else {
                     return "Please specify the amount to bridge (e.g. 'bridge 5 usdc to 0x... on Base Sepolia').";
                 }
@@ -1336,7 +1336,7 @@
                     document.getElementById('swapToToken').value = toToken;
                     document.getElementById('swapAmountIn').value = amount;
                     setTimeout(() => { uiSwap(); }, 500);
-                    return `?? Triggering Swap: **${amount} ${fromToken}** to **${toToken}**. Confirm the transaction on your wallet!`;
+                    return `⚡ Triggering Swap: **${amount} ${fromToken}** to **${toToken}**. Confirm the transaction on your wallet!`;
                 }
             }
 
@@ -1345,7 +1345,7 @@
                     document.getElementById('lendingToken').value = token;
                     document.getElementById('lendingAmount').value = amount;
                     setTimeout(() => { executeLendingDeposit(); }, 500);
-                    return `?? Executing Deposit: **${amount} ${token}** into Lending Pool...`;
+                    return `🏦 Executing Deposit: **${amount} ${token}** into Lending Pool...`;
                 }
             }
 
@@ -1354,13 +1354,13 @@
                     document.getElementById('borrowToken').value = token;
                     document.getElementById('borrowAmount').value = amount;
                     setTimeout(() => { uiBorrow(); }, 500);
-                    return `?? Requesting Borrow: **${amount} ${token}** from Lending Pool...`;
+                    return `💰 Requesting Borrow: **${amount} ${token}** from Lending Pool...`;
                 }
             }
 
             if (lower.includes("balance") || lower.includes("check")) {
                 await updateAllBalances();
-                return `?? Balances updated! Current balance: **${document.getElementById('dash-usdc').innerText} USDC** & **${document.getElementById('dash-eurc').innerText} EURC**.`;
+                return `📊 Balances updated! Current balance: **${document.getElementById('dash-usdc').innerText} USDC** & **${document.getElementById('dash-eurc').innerText} EURC**.`;
             }
 
             return "I couldn't recognize your request. Try commands like:\n• `transfer 2 usdc to 0x...`\n• `bridge 5 usdc to 0x... on Base Sepolia`\n• `swap 10 usdc to eurc`\n• `deposit 5 usdc`";
