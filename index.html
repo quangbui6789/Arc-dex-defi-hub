@@ -417,7 +417,7 @@
 
             <div class="my-pool-card">
                 <div class="my-pool-header">
-                    <div class="my-pool-title">💧 My Pool Position (USDC-EURC)</div>
+                    <div class="my-pool-title">📊 My Pool Position (USDC-EURC)</div>
                     <span style="font-size: 11px; color: var(--text-muted);">Active Share</span>
                 </div>
                 <div class="my-pool-val" id="my-pool-val">$0.00</div>
@@ -542,7 +542,7 @@
             <h3>Instant Web3 Transfer</h3>
             <div class="input-group">
                 <label>Select Token</label>
-                <select id="payToken">
+                <select id="payToken" onchange="updateAllBalances()">
                     <option value="USDC">USDC</option>
                     <option value="EURC">EURC</option>
                 </select>
@@ -554,8 +554,15 @@
             </div>
 
             <div class="input-group">
-                <label>Amount</label>
+                <label>
+                    <span>Amount</span>
+                    <span>Wallet: <span id="balance-pay" class="balance-val">0.0000</span></span>
+                </label>
                 <input type="number" id="payAmount" placeholder="0.0" step="any">
+                <div class="pct-group">
+                    <button class="btn-pct" onclick="setQuickPct('payAmount', 'balance-pay', 0.50)">50%</button>
+                    <button class="btn-pct" onclick="setQuickPct('payAmount', 'balance-pay', 1.00)">MAX</button>
+                </div>
             </div>
 
             <button class="btn-action" style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);" onclick="executePayment()">Send Payment</button>
@@ -593,7 +600,7 @@
     <div class="ai-chat-window hidden" id="aiChatWindow">
         <div class="ai-chat-header">
             <span>Arc Execution Agent (AppKit Integrated)</span>
-            <button onclick="toggleChatWindow()" style="background:none; border:none; color:#fff; cursor:pointer;">✕</button>
+            <button onclick="toggleChatWindow()" style="background:none; border:none; color:#fff; cursor:pointer;">✖</button>
         </div>
         <div class="ai-chat-body" id="chatBody">
             <div class="msg msg-agent">Hello! I can execute actions based on your prompt:
@@ -796,6 +803,11 @@
                 const balBridge = await getTokenBalance(bridgeTokenAddress, userAddress);
                 document.getElementById('balance-bridge').innerText = parseFloat(balBridge).toFixed(4);
 
+                const payToken = document.getElementById('payToken').value;
+                const payTokenAddress = payToken === "USDC" ? RAW_CONTRACTS.USDC_TOKEN : RAW_CONTRACTS.EURC_TOKEN;
+                const balPay = await getTokenBalance(payTokenAddress, userAddress);
+                document.getElementById('balance-pay').innerText = parseFloat(balPay).toFixed(4);
+
             } catch (error) {
                 console.error(error);
             }
@@ -983,15 +995,26 @@
             if (!amount || parseFloat(amount) <= 0) return alert("Invalid amount!");
 
             const tokenAddr = getSafeAddress(tokenSymbol === "USDC" ? RAW_CONTRACTS.USDC_TOKEN : RAW_CONTRACTS.EURC_TOKEN);
+            const lendingAddr = getSafeAddress(RAW_CONTRACTS.LENDING_POOL);
 
             try {
                 const provider = new ethers.BrowserProvider(window.ethereum);
                 const signer = await provider.getSigner();
-                const lendingContract = new ethers.Contract(getSafeAddress(RAW_CONTRACTS.LENDING_POOL), LENDING_POOL_ABI, signer);
+                const tokenContract = new ethers.Contract(tokenAddr, ERC20_ABI, signer);
+                const lendingContract = new ethers.Contract(lendingAddr, LENDING_POOL_ABI, signer);
+                const parsedAmount = ethers.parseUnits(amount, 6);
                 const gasParams = await getLegacyGasParam(provider);
 
-                updateLog(`Depositing ${tokenSymbol}...`);
-                const tx = await lendingContract.deposit(tokenAddr, ethers.parseUnits(amount, 6), gasParams);
+                updateLog(`Checking ${tokenSymbol} allowance...`);
+                const allowance = await tokenContract.allowance(userAddress, lendingAddr);
+                if (allowance < parsedAmount) {
+                    updateLog(`Approving ${tokenSymbol} for Lending Pool...`);
+                    const txApprove = await tokenContract.approve(lendingAddr, ethers.MaxUint256, gasParams);
+                    await txApprove.wait();
+                }
+
+                updateLog(`Depositing ${amount} ${tokenSymbol}...`);
+                const tx = await lendingContract.deposit(tokenAddr, parsedAmount, gasParams);
                 await tx.wait();
 
                 addLocalValue('supplied', amount);
@@ -1065,21 +1088,32 @@
             if (!amount || parseFloat(amount) <= 0) return alert("Invalid amount!");
 
             const tokenAddr = getSafeAddress(tokenSymbol === "USDC" ? RAW_CONTRACTS.USDC_TOKEN : RAW_CONTRACTS.EURC_TOKEN);
+            const lendingAddr = getSafeAddress(RAW_CONTRACTS.LENDING_POOL);
 
             try {
                 const provider = new ethers.BrowserProvider(window.ethereum);
                 const signer = await provider.getSigner();
-                const lendingContract = new ethers.Contract(getSafeAddress(RAW_CONTRACTS.LENDING_POOL), LENDING_POOL_ABI, signer);
+                const tokenContract = new ethers.Contract(tokenAddr, ERC20_ABI, signer);
+                const lendingContract = new ethers.Contract(lendingAddr, LENDING_POOL_ABI, signer);
+                const parsedAmount = ethers.parseUnits(amount, 6);
                 const gasParams = await getLegacyGasParam(provider);
 
-                updateLog(`Repaying ${tokenSymbol}...`);
-                const tx = await lendingContract.repay(tokenAddr, ethers.parseUnits(amount, 6), gasParams);
+                updateLog(`Checking ${tokenSymbol} allowance for Repayment...`);
+                const allowance = await tokenContract.allowance(userAddress, lendingAddr);
+                if (allowance < parsedAmount) {
+                    updateLog(`Approving ${tokenSymbol} for Repayment...`);
+                    const txApprove = await tokenContract.approve(lendingAddr, ethers.MaxUint256, gasParams);
+                    await txApprove.wait();
+                }
+
+                updateLog(`Repaying ${amount} ${tokenSymbol}...`);
+                const tx = await lendingContract.repay(tokenAddr, parsedAmount, gasParams);
                 await tx.wait();
 
                 const current = getLocalValue('borrowed');
                 setLocalValue('borrowed', Math.max(0, current - parseFloat(amount)));
 
-                updateLog("Repayment successful!");
+                updateLog("Repayment successful! 🎉");
                 await updateAllBalances();
             } catch (err) {
                 updateLog("Repay Error: " + (err.reason || err.message));
