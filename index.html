@@ -330,6 +330,7 @@
         <div id="dashboard-tab" class="tab-content active">
             <h3>Overview Dashboard</h3>
             <div class="stats-grid">
+                <!-- 1. Balances -->
                 <div class="stat-card">
                     <div class="stat-title">USDC Balance</div>
                     <div class="stat-value" id="dash-usdc">0.00</div>
@@ -338,14 +339,20 @@
                     <div class="stat-title">EURC Balance</div>
                     <div class="stat-value" id="dash-eurc">0.00</div>
                 </div>
+
+                <!-- 2. Swap Activity -->
                 <div class="stat-card">
                     <div class="stat-title">Swap Volume (24h)</div>
                     <div class="stat-value" id="dash-swap-vol">$0.00</div>
                 </div>
+
+                <!-- 3. Liquidity Pool Position -->
                 <div class="stat-card">
                     <div class="stat-title">Active Liquidity Pool</div>
                     <div class="stat-value" id="dash-liquidity">$0.00</div>
                 </div>
+
+                <!-- 4. Lending & Borrowing Stats -->
                 <div class="stat-card">
                     <div class="stat-title">Total Supplied (Lending)</div>
                     <div class="stat-value" id="dash-supplied" style="color:#10b981;">$0.00</div>
@@ -354,6 +361,8 @@
                     <div class="stat-title">Total Borrowed</div>
                     <div class="stat-value" id="dash-borrowed" style="color:#f87171;">$0.00</div>
                 </div>
+
+                <!-- 5. Cross-chain & Payments Trackers -->
                 <div class="stat-card">
                     <div class="stat-title">Bridge Transferred</div>
                     <div class="stat-value" id="dash-bridge-vol">$0.00</div>
@@ -641,10 +650,8 @@
         const LENDING_POOL_ABI = [
             "function deposit(address token, uint256 amount) external",
             "function withdraw(address token, uint256 amount) external",
-            "function withdraw(uint256 amount, address token) external",
             "function borrow(address token, uint256 amount) external",
             "function repay(address token, uint256 amount) external",
-            "function repay(uint256 amount, address token) external",
             "function getUserSupplied(address user, address token) external view returns (uint256)",
             "function getUserBorrowed(address user, address token) external view returns (uint256)"
         ];
@@ -756,7 +763,7 @@
                 document.getElementById('dash-supplied').innerText = "$" + totalSuppliedUSD.toFixed(2);
                 document.getElementById('dash-borrowed').innerText = "$" + totalBorrowedUSD.toFixed(2);
 
-                // C. Active Liquidity Pool
+                // C. Active Liquidity Pool (On-chain / Fallback Local)
                 let activeLiquidity = getLocalValue('liquidity');
                 try {
                     const swapContract = new ethers.Contract(getSafeAddress(RAW_CONTRACTS.SWAP_POOL_ROUTER), SWAP_POOL_ABI, provider);
@@ -1033,27 +1040,24 @@
                 const signer = await provider.getSigner();
                 const lendingContract = new ethers.Contract(lendingAddr, LENDING_POOL_ABI, signer);
                 const parsedAmount = ethers.parseUnits(amount, 6);
+
+                try {
+                    const userSupplied = await lendingContract.getUserSupplied(userAddress, tokenAddr);
+                    if (userSupplied < parsedAmount) {
+                        const available = ethers.formatUnits(userSupplied, 6);
+                        return updateLog(`Withdraw Error: You only have ${available} ${tokenSymbol} supplied in pool.`);
+                    }
+                } catch (e) {
+                    console.warn("Could not check user supplied balance on-chain", e);
+                }
+
                 const gasParams = await getLegacyGasParam(provider);
 
                 updateLog(`Withdrawing ${amount} ${tokenSymbol}...`);
-
-                let tx;
-                try {
-                    // Thử signature: withdraw(address, uint256)
-                    tx = await lendingContract.withdraw(tokenAddr, parsedAmount, {
-                        ...gasParams,
-                        gasLimit: 500000n
-                    });
-                } catch (firstErr) {
-                    console.warn("Thử signature (address, uint256) thất bại, thử signature (uint256, address)...", firstErr);
-                    // Thử signature: withdraw(uint256, address)
-                    tx = await lendingContract.withdraw(parsedAmount, tokenAddr, {
-                        ...gasParams,
-                        gasLimit: 500000n
-                    });
-                }
-
-                updateLog("Giao dịch đã gửi, đang chờ xác thực...");
+                const tx = await lendingContract.withdraw(tokenAddr, parsedAmount, {
+                    ...gasParams,
+                    gasLimit: 300000n
+                });
                 await tx.wait();
 
                 const current = getLocalValue('supplied');
@@ -1062,12 +1066,7 @@
                 updateLog("Withdrawal successful! 🎉");
                 await updateAllBalances();
             } catch (err) {
-                console.error("Full Withdraw Error:", err);
-                let reason = err.reason || err.message;
-                if (err.receipt && err.receipt.status === 0) {
-                    reason = "Transaction Reverted on-chain (Kiểm tra lại số dư đã Deposit hoặc ABI hợp đồng).";
-                }
-                updateLog("Withdraw Error: " + reason);
+                updateLog("Withdraw Error: " + (err.reason || err.message));
             }
         }
 
@@ -1113,9 +1112,22 @@
                 const tokenContract = new ethers.Contract(tokenAddr, ERC20_ABI, signer);
                 const lendingContract = new ethers.Contract(lendingAddr, LENDING_POOL_ABI, signer);
                 const parsedAmount = ethers.parseUnits(amount, 6);
+
+                try {
+                    const userBorrowed = await lendingContract.getUserBorrowed(userAddress, tokenAddr);
+                    if (userBorrowed === 0n) {
+                        return updateLog(`Repay Error: You do not have active borrow balance for ${tokenSymbol}.`);
+                    }
+                    if (userBorrowed < parsedAmount) {
+                        const activeDebt = ethers.formatUnits(userBorrowed, 6);
+                        return updateLog(`Repay Error: Amount exceeds active borrow balance (${activeDebt} ${tokenSymbol}).`);
+                    }
+                } catch (e) {
+                    console.warn("Could not check borrowed balance on-chain", e);
+                }
+
                 const gasParams = await getLegacyGasParam(provider);
 
-                // Kiểm tra & Approve bắt buộc cho Repay
                 updateLog(`Checking ${tokenSymbol} allowance for Repayment...`);
                 const allowance = await tokenContract.allowance(userAddress, lendingAddr);
                 if (allowance < parsedAmount) {
@@ -1125,28 +1137,14 @@
                         gasLimit: 100000n
                     });
                     await txApprove.wait();
-                    updateLog(`Approval successful. Executing Repay...`);
+                    updateLog(`Approval successful. Submitting repayment...`);
                 }
 
                 updateLog(`Repaying ${amount} ${tokenSymbol}...`);
-
-                let tx;
-                try {
-                    // Thử signature: repay(address, uint256)
-                    tx = await lendingContract.repay(tokenAddr, parsedAmount, {
-                        ...gasParams,
-                        gasLimit: 500000n
-                    });
-                } catch (firstErr) {
-                    console.warn("Thử signature (address, uint256) thất bại, thử signature (uint256, address)...", firstErr);
-                    // Thử signature: repay(uint256, address)
-                    tx = await lendingContract.repay(parsedAmount, tokenAddr, {
-                        ...gasParams,
-                        gasLimit: 500000n
-                    });
-                }
-
-                updateLog("Giao dịch đã gửi, đang chờ xác thực...");
+                const tx = await lendingContract.repay(tokenAddr, parsedAmount, {
+                    ...gasParams,
+                    gasLimit: 300000n
+                });
                 await tx.wait();
 
                 const current = getLocalValue('borrowed');
@@ -1155,12 +1153,7 @@
                 updateLog("Repayment successful! 🎉");
                 await updateAllBalances();
             } catch (err) {
-                console.error("Full Repay Error:", err);
-                let reason = err.reason || err.message;
-                if (err.receipt && err.receipt.status === 0) {
-                    reason = "Transaction Reverted on-chain (Kiểm tra lại hạn mức Approve hoặc khoản nợ hiện tại).";
-                }
-                updateLog("Repay Error: " + reason);
+                updateLog("Repay Error: " + (err.reason || err.message));
             }
         }
 
